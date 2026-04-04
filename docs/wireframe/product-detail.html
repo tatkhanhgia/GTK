@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTKBlog — Product Detail Wireframe</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAF8F5; --fg: #1A1715; --card: #FFFFFF; --card-fg: #2C2825;
+    --primary: #D97757; --primary-fg: #FFFFFF;
+    --secondary: #F0EBE4; --secondary-fg: #5C554D;
+    --accent: #C4713E; --accent-fg: #FFFFFF;
+    --muted: #F0EBE4; --muted-fg: #8A817A;
+    --border: #E5DED5; --ring: #D97757;
+    --success: #3D8B6E; --warning: #D4952B;
+    --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
+    --shadow-sm: 0 1px 3px rgba(26,23,21,0.06), 0 1px 2px rgba(26,23,21,0.04);
+    --shadow-md: 0 4px 12px rgba(26,23,21,0.08), 0 2px 4px rgba(26,23,21,0.04);
+    --shadow-lg: 0 8px 24px rgba(26,23,21,0.10);
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Be Vietnam Pro', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  .dark {
+    --bg: #1A1614; --fg: #F0EBE4; --card: #241F1C; --card-fg: #E0D8CF;
+    --primary: #E09070; --primary-fg: #1A1614;
+    --secondary: #2E2824; --secondary-fg: #A69E96;
+    --accent: #E0955E; --accent-fg: #1A1614;
+    --muted: #2E2824; --muted-fg: #7A726A;
+    --border: #3A332E;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); line-height: 1.65; font-size: 16px; -webkit-font-smoothing: antialiased; transition: background 0.3s, color 0.3s; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  h1,h2,h3,h4 { font-family: var(--font-heading); line-height: 1.2; }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .text-gradient { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+  .badge-primary { background: rgba(217,119,87,0.1); color: var(--primary); }
+  .badge-accent { background: rgba(196,113,62,0.1); color: var(--accent); }
+  .badge-success { background: rgba(61,139,110,0.1); color: var(--success); }
+  .badge-warning { background: rgba(212,149,43,0.1); color: var(--warning); }
+  .badge-muted { background: var(--muted); color: var(--muted-fg); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: var(--radius); font-family: var(--font-body); font-size: 15px; font-weight: 500; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .btn:hover { transform: translateY(-1px); text-decoration: none; }
+  .btn-primary { background: var(--primary); color: var(--primary-fg); }
+  .btn-primary:hover { box-shadow: 0 4px 16px rgba(217,119,87,0.30); }
+  .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--secondary); }
+  .btn-accent { background: var(--accent); color: var(--accent-fg); }
+  .btn-accent:hover { box-shadow: 0 4px 16px rgba(196,113,62,0.30); }
+  .btn-lg { padding: 16px 32px; font-size: 16px; border-radius: var(--radius-lg); }
+  .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+  /* NAVBAR (Anthropic-style) */
+  .navbar { position: sticky; top: 0; z-index: 50; height: 64px; display: flex; align-items: center; background: rgba(250,248,245,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); transition: background 0.3s; }
+  .dark .navbar { background: rgba(26,22,20,0.88); }
+  .navbar .container { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; }
+  .navbar-brand { font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--fg); text-decoration: none; }
+  .navbar-brand span { color: var(--primary); }
+  .navbar-links { display: flex; justify-content: center; gap: 36px; list-style: none; }
+  .navbar-links a { color: var(--muted-fg); font-size: 15px; font-weight: 500; text-decoration: none; transition: color 0.2s; position: relative; }
+  .navbar-links a:hover, .navbar-links a.active { color: var(--fg); }
+  .navbar-links a.active::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: var(--primary); border-radius: 1px; }
+  .navbar-actions { display: flex; align-items: center; gap: 10px; }
+  .lang-toggle { padding: 6px 12px; border-radius: 9999px; font-size: 13px; font-weight: 600; background: var(--secondary); color: var(--secondary-fg); border: none; cursor: pointer; }
+  .theme-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--secondary); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--fg); transition: all 0.2s; }
+  .theme-btn:hover { background: var(--border); }
+  .navbar-login { padding: 8px 20px; font-size: 14px; border-radius: var(--radius); background: var(--primary); color: var(--primary-fg); border: none; cursor: pointer; font-family: var(--font-body); font-weight: 500; text-decoration: none; transition: all 0.2s; }
+  .navbar-login:hover { box-shadow: 0 2px 8px rgba(217,119,87,0.3); text-decoration: none; }
+
+  /* BREADCRUMB */
+  .breadcrumb-bar { padding: 16px 0; }
+  .breadcrumb { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted-fg); }
+  .breadcrumb a { color: var(--muted-fg); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--primary); }
+
+  /* PRODUCT HERO */
+  .product-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 16px 0 64px; align-items: start; }
+
+  /* IMAGE GALLERY */
+  .gallery { display: flex; flex-direction: column; gap: 12px; }
+  .gallery-main {
+    width: 100%; aspect-ratio: 4/3; border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, #D97757, #C4713E);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500;
+    position: relative; overflow: hidden;
+  }
+  .gallery-main-badge {
+    position: absolute; top: 16px; left: 16px;
+    padding: 6px 14px; border-radius: 9999px;
+    background: rgba(212,149,43,0.9); color: white;
+    font-size: 12px; font-weight: 600;
+  }
+  .gallery-nav { position: absolute; bottom: 16px; display: flex; gap: 8px; }
+  .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); border: none; cursor: pointer; }
+  .gallery-dot.active { background: white; width: 24px; border-radius: 4px; }
+  .gallery-thumbs { display: flex; gap: 12px; }
+  .gallery-thumb {
+    flex: 1; aspect-ratio: 16/9; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500;
+    cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
+  }
+  .gallery-thumb.active { border-color: var(--primary); }
+  .gallery-thumb:nth-child(1) { background: linear-gradient(135deg, #D97757, #C4713E); }
+  .gallery-thumb:nth-child(2) { background: linear-gradient(135deg, #C4713E, #B06535); }
+  .gallery-thumb:nth-child(3) { background: linear-gradient(135deg, #B06535, #9C5A2E); }
+  .gallery-thumb:nth-child(4) { background: linear-gradient(135deg, #9C5A2E, #8B5028); }
+
+  /* PRODUCT INFO */
+  .product-info { display: flex; flex-direction: column; gap: 0; }
+  .product-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .product-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+  .product-subtitle { font-size: 16px; color: var(--muted-fg); line-height: 1.6; margin-bottom: 20px; }
+
+  .product-rating-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .product-stars { color: var(--warning); font-size: 18px; }
+  .product-rating-text { font-size: 14px; color: var(--muted-fg); }
+  .product-rating-text strong { color: var(--fg); }
+  .product-sales { font-size: 14px; color: var(--muted-fg); }
+
+  .product-price-block { margin-bottom: 24px; }
+  .product-price { font-family: var(--font-heading); font-size: 36px; font-weight: 700; color: var(--primary); }
+  .product-price .old-price { font-size: 20px; text-decoration: line-through; color: var(--muted-fg); font-weight: 400; margin-right: 8px; }
+  .product-price .discount { font-size: 16px; color: #D94F4F; font-weight: 600; margin-left: 12px; background: rgba(217,79,79,0.1); padding: 4px 10px; border-radius: 9999px; }
+  .product-price-note { font-size: 13px; color: var(--muted-fg); margin-top: 4px; }
+
+  /* CTA BUTTONS */
+  .product-cta { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .product-cta-row { display: flex; gap: 12px; }
+  .payment-options { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted-fg); margin-top: 4px; }
+  .payment-icon {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+    border-radius: var(--radius); background: var(--secondary); font-size: 12px; font-weight: 600; color: var(--secondary-fg);
+  }
+
+  /* FEATURES LIST */
+  .product-features { margin-bottom: 24px; padding: 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .product-features-title { font-family: var(--font-heading); font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+  .feature-list { list-style: none; }
+  .feature-list li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-check { color: var(--success); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* GUARANTEE */
+  .product-guarantee { display: flex; gap: 24px; padding: 16px 0; margin-bottom: 20px; }
+  .guarantee-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted-fg); }
+  .guarantee-icon { font-size: 18px; }
+
+  /* SHARE */
+  .product-share { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted-fg); }
+  .share-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--card); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; color: var(--muted-fg); transition: all 0.2s;
+  }
+  .share-btn:hover { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+
+  /* TABS */
+  .product-tabs { border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .tabs-nav { display: flex; gap: 0; }
+  .tab-btn {
+    padding: 16px 24px; font-family: var(--font-body); font-size: 15px; font-weight: 500;
+    border: none; background: transparent; color: var(--muted-fg); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s; margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--fg); }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .tab-content { padding: 32px 0; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* DESCRIPTION TAB */
+  .description-content h3 { font-size: 22px; margin-bottom: 12px; margin-top: 32px; }
+  .description-content h3:first-child { margin-top: 0; }
+  .description-content p { margin-bottom: 16px; line-height: 1.7; color: var(--card-fg); }
+  .description-content ul { padding-left: 20px; margin-bottom: 16px; }
+  .description-content li { margin-bottom: 8px; line-height: 1.6; color: var(--card-fg); }
+
+  /* SPECS TABLE */
+  .specs-table { width: 100%; border-collapse: collapse; }
+  .specs-table tr { border-bottom: 1px solid var(--border); }
+  .specs-table td { padding: 14px 16px; font-size: 14px; }
+  .specs-table td:first-child { font-weight: 600; width: 200px; color: var(--fg); }
+  .specs-table td:last-child { color: var(--card-fg); }
+
+  /* REVIEWS */
+  .reviews-summary { display: grid; grid-template-columns: 200px 1fr; gap: 40px; margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .reviews-big-score { text-align: center; }
+  .reviews-big-num { font-family: var(--font-heading); font-size: 56px; font-weight: 700; line-height: 1; color: var(--primary); }
+  .reviews-big-stars { color: var(--warning); font-size: 20px; margin: 8px 0 4px; }
+  .reviews-big-count { font-size: 14px; color: var(--muted-fg); }
+  .reviews-bars { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+  .review-bar-row { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .review-bar-label { width: 50px; text-align: right; color: var(--muted-fg); }
+  .review-bar { flex: 1; height: 8px; border-radius: 4px; background: var(--secondary); overflow: hidden; }
+  .review-bar-fill { height: 100%; border-radius: 4px; background: var(--warning); }
+  .review-bar-count { width: 30px; color: var(--muted-fg); }
+
+  .review-list { display: flex; flex-direction: column; gap: 24px; }
+  .review-item { padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .review-item:last-child { border-bottom: none; }
+  .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--secondary); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--secondary-fg); flex-shrink: 0; }
+  .review-name { font-weight: 600; font-size: 14px; }
+  .review-date { font-size: 12px; color: var(--muted-fg); }
+  .review-stars { color: var(--warning); font-size: 14px; }
+  .review-verified { font-size: 11px; color: var(--success); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+  .review-text { font-size: 14px; color: var(--card-fg); line-height: 1.6; }
+  .review-helpful { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: 12px; color: var(--muted-fg); }
+  .review-helpful button { font-size: 12px; color: var(--muted-fg); background: var(--secondary); border: none; padding: 4px 12px; border-radius: 9999px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
+  .review-helpful button:hover { background: var(--primary); color: var(--primary-fg); }
+
+  /* RELATED PRODUCTS */
+  .related-section { padding: 64px 0; border-top: 1px solid var(--border); }
+  .related-section h2 { font-size: 24px; margin-bottom: 24px; }
+  .related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .related-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; transition: all 0.25s; cursor: pointer;
+  }
+  .related-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .related-card-image {
+    width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500;
+  }
+  .related-card-image.ebook { background: linear-gradient(135deg, #D97757, #C4713E); }
+  .related-card-image.template { background: linear-gradient(135deg, #5B8C7B, #3D8B6E); }
+  .related-card-image.code { background: linear-gradient(135deg, #8B7355, #6B5B3E); }
+  .related-card-body { padding: 14px; }
+  .related-card-title { font-family: var(--font-heading); font-size: 14px; font-weight: 600; margin-bottom: 6px; line-height: 1.3; }
+  .related-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .related-card-price { font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: var(--primary); }
+  .related-card-rating { font-size: 12px; color: var(--warning); }
+
+  /* FOOTER */
+  .footer { padding: 48px 0 24px; border-top: 1px solid var(--border); }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted-fg); }
+  .footer-brand { font-family: var(--font-heading); font-weight: 700; }
+  .footer-brand span { color: var(--primary); }
+  .footer-links-row { display: flex; gap: 24px; }
+  .footer-links-row a { color: var(--muted-fg); text-decoration: none; font-size: 13px; }
+  .footer-links-row a:hover { color: var(--primary); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .product-hero { grid-template-columns: 1fr; gap: 32px; }
+    .related-grid { grid-template-columns: repeat(2, 1fr); }
+    .reviews-summary { grid-template-columns: 1fr; gap: 24px; }
+  }
+  @media (max-width: 768px) {
+    .navbar-links { display: none; }
+    .navbar .container { grid-template-columns: auto 1fr auto; }
+    .product-title { font-size: 26px; }
+    .product-price { font-size: 28px; }
+    .product-cta-row { flex-direction: column; }
+    .product-guarantee { flex-direction: column; gap: 12px; }
+    .related-grid { grid-template-columns: 1fr; }
+    .tabs-nav { overflow-x: auto; }
+    .tab-btn { white-space: nowrap; padding: 12px 16px; font-size: 14px; }
+    .gallery-thumbs { gap: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR (Anthropic-style) -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="navbar-brand">GTK<span>Blog</span></a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Trang chủ</a></li>
+      <li><a href="blog.html">Bài viết</a></li>
+      <li><a href="products.html" class="active">Sản phẩm</a></li>
+      <li><a href="#">Khóa học</a></li>
+      <li><a href="#">Giới thiệu</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <button class="lang-toggle">VI / EN</button>
+      <button class="theme-btn" onclick="document.body.classList.toggle('dark'); this.querySelector('span').textContent = document.body.classList.contains('dark') ? '\u2600' : '\u263D';" title="Toggle dark mode"><span>&#9789;</span></button>
+      <a href="#" class="navbar-login">Đăng nhập</a>
+    </div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a><span>/</span>
+      <a href="products.html">Sản phẩm</a><span>/</span>
+      <a href="products.html">Ebook</a><span>/</span>
+      <span>Làm chủ AI</span>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT HERO -->
+<div class="container">
+  <div class="product-hero">
+
+    <!-- IMAGE GALLERY -->
+    <div class="gallery">
+      <div class="gallery-main">
+        <span>Product Main Image — Ebook Cover (4:3)</span>
+        <span class="gallery-main-badge">&#9733; Bestseller</span>
+        <div class="gallery-nav">
+          <span class="gallery-dot active"></span>
+          <span class="gallery-dot"></span>
+          <span class="gallery-dot"></span>
+          <span class="gallery-dot"></span>
+        </div>
+      </div>
+      <div class="gallery-thumbs">
+        <div class="gallery-thumb active">Cover</div>
+        <div class="gallery-thumb">Preview 1</div>
+        <div class="gallery-thumb">Preview 2</div>
+        <div class="gallery-thumb">Preview 3</div>
+      </div>
+    </div>
+
+    <!-- PRODUCT INFO -->
+    <div class="product-info">
+      <div class="product-badges">
+        <span class="badge badge-primary">Ebook</span>
+        <span class="badge badge-warning">Bestseller</span>
+        <span class="badge badge-success">Đã cập nhật 2026</span>
+      </div>
+
+      <h1 class="product-title">Làm chủ AI: Từ cơ bản đến nâng cao</h1>
+      <p class="product-subtitle">Tài liệu toàn diện về trí tuệ nhân tạo, machine learning và deep learning cho người Việt. Hơn 300 trang nội dung chất lượng với ví dụ thực tế và bài tập thực hành.</p>
+
+      <div class="product-rating-row">
+        <div class="product-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div class="product-rating-text"><strong>4.9</strong> / 5.0 (128 đánh giá)</div>
+        <div class="product-sales">&#128722; 256 đã mua</div>
+      </div>
+
+      <div class="product-price-block">
+        <div class="product-price">
+          299.000 VND
+        </div>
+        <div class="product-price-note">Thanh toán một lần. Nhận ngay. Cập nhật miễn phí trọn đời.</div>
+      </div>
+
+      <div class="product-cta">
+        <div class="product-cta-row">
+          <button class="btn btn-primary btn-lg" style="flex:1;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Mua ngay — 299K
+          </button>
+          <button class="btn btn-ghost btn-lg" title="Thêm vào yêu thích" style="padding:16px;">
+            &#9825;
+          </button>
+        </div>
+        <div class="payment-options">
+          <span>Thanh toán qua:</span>
+          <span class="payment-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Stripe
+          </span>
+          <span class="payment-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/></svg>
+            SePay
+          </span>
+          <span class="payment-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            MoMo
+          </span>
+        </div>
+      </div>
+
+      <div class="product-features">
+        <div class="product-features-title">Bạn sẽ nhận được</div>
+        <ul class="feature-list">
+          <li><span class="feature-check">&#10003;</span> Ebook PDF 300+ trang nội dung chi tiết</li>
+          <li><span class="feature-check">&#10003;</span> Source code ví dụ (GitHub repo riêng)</li>
+          <li><span class="feature-check">&#10003;</span> Video hướng dẫn bổ sung (5 giờ)</li>
+          <li><span class="feature-check">&#10003;</span> Cập nhật miễn phí khi có phiên bản mới</li>
+          <li><span class="feature-check">&#10003;</span> Truy cập nhóm Discord hỗ trợ</li>
+          <li><span class="feature-check">&#10003;</span> Chứng chỉ hoàn thành (Certificate)</li>
+        </ul>
+      </div>
+
+      <div class="product-guarantee">
+        <div class="guarantee-item">
+          <span class="guarantee-icon">&#128274;</span>
+          <span>Thanh toán bảo mật</span>
+        </div>
+        <div class="guarantee-item">
+          <span class="guarantee-icon">&#8634;</span>
+          <span>Hoàn tiền 30 ngày</span>
+        </div>
+        <div class="guarantee-item">
+          <span class="guarantee-icon">&#9889;</span>
+          <span>Nhận ngay sau thanh toán</span>
+        </div>
+      </div>
+
+      <div class="product-share">
+        <span>Chia sẻ:</span>
+        <button class="share-btn">f</button>
+        <button class="share-btn">X</button>
+        <button class="share-btn">in</button>
+        <button class="share-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TABS: Description / Specs / Reviews / FAQ -->
+<div class="container">
+  <div class="product-tabs">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('desc')">Mô tả chi tiết</button>
+      <button class="tab-btn" onclick="switchTab('specs')">Thông số</button>
+      <button class="tab-btn" onclick="switchTab('reviews')">Đánh giá (128)</button>
+      <button class="tab-btn" onclick="switchTab('faq')">Câu hỏi thường gặp</button>
+    </div>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- DESCRIPTION TAB -->
+    <div class="tab-panel active" id="tab-desc">
+      <div class="description-content">
+        <h3>Giới thiệu về cuốn sách</h3>
+        <p>"Làm chủ AI" là tài liệu toàn diện nhất bằng tiếng Việt về trí tuệ nhân tạo. Cuốn sách được viết dành cho cả người mới bắt đầu và những người đã có kinh nghiệm muốn nâng cao kỹ năng.</p>
+        <p>Với hơn 300 trang nội dung được trình bày rõ ràng, có hệ thống, kèm theo ví dụ thực tế và bài tập thực hành, bạn sẽ nắm vững được các khái niệm từ cơ bản đến nâng cao trong lĩnh vực AI.</p>
+
+        <h3>Nội dung chính</h3>
+        <ul>
+          <li><strong>Phần 1 — Nền tảng:</strong> Giới thiệu AI, lịch sử phát triển, các khái niệm cơ bản về machine learning</li>
+          <li><strong>Phần 2 — Machine Learning:</strong> Supervised, unsupervised, reinforcement learning với ví dụ Python</li>
+          <li><strong>Phần 3 — Deep Learning:</strong> Neural networks, CNN, RNN, Transformer architecture</li>
+          <li><strong>Phần 4 — NLP & LLM:</strong> Xử lý ngôn ngữ tự nhiên, GPT, BERT, fine-tuning mô hình</li>
+          <li><strong>Phần 5 — Ứng dụng thực tế:</strong> Xây dựng 5 dự án thực tế từ đầu đến cuối</li>
+          <li><strong>Phần 6 — AI trong sản xuất:</strong> Deploy, monitoring, MLOps best practices</li>
+        </ul>
+
+        <h3>Ai nên đọc cuốn sách này?</h3>
+        <p>Cuốn sách phù hợp với lập trình viên, sinh viên CNTT, data analyst, product manager và bất kỳ ai muốn hiểu sâu về AI và ứng dụng của nó trong công việc.</p>
+
+        <div style="padding:24px; background:var(--secondary); border-radius:var(--radius-lg); margin-top:24px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <span style="font-size:24px;">&#128214;</span>
+            <strong style="font-family:var(--font-heading);">Xem trước miễn phí</strong>
+          </div>
+          <p style="font-size:14px; color:var(--muted-fg); margin-bottom:12px;">Tải 2 chương đầu tiên miễn phí để trải nghiệm trước khi mua.</p>
+          <button class="btn btn-ghost btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Tải bản xem trước (PDF)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPECS TAB -->
+    <div class="tab-panel" id="tab-specs">
+      <table class="specs-table">
+        <tr><td>Định dạng</td><td>PDF, EPUB</td></tr>
+        <tr><td>Số trang</td><td>312 trang</td></tr>
+        <tr><td>Ngôn ngữ</td><td>Tiếng Việt</td></tr>
+        <tr><td>Phiên bản</td><td>v3.0 (Cập nhật tháng 1/2026)</td></tr>
+        <tr><td>Yêu cầu</td><td>Kiến thức cơ bản về lập trình (Python khuyến khích)</td></tr>
+        <tr><td>Source code</td><td>Có — GitHub repo riêng, Python + Jupyter Notebooks</td></tr>
+        <tr><td>Video bổ sung</td><td>5 giờ video hướng dẫn (Tiếng Việt)</td></tr>
+        <tr><td>Cập nhật</td><td>Miễn phí trọn đời</td></tr>
+        <tr><td>Hỗ trợ</td><td>Discord community + email tác giả</td></tr>
+        <tr><td>Giấy phép</td><td>Cá nhân — không được chia sẻ hoặc bán lại</td></tr>
+      </table>
+    </div>
+
+    <!-- REVIEWS TAB -->
+    <div class="tab-panel" id="tab-reviews">
+      <!-- Summary -->
+      <div class="reviews-summary">
+        <div class="reviews-big-score">
+          <div class="reviews-big-num">4.9</div>
+          <div class="reviews-big-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <div class="reviews-big-count">128 đánh giá</div>
+        </div>
+        <div class="reviews-bars">
+          <div class="review-bar-row">
+            <span class="review-bar-label">5 &#9733;</span>
+            <div class="review-bar"><div class="review-bar-fill" style="width:88%;"></div></div>
+            <span class="review-bar-count">112</span>
+          </div>
+          <div class="review-bar-row">
+            <span class="review-bar-label">4 &#9733;</span>
+            <div class="review-bar"><div class="review-bar-fill" style="width:9%;"></div></div>
+            <span class="review-bar-count">12</span>
+          </div>
+          <div class="review-bar-row">
+            <span class="review-bar-label">3 &#9733;</span>
+            <div class="review-bar"><div class="review-bar-fill" style="width:2%;"></div></div>
+            <span class="review-bar-count">3</span>
+          </div>
+          <div class="review-bar-row">
+            <span class="review-bar-label">2 &#9733;</span>
+            <div class="review-bar"><div class="review-bar-fill" style="width:1%;"></div></div>
+            <span class="review-bar-count">1</span>
+          </div>
+          <div class="review-bar-row">
+            <span class="review-bar-label">1 &#9733;</span>
+            <div class="review-bar"><div class="review-bar-fill" style="width:0%;"></div></div>
+            <span class="review-bar-count">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review List -->
+      <div class="review-list">
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-avatar">M</div>
+            <div>
+              <div class="review-name">Minh Trần</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                <span class="review-verified">&#10003; Đã mua hàng</span>
+              </div>
+            </div>
+            <span class="review-date" style="margin-left:auto;">2 tuần trước</span>
+          </div>
+          <div class="review-text">Cuốn sách rất tuyệt vời! Nội dung chi tiết, dễ hiểu và có nhiều ví dụ thực tế. Tôi đã học được rất nhiều về machine learning và deep learning. Đặc biệt phần về Transformer và LLM rất cập nhật.</div>
+          <div class="review-helpful">
+            <span>Hữu ích?</span>
+            <button>&#128077; 12</button>
+            <button>&#128078; 0</button>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-avatar">H</div>
+            <div>
+              <div class="review-name">Hoàng Lê</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                <span class="review-verified">&#10003; Đã mua hàng</span>
+              </div>
+            </div>
+            <span class="review-date" style="margin-left:auto;">1 tháng trước</span>
+          </div>
+          <div class="review-text">Tài liệu bằng tiếng Việt tốt nhất về AI mà tôi từng đọc. Source code chạy được ngay, video hướng dẫn bổ sung rất hữu ích. Giá cả hợp lý cho lượng nội dung này.</div>
+          <div class="review-helpful">
+            <span>Hữu ích?</span>
+            <button>&#128077; 8</button>
+            <button>&#128078; 1</button>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-avatar">L</div>
+            <div>
+              <div class="review-name">Linh Nguyễn</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+                <span class="review-verified">&#10003; Đã mua hàng</span>
+              </div>
+            </div>
+            <span class="review-date" style="margin-left:auto;">1 tháng trước</span>
+          </div>
+          <div class="review-text">Nội dung rất tốt, nhưng tôi mong có thêm phần về Computer Vision và Generative AI. Hy vọng phiên bản tiếp theo sẽ cập nhật thêm. Nhìn chung vẫn là đáng mua.</div>
+          <div class="review-helpful">
+            <span>Hữu ích?</span>
+            <button>&#128077; 5</button>
+            <button>&#128078; 0</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center; padding:24px 0;">
+        <button class="btn btn-ghost">Xem tất cả 128 đánh giá</button>
+      </div>
+    </div>
+
+    <!-- FAQ TAB -->
+    <div class="tab-panel" id="tab-faq">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <details style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;">
+          <summary style="padding:16px 20px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+            Tôi có cần biết lập trình trước khi đọc không?
+            <span style="color:var(--muted-fg);">+</span>
+          </summary>
+          <div style="padding:0 20px 16px;font-size:14px;color:var(--card-fg);line-height:1.6;">
+            Kiến thức cơ bản về Python sẽ giúp bạn tiến hành tốt hơn. Tuy nhiên, phần 1 của sách giải thích các khái niệm từ rất cơ bản nên người mới hoàn toàn có thể theo được.
+          </div>
+        </details>
+        <details style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;">
+          <summary style="padding:16px 20px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+            Làm sao để nhận sách sau khi thanh toán?
+            <span style="color:var(--muted-fg);">+</span>
+          </summary>
+          <div style="padding:0 20px 16px;font-size:14px;color:var(--card-fg);line-height:1.6;">
+            Sau khi thanh toán thành công, bạn sẽ nhận email với link tải sách ngay lập tức. Bạn cũng có thể truy cập từ trang "Sản phẩm của tôi" trong tài khoản.
+          </div>
+        </details>
+        <details style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;">
+          <summary style="padding:16px 20px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+            Có chính sách hoàn tiền không?
+            <span style="color:var(--muted-fg);">+</span>
+          </summary>
+          <div style="padding:0 20px 16px;font-size:14px;color:var(--card-fg);line-height:1.6;">
+            Có. Chúng tôi có chính sách hoàn tiền 100% trong vòng 30 ngày nếu bạn không hài lòng với sản phẩm. Không cần lý do.
+          </div>
+        </details>
+        <details style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;">
+          <summary style="padding:16px 20px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+            Sách có được cập nhật không?
+            <span style="color:var(--muted-fg);">+</span>
+          </summary>
+          <div style="padding:0 20px 16px;font-size:14px;color:var(--card-fg);line-height:1.6;">
+            Có. Khi mua sách, bạn sẽ nhận mọi bản cập nhật miễn phí trọn đời. Phiên bản hiện tại là v3.0, được cập nhật tháng 1/2026 với nội dung mới về GPT-5 và các mô hình AI mới nhất.
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RELATED PRODUCTS -->
+<section class="related-section">
+  <div class="container">
+    <h2>Sản phẩm tương tự</h2>
+    <div class="related-grid">
+      <div class="related-card">
+        <div class="related-card-image ebook">Ebook Cover</div>
+        <div class="related-card-body">
+          <div class="related-card-title">Prompt Engineering Handbook</div>
+          <div class="related-card-footer">
+            <div class="related-card-price">139K</div>
+            <div class="related-card-rating">&#9733; 4.8</div>
+          </div>
+        </div>
+      </div>
+      <div class="related-card">
+        <div class="related-card-image code">Code Preview</div>
+        <div class="related-card-body">
+          <div class="related-card-title">AI Chatbot Component Library</div>
+          <div class="related-card-footer">
+            <div class="related-card-price">399K</div>
+            <div class="related-card-rating">&#9733; 5.0</div>
+          </div>
+        </div>
+      </div>
+      <div class="related-card">
+        <div class="related-card-image template">Template Preview</div>
+        <div class="related-card-body">
+          <div class="related-card-title">Next.js SaaS Starter Kit</div>
+          <div class="related-card-footer">
+            <div class="related-card-price">499K</div>
+            <div class="related-card-rating">&#9733; 4.7</div>
+          </div>
+        </div>
+      </div>
+      <div class="related-card">
+        <div class="related-card-image ebook">Ebook Cover</div>
+        <div class="related-card-body">
+          <div class="related-card-title">System Design Interview Guide</div>
+          <div class="related-card-footer">
+            <div class="related-card-price">249K</div>
+            <div class="related-card-rating">&#9733; 4.7</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">GTK<span>Blog</span> &middot; <span style="font-weight:400;color:var(--muted-fg);">&copy; 2026</span></div>
+      <div class="footer-links-row">
+        <a href="#">Giới thiệu</a>
+        <a href="#">Liên hệ</a>
+        <a href="#">Bảo mật</a>
+        <a href="#">Điều khoản</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark');
+    const s = document.querySelector('.theme-btn span');
+    if (s) s.textContent = '\u2600';
+  }
+
+  // Tabs
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + tabId).classList.add('active');
+  }
+</script>
+
+</body>
+</html>

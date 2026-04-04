@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTKBlog — Blog Listing Wireframe</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAF8F5; --fg: #1A1715; --card: #FFFFFF; --card-fg: #2C2825;
+    --primary: #D97757; --primary-fg: #FFFFFF;
+    --secondary: #F0EBE4; --secondary-fg: #5C554D;
+    --accent: #C4713E; --accent-fg: #FFFFFF;
+    --muted: #F0EBE4; --muted-fg: #8A817A;
+    --border: #E5DED5; --ring: #D97757;
+    --success: #3D8B6E; --warning: #D4952B;
+    --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
+    --shadow-sm: 0 1px 3px rgba(26,23,21,0.06), 0 1px 2px rgba(26,23,21,0.04);
+    --shadow-md: 0 4px 12px rgba(26,23,21,0.08), 0 2px 4px rgba(26,23,21,0.04);
+    --shadow-lg: 0 8px 24px rgba(26,23,21,0.10);
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Be Vietnam Pro', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  .dark {
+    --bg: #1A1614; --fg: #F0EBE4; --card: #241F1C; --card-fg: #E0D8CF;
+    --primary: #E09070; --primary-fg: #1A1614;
+    --secondary: #2E2824; --secondary-fg: #A69E96;
+    --accent: #E0955E; --accent-fg: #1A1614;
+    --muted: #2E2824; --muted-fg: #7A726A;
+    --border: #3A332E;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); line-height: 1.65; font-size: 16px; -webkit-font-smoothing: antialiased; transition: background 0.3s, color 0.3s; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  h1,h2,h3,h4 { font-family: var(--font-heading); line-height: 1.2; }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .text-gradient { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+  .badge-primary { background: rgba(217,119,87,0.1); color: var(--primary); }
+  .badge-accent { background: rgba(196,113,62,0.1); color: var(--accent); }
+  .badge-muted { background: var(--muted); color: var(--muted-fg); }
+  .badge-success { background: rgba(61,139,110,0.1); color: var(--success); }
+  .badge-warning { background: rgba(212,149,43,0.1); color: var(--warning); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius); font-family: var(--font-body); font-size: 14px; font-weight: 500; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .btn:hover { transform: translateY(-1px); text-decoration: none; }
+  .btn-primary { background: var(--primary); color: var(--primary-fg); }
+  .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--secondary); }
+
+  /* NAVBAR (Anthropic-style) */
+  .navbar { position: sticky; top: 0; z-index: 50; height: 64px; display: flex; align-items: center; background: rgba(250,248,245,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); transition: background 0.3s; }
+  .dark .navbar { background: rgba(26,22,20,0.88); }
+  .navbar .container { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; }
+  .navbar-brand { font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--fg); text-decoration: none; }
+  .navbar-brand span { color: var(--primary); }
+  .navbar-links { display: flex; justify-content: center; gap: 36px; list-style: none; }
+  .navbar-links a { color: var(--muted-fg); font-size: 15px; font-weight: 500; text-decoration: none; transition: color 0.2s; position: relative; }
+  .navbar-links a:hover, .navbar-links a.active { color: var(--fg); }
+  .navbar-links a.active::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: var(--primary); border-radius: 1px; }
+  .navbar-actions { display: flex; align-items: center; gap: 10px; }
+  .lang-toggle { padding: 6px 12px; border-radius: 9999px; font-size: 13px; font-weight: 600; background: var(--secondary); color: var(--secondary-fg); border: none; cursor: pointer; }
+  .theme-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--secondary); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--fg); transition: all 0.2s; }
+  .theme-btn:hover { background: var(--border); }
+  .navbar-login { padding: 8px 20px; font-size: 14px; border-radius: var(--radius); background: var(--primary); color: var(--primary-fg); border: none; cursor: pointer; font-family: var(--font-body); font-weight: 500; text-decoration: none; transition: all 0.2s; }
+  .navbar-login:hover { box-shadow: 0 2px 8px rgba(217,119,87,0.3); text-decoration: none; }
+
+  /* PAGE HEADER */
+  .page-header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); }
+  .page-header h1 { font-size: 36px; margin-bottom: 8px; }
+  .page-header p { font-size: 17px; color: var(--muted-fg); max-width: 600px; }
+  .breadcrumb { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted-fg); margin-bottom: 16px; }
+  .breadcrumb a { color: var(--muted-fg); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--primary); }
+
+  /* FILTER TABS */
+  .filter-bar { padding: 24px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-tab { padding: 8px 20px; border-radius: 9999px; font-size: 14px; font-weight: 500; border: 1px solid var(--border); background: transparent; color: var(--muted-fg); cursor: pointer; transition: all 0.2s; font-family: var(--font-body); }
+  .filter-tab:hover { border-color: var(--primary); color: var(--primary); }
+  .filter-tab.active { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+  .view-toggle { display: flex; gap: 4px; }
+  .view-btn { width: 40px; height: 40px; border-radius: var(--radius); border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted-fg); transition: all 0.2s; }
+  .view-btn.active { background: var(--secondary); color: var(--fg); border-color: transparent; }
+
+  /* MAIN LAYOUT — blog cards + sidebar */
+  .blog-layout { display: grid; grid-template-columns: 1fr 300px; gap: 40px; padding: 32px 0 80px; }
+
+  /* BLOG CARDS */
+  .posts-list { display: flex; flex-direction: column; gap: 24px; }
+  .post-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.25s; cursor: pointer; display: grid; grid-template-columns: 280px 1fr; }
+  .post-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: rgba(217,119,87,0.2); }
+  .post-card-image { width: 100%; height: 100%; min-height: 200px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500; }
+  .post-card-image.ai { background: linear-gradient(135deg, #D97757, #C4713E); }
+  .post-card-image.tech { background: linear-gradient(135deg, #5B8C7B, #3D8B6E); }
+  .post-card-image.tutorial { background: linear-gradient(135deg, #8B7355, #6B5B3E); }
+  .post-card-image.opinion { background: linear-gradient(135deg, #D4952B, #B8822A); }
+  .post-card-body { padding: 24px; display: flex; flex-direction: column; justify-content: center; }
+  .post-card-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; color: var(--muted-fg); flex-wrap: wrap; }
+  .post-card-title { font-family: var(--font-heading); font-size: 20px; font-weight: 600; line-height: 1.3; margin-bottom: 8px; color: var(--fg); }
+  .post-card-excerpt { font-size: 14px; color: var(--muted-fg); line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .post-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+  .post-card-author { display: flex; align-items: center; gap: 8px; }
+  .post-card-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 600; }
+  .post-card-author-name { font-size: 13px; font-weight: 500; }
+  .post-card-stats { display: flex; gap: 12px; font-size: 12px; color: var(--muted-fg); }
+
+  /* GRID VIEW */
+  .posts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .posts-grid .post-card { grid-template-columns: 1fr; }
+  .posts-grid .post-card-image { min-height: 180px; aspect-ratio: 16/9; }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 24px; }
+  .sidebar-widget { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+  .sidebar-title { font-family: var(--font-heading); font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+  /* SEARCH WIDGET */
+  .search-input-wrap { position: relative; }
+  .search-input { width: 100%; padding: 12px 16px 12px 40px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-size: 14px; font-family: var(--font-body); outline: none; }
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(217,119,87,0.1); }
+  .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted-fg); }
+
+  /* CATEGORIES WIDGET */
+  .sidebar-categories { list-style: none; }
+  .sidebar-categories li { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .sidebar-categories li:last-child { border-bottom: none; }
+  .sidebar-categories a { color: var(--fg); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+  .sidebar-categories a:hover { color: var(--primary); }
+  .sidebar-categories .count { font-size: 12px; color: var(--muted-fg); background: var(--secondary); padding: 2px 8px; border-radius: 9999px; }
+
+  /* POPULAR POSTS */
+  .popular-post { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .popular-post:last-child { border-bottom: none; padding-bottom: 0; }
+  .popular-post:first-child { padding-top: 0; }
+  .popular-post-num { font-family: var(--font-heading); font-size: 24px; font-weight: 700; color: var(--border); min-width: 32px; line-height: 1; }
+  .dark .popular-post-num { color: var(--muted); }
+  .popular-post-title { font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--fg); }
+  .popular-post-meta { font-size: 12px; color: var(--muted-fg); margin-top: 4px; }
+
+  /* TAGS */
+  .tags-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; background: var(--secondary); color: var(--secondary-fg); cursor: pointer; transition: all 0.2s; border: none; font-family: var(--font-body); }
+  .tag:hover { background: var(--primary); color: var(--primary-fg); }
+
+  /* NEWSLETTER WIDGET */
+  .sidebar-newsletter-desc { font-size: 14px; color: var(--muted-fg); margin-bottom: 12px; line-height: 1.5; }
+  .sidebar-newsletter-input { width: 100%; padding: 10px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-size: 14px; font-family: var(--font-body); margin-bottom: 8px; outline: none; }
+  .sidebar-newsletter-input:focus { border-color: var(--primary); }
+
+  /* PAGINATION */
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 40px 0 0; }
+  .page-btn { width: 40px; height: 40px; border-radius: var(--radius); border: 1px solid var(--border); background: transparent; color: var(--fg); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: var(--font-body); }
+  .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .page-btn.active { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+  .page-btn.nav { width: auto; padding: 0 16px; gap: 6px; }
+
+  /* FOOTER */
+  .footer { padding: 48px 0 24px; border-top: 1px solid var(--border); }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted-fg); }
+  .footer-brand { font-family: var(--font-heading); font-weight: 700; }
+  .footer-brand span { color: var(--primary); }
+  .footer-links-row { display: flex; gap: 24px; }
+  .footer-links-row a { color: var(--muted-fg); text-decoration: none; font-size: 13px; }
+  .footer-links-row a:hover { color: var(--primary); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .blog-layout { grid-template-columns: 1fr; }
+    .sidebar { order: -1; display: grid; grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .navbar-links { display: none; }
+    .navbar .container { grid-template-columns: auto 1fr auto; }
+    .post-card { grid-template-columns: 1fr; }
+    .post-card-image { min-height: 180px; aspect-ratio: 16/9; }
+    .posts-grid { grid-template-columns: 1fr; }
+    .sidebar { grid-template-columns: 1fr; }
+    .page-header h1 { font-size: 28px; }
+    .filter-bar { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR (Anthropic-style) -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="navbar-brand">GTK<span>Blog</span></a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Trang chủ</a></li>
+      <li><a href="blog.html" class="active">Bài viết</a></li>
+      <li><a href="products.html">Sản phẩm</a></li>
+      <li><a href="#">Khóa học</a></li>
+      <li><a href="#">Giới thiệu</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <button class="lang-toggle">VI / EN</button>
+      <button class="theme-btn" onclick="document.body.classList.toggle('dark'); this.querySelector('span').textContent = document.body.classList.contains('dark') ? '\u2600' : '\u263D';" title="Toggle dark mode"><span>&#9789;</span></button>
+      <a href="#" class="navbar-login">Đăng nhập</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<section class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span>/</span>
+      <span>Bài viết</span>
+    </div>
+    <h1>Bài viết <span class="text-gradient">Blog</span></h1>
+    <p>Khám phá những bài viết về công nghệ, trí tuệ nhân tạo, hướng dẫn lập trình và quan điểm cá nhân.</p>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<div class="container">
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="filter-tab active">Tất cả</button>
+      <button class="filter-tab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1"/></svg>
+        AI
+      </button>
+      <button class="filter-tab">Công nghệ</button>
+      <button class="filter-tab">Hướng dẫn</button>
+      <button class="filter-tab">Quan điểm</button>
+      <button class="filter-tab">Series</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <select style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:14px;font-family:var(--font-body);cursor:pointer;">
+        <option>Mới nhất</option>
+        <option>Phổ biến nhất</option>
+        <option>Nhiều bình luận</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" title="List view" onclick="setView('list')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+        <button class="view-btn" title="Grid view" onclick="setView('grid')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+  <div class="blog-layout">
+
+    <!-- POSTS -->
+    <div>
+      <div class="posts-list" id="posts-container">
+
+        <!-- Post 1 -->
+        <article class="post-card">
+          <div class="post-card-image ai">16:9 Thumbnail — AI</div>
+          <div class="post-card-body">
+            <div class="post-card-meta">
+              <span class="badge badge-primary">AI</span>
+              <span>15 Tháng 3, 2026</span>
+              <span>&#183;</span>
+              <span>8 phút đọc</span>
+            </div>
+            <h3 class="post-card-title">Tổng quan GPT-5: Những thay đổi đột phá trong xử lý ngôn ngữ tự nhiên</h3>
+            <p class="post-card-excerpt">Phân tích chi tiết những cải tiến mới của GPT-5, so sánh với các phiên bản trước và tác động đến ngành công nghiệp AI. Tìm hiểu về khả năng suy luận mới và hiệu suất vượt trội.</p>
+            <div class="post-card-footer">
+              <div class="post-card-author">
+                <div class="post-card-avatar">G</div>
+                <span class="post-card-author-name">GTK</span>
+              </div>
+              <div class="post-card-stats">
+                <span>&#128065; 2.4K</span>
+                <span>&#128172; 24</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Post 2 -->
+        <article class="post-card">
+          <div class="post-card-image tech">16:9 Thumbnail — Tech</div>
+          <div class="post-card-body">
+            <div class="post-card-meta">
+              <span class="badge badge-accent">Tech</span>
+              <span>12 Tháng 3, 2026</span>
+              <span>&#183;</span>
+              <span>6 phút đọc</span>
+            </div>
+            <h3 class="post-card-title">Next.js 16 và tương lai của Server Components</h3>
+            <p class="post-card-excerpt">Khám phá những tính năng mới của Next.js 16 bao gồm cải tiến Server Components, Partial Prerendering và hiệu suất vượt trội hơn bao giờ hết.</p>
+            <div class="post-card-footer">
+              <div class="post-card-author">
+                <div class="post-card-avatar">G</div>
+                <span class="post-card-author-name">GTK</span>
+              </div>
+              <div class="post-card-stats">
+                <span>&#128065; 1.8K</span>
+                <span>&#128172; 16</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Post 3 -->
+        <article class="post-card">
+          <div class="post-card-image tutorial">16:9 Thumbnail — Tutorial</div>
+          <div class="post-card-body">
+            <div class="post-card-meta">
+              <span class="badge badge-success">Hướng dẫn</span>
+              <span class="badge badge-warning">Series</span>
+              <span>10 Tháng 3, 2026</span>
+              <span>&#183;</span>
+              <span>15 phút đọc</span>
+            </div>
+            <h3 class="post-card-title">Xây dựng chatbot AI với LangChain và Next.js từ A-Z (Phần 1)</h3>
+            <p class="post-card-excerpt">Hướng dẫn chi tiết cách tạo chatbot thông minh với LangChain, tích hợp với Next.js 15 và sử dụng các mô hình AI mới nhất. Đây là phần đầu tiên trong series 5 phần.</p>
+            <div class="post-card-footer">
+              <div class="post-card-author">
+                <div class="post-card-avatar">G</div>
+                <span class="post-card-author-name">GTK</span>
+              </div>
+              <div class="post-card-stats">
+                <span>&#128065; 3.1K</span>
+                <span>&#128172; 42</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Post 4 -->
+        <article class="post-card">
+          <div class="post-card-image opinion">16:9 Thumbnail — Opinion</div>
+          <div class="post-card-body">
+            <div class="post-card-meta">
+              <span class="badge badge-warning">Quan điểm</span>
+              <span>8 Tháng 3, 2026</span>
+              <span>&#183;</span>
+              <span>5 phút đọc</span>
+            </div>
+            <h3 class="post-card-title">AI có thay thế lập trình viên không? Góc nhìn thực tế</h3>
+            <p class="post-card-excerpt">Phân tích khách quan về tác động của AI lên nghề lập trình, những kỹ năng cần thiết trong tương lai và cách thích ứng để không bị tụt hậu.</p>
+            <div class="post-card-footer">
+              <div class="post-card-author">
+                <div class="post-card-avatar">G</div>
+                <span class="post-card-author-name">GTK</span>
+              </div>
+              <div class="post-card-stats">
+                <span>&#128065; 5.2K</span>
+                <span>&#128172; 87</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Post 5 -->
+        <article class="post-card">
+          <div class="post-card-image ai">16:9 Thumbnail — AI</div>
+          <div class="post-card-body">
+            <div class="post-card-meta">
+              <span class="badge badge-primary">AI</span>
+              <span>5 Tháng 3, 2026</span>
+              <span>&#183;</span>
+              <span>10 phút đọc</span>
+            </div>
+            <h3 class="post-card-title">So sánh chi tiết Claude 4 vs GPT-5 vs Gemini 3: Mô hình nào tốt nhất?</h3>
+            <p class="post-card-excerpt">Đánh giá toàn diện 3 mô hình AI hàng đầu hiện nay qua các bài test thực tế về coding, viết content, phân tích dữ liệu và suy luận logic.</p>
+            <div class="post-card-footer">
+              <div class="post-card-author">
+                <div class="post-card-avatar">G</div>
+                <span class="post-card-author-name">GTK</span>
+              </div>
+              <div class="post-card-stats">
+                <span>&#128065; 4.6K</span>
+                <span>&#128172; 63</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination">
+        <button class="page-btn nav">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Trước
+        </button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">...</button>
+        <button class="page-btn">12</button>
+        <button class="page-btn nav">
+          Tiếp
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <!-- Search -->
+      <div class="sidebar-widget">
+        <div class="sidebar-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Tìm kiếm
+        </div>
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="search-input" placeholder="Tìm bài viết...">
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="sidebar-widget">
+        <div class="sidebar-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Danh mục
+        </div>
+        <ul class="sidebar-categories">
+          <li><a href="#">Trí tuệ nhân tạo</a> <span class="count">42</span></li>
+          <li><a href="#">Công nghệ</a> <span class="count">38</span></li>
+          <li><a href="#">Hướng dẫn</a> <span class="count">56</span></li>
+          <li><a href="#">Quan điểm</a> <span class="count">18</span></li>
+          <li><a href="#">Series</a> <span class="count">8</span></li>
+        </ul>
+      </div>
+
+      <!-- Popular Posts -->
+      <div class="sidebar-widget">
+        <div class="sidebar-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Phổ biến nhất
+        </div>
+        <div class="popular-post">
+          <div class="popular-post-num">01</div>
+          <div>
+            <div class="popular-post-title">AI có thay thế lập trình viên không?</div>
+            <div class="popular-post-meta">5.2K lượt xem</div>
+          </div>
+        </div>
+        <div class="popular-post">
+          <div class="popular-post-num">02</div>
+          <div>
+            <div class="popular-post-title">So sánh Claude 4 vs GPT-5 vs Gemini 3</div>
+            <div class="popular-post-meta">4.6K lượt xem</div>
+          </div>
+        </div>
+        <div class="popular-post">
+          <div class="popular-post-num">03</div>
+          <div>
+            <div class="popular-post-title">Xây dựng chatbot AI với LangChain</div>
+            <div class="popular-post-meta">3.1K lượt xem</div>
+          </div>
+        </div>
+        <div class="popular-post">
+          <div class="popular-post-num">04</div>
+          <div>
+            <div class="popular-post-title">Tổng quan GPT-5: Đột phá xử lý ngôn ngữ</div>
+            <div class="popular-post-meta">2.4K lượt xem</div>
+          </div>
+        </div>
+        <div class="popular-post">
+          <div class="popular-post-num">05</div>
+          <div>
+            <div class="popular-post-title">Hướng dẫn deploy Next.js lên Vercel</div>
+            <div class="popular-post-meta">1.9K lượt xem</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="sidebar-widget">
+        <div class="sidebar-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Tags
+        </div>
+        <div class="tags-cloud">
+          <button class="tag">AI</button>
+          <button class="tag">Machine Learning</button>
+          <button class="tag">Next.js</button>
+          <button class="tag">React</button>
+          <button class="tag">TypeScript</button>
+          <button class="tag">LangChain</button>
+          <button class="tag">ChatGPT</button>
+          <button class="tag">Claude</button>
+          <button class="tag">Python</button>
+          <button class="tag">DevOps</button>
+          <button class="tag">Tailwind</button>
+          <button class="tag">API</button>
+        </div>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="sidebar-widget" style="background: linear-gradient(135deg, rgba(217,119,87,0.06), rgba(196,113,62,0.04)); border-color: rgba(217,119,87,0.15);">
+        <div class="sidebar-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Bản tin
+        </div>
+        <p class="sidebar-newsletter-desc">Nhận bài viết mới và ưu đãi sản phẩm độc quyền mỗi tuần.</p>
+        <input type="email" class="sidebar-newsletter-input" placeholder="email@example.com">
+        <button class="btn btn-primary" style="width:100%;font-size:14px;">Đăng ký ngay</button>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">GTK<span>Blog</span> &middot; <span style="font-weight:400;color:var(--muted-fg);">&copy; 2026</span></div>
+      <div class="footer-links-row">
+        <a href="#">Giới thiệu</a>
+        <a href="#">Liên hệ</a>
+        <a href="#">Bảo mật</a>
+        <a href="#">Điều khoản</a>
+        <a href="#">RSS</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark');
+    const s = document.querySelector('.theme-btn span');
+    if (s) s.textContent = '\u2600';
+  }
+
+  // View toggle (list / grid)
+  function setView(mode) {
+    const container = document.getElementById('posts-container');
+    const btns = document.querySelectorAll('.view-btn');
+    btns.forEach((b,i) => b.classList.toggle('active', (mode==='list' && i===0) || (mode==='grid' && i===1)));
+    if (mode === 'grid') {
+      container.className = 'posts-grid';
+    } else {
+      container.className = 'posts-list';
+    }
+  }
+</script>
+
+</body>
+</html>

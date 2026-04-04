@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTKBlog — Homepage Wireframe</title>
+<style>
+  /* ===== CSS RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAF8F5; --fg: #1A1715; --card: #FFFFFF; --card-fg: #2C2825;
+    --primary: #D97757; --primary-fg: #FFFFFF;
+    --secondary: #F0EBE4; --secondary-fg: #5C554D;
+    --accent: #C4713E; --accent-fg: #FFFFFF;
+    --muted: #F0EBE4; --muted-fg: #8A817A;
+    --border: #E5DED5; --ring: #D97757;
+    --destructive: #D94F4F; --success: #3D8B6E; --warning: #D4952B;
+    --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
+    --shadow-sm: 0 1px 3px rgba(26,23,21,0.06), 0 1px 2px rgba(26,23,21,0.04);
+    --shadow-md: 0 4px 12px rgba(26,23,21,0.08), 0 2px 4px rgba(26,23,21,0.04);
+    --shadow-lg: 0 8px 24px rgba(26,23,21,0.10);
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Be Vietnam Pro', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  .dark {
+    --bg: #1A1614; --fg: #F0EBE4; --card: #241F1C; --card-fg: #E0D8CF;
+    --primary: #E09070; --primary-fg: #1A1614;
+    --secondary: #2E2824; --secondary-fg: #A69E96;
+    --accent: #E0955E; --accent-fg: #1A1614;
+    --muted: #2E2824; --muted-fg: #7A726A;
+    --border: #3A332E; --ring: #E09070;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg); color: var(--fg);
+    line-height: 1.65; font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* ===== UTILITIES ===== */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .container-wide { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 80px 0; }
+  .section-sm { padding: 48px 0; }
+
+  .text-gradient {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 12px; border-radius: 9999px;
+    font-size: 12px; font-weight: 500; font-family: var(--font-body);
+  }
+  .badge-primary { background: rgba(217,119,87,0.1); color: var(--primary); }
+  .badge-accent { background: rgba(196,113,62,0.1); color: var(--accent); }
+  .badge-muted { background: var(--muted); color: var(--muted-fg); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 24px; border-radius: var(--radius);
+    font-family: var(--font-body); font-size: 15px; font-weight: 500;
+    border: none; cursor: pointer; text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--primary); color: var(--primary-fg); }
+  .btn-primary:hover { box-shadow: 0 4px 16px rgba(217,119,87,0.30); }
+  .btn-secondary { background: var(--secondary); color: var(--secondary-fg); }
+  .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--secondary); }
+  .btn-lg { padding: 16px 32px; font-size: 16px; border-radius: var(--radius-lg); }
+
+  h1, h2, h3, h4 { font-family: var(--font-heading); line-height: 1.2; }
+  h1 { font-size: 40px; font-weight: 700; }
+  h2 { font-size: 32px; font-weight: 600; }
+  h3 { font-size: 24px; font-weight: 600; }
+  h4 { font-size: 20px; font-weight: 500; }
+
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  img { max-width: 100%; height: auto; }
+
+  /* ===== THEME TOGGLE (in navbar actions now, floating removed) ===== */
+
+  /* ===== NAVBAR (Anthropic-style: logo left, links center, actions right) ===== */
+  .navbar {
+    position: sticky; top: 0; z-index: 50;
+    height: 64px; display: flex; align-items: center;
+    background: rgba(250,248,245,0.85); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s ease;
+  }
+  .dark .navbar { background: rgba(26,22,20,0.88); }
+  .navbar .container {
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: center; gap: 24px;
+  }
+  .navbar-brand {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 700;
+    color: var(--fg); text-decoration: none; display: flex; align-items: center; gap: 8px;
+  }
+  .navbar-brand span { color: var(--primary); }
+  .navbar-links {
+    display: flex; align-items: center; justify-content: center;
+    gap: 36px; list-style: none;
+  }
+  .navbar-links a {
+    color: var(--muted-fg); font-size: 15px; font-weight: 500;
+    text-decoration: none; transition: color 0.2s;
+    position: relative;
+  }
+  .navbar-links a:hover, .navbar-links a.active { color: var(--fg); }
+  .navbar-links a.active::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 2px; background: var(--primary); border-radius: 1px;
+  }
+  .navbar-actions { display: flex; align-items: center; gap: 10px; }
+  .lang-toggle {
+    padding: 6px 12px; border-radius: 9999px; font-size: 13px; font-weight: 600;
+    background: var(--secondary); color: var(--secondary-fg); border: none; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .lang-toggle:hover { background: var(--border); }
+  .theme-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--secondary); border: 1px solid var(--border);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all 0.2s; color: var(--fg);
+  }
+  .theme-btn:hover { background: var(--border); }
+  .navbar-login {
+    padding: 8px 20px; font-size: 14px; border-radius: var(--radius);
+    background: var(--primary); color: var(--primary-fg);
+    border: none; cursor: pointer; font-family: var(--font-body);
+    font-weight: 500; text-decoration: none; transition: all 0.2s;
+  }
+  .navbar-login:hover { box-shadow: 0 2px 8px rgba(217,119,87,0.3); text-decoration: none; }
+
+  /* Mobile hamburger (hidden on desktop) */
+  .navbar-hamburger {
+    display: none; width: 36px; height: 36px; border: none; background: none;
+    cursor: pointer; color: var(--fg); font-size: 20px;
+    align-items: center; justify-content: center;
+  }
+
+  /* ===== HERO ===== */
+  .hero { padding: 100px 0 80px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ''; position: absolute; top: -200px; right: -200px;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,119,87,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -100px; left: -100px;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,113,62,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero .container { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; font-size: 14px; font-weight: 500; color: var(--primary);
+    padding: 6px 16px; background: rgba(217,119,87,0.08); border-radius: 9999px;
+  }
+  .hero-title { font-size: 52px; line-height: 1.1; margin-bottom: 20px; }
+  .hero-desc { font-size: 18px; color: var(--muted-fg); line-height: 1.7; margin-bottom: 32px; max-width: 500px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero-stats { display: flex; gap: 40px; margin-top: 40px; }
+  .hero-stat-value { font-family: var(--font-heading); font-size: 28px; font-weight: 700; }
+  .hero-stat-label { font-size: 13px; color: var(--muted-fg); margin-top: 2px; }
+  .hero-visual {
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .hero-image-placeholder {
+    width: 100%; aspect-ratio: 4/3; border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, rgba(217,119,87,0.10), rgba(196,113,62,0.08));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--muted-fg); font-weight: 500;
+    border: 1px dashed var(--border); position: relative; overflow: hidden;
+  }
+  .hero-image-placeholder::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(217,119,87,0.04) 100%);
+  }
+  .hero-float-card {
+    position: absolute; padding: 12px 16px; border-radius: var(--radius-lg);
+    background: var(--card); box-shadow: var(--shadow-md); border: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .hero-float-card.top-right { top: -16px; right: -16px; }
+  .hero-float-card.bottom-left { bottom: -16px; left: -16px; }
+
+  /* ===== SECTION HEADER ===== */
+  .section-header { margin-bottom: 48px; }
+  .section-header.center { text-align: center; }
+  .section-subtitle { font-size: 14px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .section-title { margin-bottom: 12px; }
+  .section-desc { color: var(--muted-fg); font-size: 17px; max-width: 600px; }
+  .section-header.center .section-desc { margin: 0 auto; }
+
+  /* ===== FEATURED POSTS ===== */
+  .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .post-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; transition: all 0.25s ease; cursor: pointer;
+  }
+  .post-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(217,119,87,0.2); }
+  .post-card-image {
+    width: 100%; aspect-ratio: 16/9;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;
+  }
+  .post-card-image.ai { background: linear-gradient(135deg, #D97757, #C4713E); }
+  .post-card-image.tech { background: linear-gradient(135deg, #5B8C7B, #3D8B6E); }
+  .post-card-image.tutorial { background: linear-gradient(135deg, #8B7355, #6B5B3E); }
+  .post-card-image.opinion { background: linear-gradient(135deg, #D4952B, #B8822A); }
+  .post-card-body { padding: 20px; }
+  .post-card-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 13px; color: var(--muted-fg); }
+  .post-card-title { font-family: var(--font-heading); font-size: 18px; font-weight: 600; line-height: 1.35; margin-bottom: 8px; color: var(--fg); }
+  .post-card-excerpt { font-size: 14px; color: var(--muted-fg); line-height: 1.6; margin-bottom: 16px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .post-card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .post-card-author { display: flex; align-items: center; gap: 8px; }
+  .post-card-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: white; font-weight: 600;
+  }
+  .post-card-author-name { font-size: 13px; font-weight: 500; }
+  .post-card-readtime { font-size: 12px; color: var(--muted-fg); }
+
+  /* ===== FEATURED POSTS HIGHLIGHT (first large card) ===== */
+  .posts-featured {
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px;
+    margin-bottom: 24px;
+  }
+  .post-card-featured {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; transition: all 0.25s ease; cursor: pointer;
+  }
+  .post-card-featured:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(217,119,87,0.2); }
+  .post-card-featured .post-card-image { aspect-ratio: 16/10; }
+  .post-card-featured .post-card-body { padding: 24px; }
+  .post-card-featured .post-card-title { font-size: 22px; }
+
+  /* ===== CATEGORIES ===== */
+  .categories-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .category-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 28px 24px; text-align: center;
+    transition: all 0.25s ease; cursor: pointer; position: relative; overflow: hidden;
+  }
+  .category-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(217,119,87,0.2); }
+  .category-icon {
+    width: 56px; height: 56px; border-radius: var(--radius-lg); margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .category-icon.ai { background: rgba(217,119,87,0.1); }
+  .category-icon.tech { background: rgba(61,139,110,0.1); }
+  .category-icon.tutorial { background: rgba(139,115,85,0.1); }
+  .category-icon.opinion { background: rgba(212,149,43,0.1); }
+  .category-name { font-family: var(--font-heading); font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .category-count { font-size: 13px; color: var(--muted-fg); }
+
+  /* ===== PRODUCTS ===== */
+  .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .product-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; transition: all 0.25s ease; cursor: pointer;
+  }
+  .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(217,119,87,0.2); }
+  .product-card-image {
+    width: 100%; aspect-ratio: 4/3;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;
+    position: relative;
+  }
+  .product-card-image.ebook { background: linear-gradient(135deg, #D97757, #C4713E); }
+  .product-card-image.template { background: linear-gradient(135deg, #5B8C7B, #3D8B6E); }
+  .product-card-image.code { background: linear-gradient(135deg, #8B7355, #6B5B3E); }
+  .product-card-badge {
+    position: absolute; top: 12px; right: 12px;
+    padding: 4px 10px; border-radius: 9999px;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
+    color: white; font-size: 11px; font-weight: 600;
+  }
+  .product-card-body { padding: 16px; }
+  .product-card-title { font-family: var(--font-heading); font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .product-card-desc { font-size: 13px; color: var(--muted-fg); margin-bottom: 12px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .product-card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .product-card-price { font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: var(--primary); }
+  .product-card-rating { font-size: 13px; color: var(--warning); }
+
+  /* ===== NEWSLETTER ===== */
+  .newsletter {
+    background: linear-gradient(135deg, rgba(217,119,87,0.06), rgba(196,113,62,0.04));
+    border: 1px solid var(--border); border-radius: var(--radius-xl);
+    padding: 64px; text-align: center; position: relative; overflow: hidden;
+  }
+  .dark .newsletter { background: linear-gradient(135deg, rgba(224,144,112,0.08), rgba(224,149,94,0.05)); }
+  .newsletter::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,119,87,0.08), transparent);
+  }
+  .newsletter-title { margin-bottom: 12px; }
+  .newsletter-desc { color: var(--muted-fg); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto; }
+  .newsletter-form { display: flex; gap: 12px; max-width: 480px; margin: 0 auto; }
+  .newsletter-input {
+    flex: 1; padding: 14px 20px; border-radius: var(--radius); font-size: 15px;
+    border: 1px solid var(--border); background: var(--card); color: var(--fg);
+    font-family: var(--font-body); outline: none;
+  }
+  .newsletter-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(217,119,87,0.1); }
+  .newsletter-note { font-size: 13px; color: var(--muted-fg); margin-top: 12px; }
+
+  /* ===== FOOTER ===== */
+  .footer { padding: 64px 0 32px; border-top: 1px solid var(--border); }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+  .footer-brand { font-family: var(--font-heading); font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+  .footer-brand span { color: var(--primary); }
+  .footer-desc { font-size: 14px; color: var(--muted-fg); line-height: 1.6; margin-bottom: 20px; }
+  .footer-social { display: flex; gap: 12px; }
+  .footer-social-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--secondary); display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--muted-fg); transition: all 0.2s;
+    text-decoration: none; cursor: pointer;
+  }
+  .footer-social-icon:hover { background: var(--primary); color: var(--primary-fg); }
+  .footer-heading { font-family: var(--font-heading); font-size: 14px; font-weight: 600; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 10px; }
+  .footer-links a { color: var(--muted-fg); font-size: 14px; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--primary); }
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 24px; border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--muted-fg);
+  }
+  .footer-bottom-links { display: flex; gap: 24px; }
+  .footer-bottom-links a { color: var(--muted-fg); text-decoration: none; }
+  .footer-bottom-links a:hover { color: var(--primary); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .hero .container { grid-template-columns: 1fr; gap: 40px; }
+    .hero-visual { max-width: 480px; }
+    .posts-grid { grid-template-columns: repeat(2, 1fr); }
+    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .categories-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  }
+  @media (max-width: 768px) {
+    .hero-title { font-size: 36px; }
+    h2 { font-size: 26px; }
+    .section { padding: 56px 0; }
+    .navbar-links { display: none; }
+    .navbar-hamburger { display: flex; }
+    .navbar .container { grid-template-columns: auto 1fr auto; }
+    .posts-featured { grid-template-columns: 1fr; }
+    .posts-grid { grid-template-columns: 1fr; }
+    .products-grid { grid-template-columns: 1fr; }
+    .categories-grid { grid-template-columns: repeat(2, 1fr); }
+    .newsletter { padding: 40px 24px; }
+    .newsletter-form { flex-direction: column; }
+    .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    .hero-stats { gap: 24px; }
+    .hero-stat-value { font-size: 22px; }
+  }
+
+  /* ===== ANNOTATION ===== */
+  .annotation {
+    position: relative; outline: 2px dashed rgba(217,119,87,0.3); outline-offset: 4px;
+  }
+  .annotation::before {
+    content: attr(data-note);
+    position: absolute; top: -28px; left: 0;
+    padding: 2px 10px; border-radius: 4px;
+    background: var(--primary); color: white;
+    font-size: 11px; font-weight: 600; white-space: nowrap; z-index: 10;
+    font-family: var(--font-mono);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR (Anthropic-style: logo left, links center, actions right) ===== -->
+<nav class="navbar">
+  <div class="container">
+    <a href="#" class="navbar-brand">GTK<span>Blog</span></a>
+    <ul class="navbar-links">
+      <li><a href="#" class="active">Trang chủ</a></li>
+      <li><a href="blog.html">Bài viết</a></li>
+      <li><a href="products.html">Sản phẩm</a></li>
+      <li><a href="#">Khóa học</a></li>
+      <li><a href="#">Giới thiệu</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <button class="lang-toggle">VI / EN</button>
+      <button class="theme-btn" onclick="document.body.classList.toggle('dark'); this.textContent = document.body.classList.contains('dark') ? '\u2600' : '\u263D';" title="Toggle dark mode">
+        <span>&#9789;</span>
+      </button>
+      <a href="#" class="navbar-login">Đăng nhập</a>
+    </div>
+    <button class="navbar-hamburger" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Tech & AI Blog + Digital Products
+      </div>
+      <h1 class="hero-title">
+        Chia sẻ kiến thức<br>
+        <span class="text-gradient">Công nghệ & AI</span>
+      </h1>
+      <p class="hero-desc">
+        Khám phá những bài viết chuyên sâu về trí tuệ nhân tạo, công nghệ mới, hướng dẫn lập trình và các sản phẩm số chất lượng cao.
+      </p>
+      <div class="hero-actions">
+        <a href="blog.html" class="btn btn-primary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Đọc bài viết
+        </a>
+        <a href="products.html" class="btn btn-ghost btn-lg">
+          Xem sản phẩm
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-value text-gradient">150+</div>
+          <div class="hero-stat-label">Bài viết</div>
+        </div>
+        <div>
+          <div class="hero-stat-value text-gradient">12K+</div>
+          <div class="hero-stat-label">Độc giả</div>
+        </div>
+        <div>
+          <div class="hero-stat-value text-gradient">25+</div>
+          <div class="hero-stat-label">Sản phẩm số</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-image-placeholder">
+        <!-- Annotation: Hero illustration / 3D avatar / personal photo -->
+        Ảnh đại diện / Illustration / 3D Avatar
+      </div>
+      <div class="hero-float-card top-right">
+        <div style="font-weight:600; font-size:14px;">🔥 Bài mới</div>
+        <div style="font-size:12px; color:var(--muted-fg); margin-top:2px;">GPT-5 có gì mới?</div>
+      </div>
+      <div class="hero-float-card bottom-left">
+        <div style="font-weight:600; font-size:14px; color:var(--success);">✓ 4.9 / 5.0</div>
+        <div style="font-size:12px; color:var(--muted-fg); margin-top:2px;">Đánh giá sản phẩm</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURED BLOG POSTS ===== -->
+<section class="section" style="padding-top: 40px;">
+  <div class="container">
+    <div class="section-header" style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div class="section-subtitle">Blog</div>
+        <h2 class="section-title">Bài viết mới nhất</h2>
+        <p class="section-desc">Cập nhật những xu hướng công nghệ và AI mới nhất</p>
+      </div>
+      <a href="blog.html" class="btn btn-ghost">
+        Xem tất cả
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <!-- Featured large card + side card -->
+    <div class="posts-featured">
+      <div class="post-card-featured">
+        <div class="post-card-image ai" style="aspect-ratio: 16/10;">16:10 Featured Thumbnail — AI</div>
+        <div class="post-card-body">
+          <div class="post-card-meta">
+            <span class="badge badge-primary">AI</span>
+            <span>15 Tháng 3, 2026</span>
+            <span>·</span>
+            <span>8 phút đọc</span>
+          </div>
+          <h3 class="post-card-title" style="font-size:22px;">Tổng quan GPT-5: Những thay đổi đột phá trong xử lý ngôn ngữ tự nhiên</h3>
+          <p class="post-card-excerpt">Phân tích chi tiết những cải tiến mới của GPT-5, so sánh với các phiên bản trước và tác động đến ngành công nghiệp AI...</p>
+          <div class="post-card-footer">
+            <div class="post-card-author">
+              <div class="post-card-avatar">G</div>
+              <span class="post-card-author-name">GTK</span>
+            </div>
+            <span class="post-card-readtime">💬 24 bình luận</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="post-card" style="flex:1;">
+          <div class="post-card-image tech">16:9 — Tech News</div>
+          <div class="post-card-body">
+            <div class="post-card-meta">
+              <span class="badge badge-accent">Tech</span>
+              <span>12 Tháng 3, 2026</span>
+            </div>
+            <h4 class="post-card-title">Next.js 16 và tương lai của Server Components</h4>
+            <p class="post-card-excerpt">Khám phá những tính năng mới của Next.js 16...</p>
+          </div>
+        </div>
+        <div class="post-card" style="flex:1;">
+          <div class="post-card-image tutorial">16:9 — Tutorial</div>
+          <div class="post-card-body">
+            <div class="post-card-meta">
+              <span class="badge badge-muted">Tutorial</span>
+              <span>10 Tháng 3, 2026</span>
+            </div>
+            <h4 class="post-card-title">Xây dựng chatbot AI với LangChain và Next.js từ A-Z</h4>
+            <p class="post-card-excerpt">Hướng dẫn chi tiết cách tạo chatbot thông minh...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CATEGORIES ===== -->
+<section class="section-sm" style="background: var(--secondary);">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-subtitle">Chủ đề</div>
+      <h2 class="section-title">Khám phá theo danh mục</h2>
+      <p class="section-desc">Tìm đọc các bài viết theo chủ đề yêu thích của bạn</p>
+    </div>
+    <div class="categories-grid">
+      <div class="category-card">
+        <div class="category-icon ai">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.27A7 7 0 0 1 14 22h-4a7 7 0 0 1-6.73-3H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="9.5" cy="15.5" r="1"/><circle cx="14.5" cy="15.5" r="1"/></svg>
+        </div>
+        <div class="category-name">Trí tuệ nhân tạo</div>
+        <div class="category-count">42 bài viết</div>
+      </div>
+      <div class="category-card">
+        <div class="category-icon tech">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3D8B6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="category-name">Công nghệ</div>
+        <div class="category-count">38 bài viết</div>
+      </div>
+      <div class="category-card">
+        <div class="category-icon tutorial">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8B7355" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <div class="category-name">Hướng dẫn</div>
+        <div class="category-count">56 bài viết</div>
+      </div>
+      <div class="category-card">
+        <div class="category-icon opinion">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4952B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="category-name">Quan điểm</div>
+        <div class="category-count">18 bài viết</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURED PRODUCTS ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-header" style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div class="section-subtitle">Sản phẩm số</div>
+        <h2 class="section-title">Công cụ & tài liệu chất lượng</h2>
+        <p class="section-desc">Ebook, template và source code giúp bạn nâng cao kỹ năng</p>
+      </div>
+      <a href="products.html" class="btn btn-ghost">
+        Xem tất cả
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-card-image ebook">
+          <span>Ebook Cover</span>
+          <span class="product-card-badge">Bestseller</span>
+        </div>
+        <div class="product-card-body">
+          <div style="margin-bottom:6px;"><span class="badge badge-primary">Ebook</span></div>
+          <div class="product-card-title">Làm chủ AI: Từ cơ bản đến nâng cao</div>
+          <div class="product-card-desc">Tài liệu toàn diện về AI, machine learning và deep learning cho người Việt</div>
+          <div class="product-card-footer">
+            <div class="product-card-price">299K</div>
+            <div class="product-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733; 4.9</div>
+          </div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-card-image template">
+          <span>Template Preview</span>
+          <span class="product-card-badge">Mới</span>
+        </div>
+        <div class="product-card-body">
+          <div style="margin-bottom:6px;"><span class="badge badge-accent">Template</span></div>
+          <div class="product-card-title">Next.js SaaS Starter Kit</div>
+          <div class="product-card-desc">Template hoàn chỉnh để xây dựng SaaS với auth, billing, dashboard</div>
+          <div class="product-card-footer">
+            <div class="product-card-price">499K</div>
+            <div class="product-card-rating">&#9733;&#9733;&#9733;&#9733;&#9734; 4.7</div>
+          </div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-card-image code">
+          <span>Code Preview</span>
+        </div>
+        <div class="product-card-body">
+          <div style="margin-bottom:6px;"><span class="badge badge-muted">Source Code</span></div>
+          <div class="product-card-title">AI Chatbot Component Library</div>
+          <div class="product-card-desc">Bộ component React cho chatbot AI, tích hợp OpenAI & Anthropic</div>
+          <div class="product-card-footer">
+            <div class="product-card-price">399K</div>
+            <div class="product-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733; 5.0</div>
+          </div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-card-image ebook">
+          <span>Ebook Cover</span>
+          <span class="product-card-badge">Sale -30%</span>
+        </div>
+        <div class="product-card-body">
+          <div style="margin-bottom:6px;"><span class="badge badge-primary">Ebook</span></div>
+          <div class="product-card-title">Prompt Engineering Handbook</div>
+          <div class="product-card-desc">Hướng dẫn kỹ thuật viết prompt hiệu quả cho ChatGPT, Claude, Gemini</div>
+          <div class="product-card-footer">
+            <div class="product-card-price"><span style="text-decoration:line-through;color:var(--muted-fg);font-size:14px;">199K</span> 139K</div>
+            <div class="product-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733; 4.8</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NEWSLETTER ===== -->
+<section class="section-sm">
+  <div class="container">
+    <div class="newsletter">
+      <h2 class="newsletter-title">Nhận bản tin công nghệ hàng tuần</h2>
+      <p class="newsletter-desc">Cập nhật xu hướng AI & tech mới nhất, tài liệu miễn phí và ưu đãi sản phẩm độc quyền mỗi tuần.</p>
+      <div class="newsletter-form">
+        <input type="email" class="newsletter-input" placeholder="email@example.com">
+        <button class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Đăng ký
+        </button>
+      </div>
+      <p class="newsletter-note">Miễn phí. Hủy đăng ký bất cứ lúc nào. Không spam.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">GTK<span>Blog</span></div>
+        <p class="footer-desc">Blog cá nhân về công nghệ, AI và lập trình. Chia sẻ kiến thức, xây dựng cộng đồng.</p>
+        <div class="footer-social">
+          <a href="#" class="footer-social-icon" title="GitHub">GH</a>
+          <a href="#" class="footer-social-icon" title="Twitter/X">X</a>
+          <a href="#" class="footer-social-icon" title="LinkedIn">in</a>
+          <a href="#" class="footer-social-icon" title="YouTube">YT</a>
+          <a href="#" class="footer-social-icon" title="Facebook">FB</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Blog</div>
+        <ul class="footer-links">
+          <li><a href="#">Trí tuệ nhân tạo</a></li>
+          <li><a href="#">Công nghệ</a></li>
+          <li><a href="#">Hướng dẫn</a></li>
+          <li><a href="#">Quan điểm</a></li>
+          <li><a href="#">Tất cả bài viết</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Sản phẩm</div>
+        <ul class="footer-links">
+          <li><a href="#">Ebook</a></li>
+          <li><a href="#">Template</a></li>
+          <li><a href="#">Source Code</a></li>
+          <li><a href="#">Miễn phí</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Liên kết</div>
+        <ul class="footer-links">
+          <li><a href="#">Giới thiệu</a></li>
+          <li><a href="#">Liên hệ</a></li>
+          <li><a href="#">Chính sách bảo mật</a></li>
+          <li><a href="#">Điều khoản sử dụng</a></li>
+          <li><a href="#">RSS Feed</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 GTKBlog. All rights reserved.</span>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Sitemap</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Detect system preference
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark');
+    const btn = document.querySelector('.theme-btn span');
+    if (btn) btn.textContent = '\u2600';
+  }
+</script>
+
+</body>
+</html>

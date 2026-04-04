@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTKBlog — Blog Detail Wireframe</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAF8F5; --fg: #1A1715; --card: #FFFFFF; --card-fg: #2C2825;
+    --primary: #D97757; --primary-fg: #FFFFFF;
+    --secondary: #F0EBE4; --secondary-fg: #5C554D;
+    --accent: #C4713E; --accent-fg: #FFFFFF;
+    --muted: #F0EBE4; --muted-fg: #8A817A;
+    --border: #E5DED5; --ring: #D97757;
+    --success: #3D8B6E; --warning: #D4952B;
+    --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
+    --shadow-sm: 0 1px 3px rgba(26,23,21,0.06), 0 1px 2px rgba(26,23,21,0.04);
+    --shadow-md: 0 4px 12px rgba(26,23,21,0.08), 0 2px 4px rgba(26,23,21,0.04);
+    --shadow-lg: 0 8px 24px rgba(26,23,21,0.10);
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Be Vietnam Pro', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  .dark {
+    --bg: #1A1614; --fg: #F0EBE4; --card: #241F1C; --card-fg: #E0D8CF;
+    --primary: #E09070; --primary-fg: #1A1614;
+    --secondary: #2E2824; --secondary-fg: #A69E96;
+    --accent: #E0955E; --accent-fg: #1A1614;
+    --muted: #2E2824; --muted-fg: #7A726A;
+    --border: #3A332E;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); line-height: 1.65; font-size: 16px; -webkit-font-smoothing: antialiased; transition: background 0.3s, color 0.3s; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  h1,h2,h3,h4 { font-family: var(--font-heading); line-height: 1.2; }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .text-gradient { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+  .badge-primary { background: rgba(217,119,87,0.1); color: var(--primary); }
+  .badge-accent { background: rgba(196,113,62,0.1); color: var(--accent); }
+  .badge-muted { background: var(--muted); color: var(--muted-fg); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius); font-family: var(--font-body); font-size: 14px; font-weight: 500; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .btn:hover { transform: translateY(-1px); text-decoration: none; }
+  .btn-primary { background: var(--primary); color: var(--primary-fg); }
+  .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--secondary); }
+  .btn-sm { padding: 6px 14px; font-size: 13px; }
+
+  /* NAVBAR (Anthropic-style) */
+  .navbar { position: sticky; top: 0; z-index: 50; height: 64px; display: flex; align-items: center; background: rgba(250,248,245,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); transition: background 0.3s; }
+  .dark .navbar { background: rgba(26,22,20,0.88); }
+  .navbar .container { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; }
+  .navbar-brand { font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--fg); text-decoration: none; }
+  .navbar-brand span { color: var(--primary); }
+  .navbar-links { display: flex; justify-content: center; gap: 36px; list-style: none; }
+  .navbar-links a { color: var(--muted-fg); font-size: 15px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+  .navbar-links a:hover, .navbar-links a.active { color: var(--fg); }
+  .navbar-actions { display: flex; align-items: center; gap: 10px; }
+  .lang-toggle { padding: 6px 12px; border-radius: 9999px; font-size: 13px; font-weight: 600; background: var(--secondary); color: var(--secondary-fg); border: none; cursor: pointer; }
+  .theme-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--secondary); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--fg); transition: all 0.2s; }
+  .theme-btn:hover { background: var(--border); }
+  .navbar-login { padding: 8px 20px; font-size: 14px; border-radius: var(--radius); background: var(--primary); color: var(--primary-fg); border: none; cursor: pointer; font-family: var(--font-body); font-weight: 500; text-decoration: none; transition: all 0.2s; }
+  .navbar-login:hover { box-shadow: 0 2px 8px rgba(217,119,87,0.3); text-decoration: none; }
+
+  /* ARTICLE LAYOUT */
+  .article-layout { display: grid; grid-template-columns: 220px 1fr; gap: 48px; padding: 40px 0 80px; max-width: 1060px; margin: 0 auto; }
+
+  /* ARTICLE HEADER */
+  .article-header { max-width: 800px; margin: 0 auto; padding: 48px 24px 0; }
+  .breadcrumb { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted-fg); margin-bottom: 20px; }
+  .breadcrumb a { color: var(--muted-fg); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--primary); }
+  .article-meta-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .article-title { font-size: 40px; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+  .article-subtitle { font-size: 19px; color: var(--muted-fg); line-height: 1.6; margin-bottom: 24px; }
+  .article-info { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .article-author { display: flex; align-items: center; gap: 12px; }
+  .article-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; font-weight: 600; }
+  .article-author-name { font-weight: 600; font-size: 15px; }
+  .article-author-role { font-size: 13px; color: var(--muted-fg); }
+  .article-stats { display: flex; gap: 20px; margin-left: auto; font-size: 13px; color: var(--muted-fg); }
+  .article-stat { display: flex; align-items: center; gap: 6px; }
+
+  /* HERO IMAGE */
+  .article-hero { max-width: 800px; margin: 32px auto 0; padding: 0 24px; }
+  .article-hero-img {
+    width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, #D97757, #C4713E);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500;
+  }
+
+  /* TABLE OF CONTENTS (sticky sidebar) */
+  .toc { position: sticky; top: 88px; }
+  .toc-title { font-family: var(--font-heading); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 16px; }
+  .toc-list { list-style: none; border-left: 2px solid var(--border); }
+  .toc-list li { padding: 6px 0 6px 16px; position: relative; }
+  .toc-list li::before { content: ''; position: absolute; left: -2px; top: 0; bottom: 0; width: 2px; background: transparent; transition: background 0.2s; }
+  .toc-list li.active::before { background: var(--primary); }
+  .toc-list a { font-size: 13px; color: var(--muted-fg); text-decoration: none; transition: color 0.2s; line-height: 1.5; display: block; }
+  .toc-list a:hover, .toc-list li.active a { color: var(--primary); }
+  .toc-list .toc-h3 { padding-left: 32px; }
+
+  /* PROGRESS BAR */
+  .reading-progress { position: fixed; top: 64px; left: 0; width: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); z-index: 49; transition: width 0.1s linear; }
+
+  /* ARTICLE CONTENT */
+  .article-content { max-width: 720px; }
+  .article-content h2 { font-size: 28px; font-weight: 600; margin: 48px 0 16px; padding-top: 8px; }
+  .article-content h3 { font-size: 22px; font-weight: 600; margin: 32px 0 12px; }
+  .article-content p { margin-bottom: 20px; line-height: 1.75; color: var(--card-fg); }
+  .article-content ul, .article-content ol { margin-bottom: 20px; padding-left: 24px; }
+  .article-content li { margin-bottom: 8px; line-height: 1.7; color: var(--card-fg); }
+  .article-content blockquote {
+    border-left: 4px solid var(--primary); padding: 16px 24px; margin: 24px 0;
+    background: rgba(217,119,87,0.04); border-radius: 0 var(--radius) var(--radius) 0;
+    font-style: italic; color: var(--secondary-fg);
+  }
+  .dark .article-content blockquote { background: rgba(224,144,112,0.08); }
+  .article-content pre {
+    background: #2C2825; color: #E0D8CF; padding: 20px 24px;
+    border-radius: var(--radius-lg); margin: 24px 0; overflow-x: auto;
+    font-family: var(--font-mono); font-size: 14px; line-height: 1.6;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .article-content code { font-family: var(--font-mono); font-size: 14px; background: var(--muted); padding: 2px 6px; border-radius: 4px; }
+  .article-content pre code { background: none; padding: 0; }
+  .article-content img, .article-content .img-placeholder {
+    width: 100%; border-radius: var(--radius-lg); margin: 24px 0;
+  }
+  .img-placeholder {
+    aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--muted-fg); font-weight: 500; border: 1px dashed var(--border);
+    background: var(--secondary);
+  }
+  .article-content .callout {
+    display: flex; gap: 12px; padding: 16px 20px;
+    background: rgba(196,113,62,0.06); border: 1px solid rgba(196,113,62,0.15);
+    border-radius: var(--radius-lg); margin: 24px 0; font-size: 14px;
+  }
+  .dark .article-content .callout { background: rgba(224,149,94,0.08); border-color: rgba(224,149,94,0.15); }
+  .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  /* SHARE BUTTONS */
+  .share-bar { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 88px; }
+  .share-btn {
+    width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--card); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 16px; color: var(--muted-fg); transition: all 0.2s;
+  }
+  .share-btn:hover { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+
+  /* TAGS */
+  .article-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 40px 0; padding-top: 24px; border-top: 1px solid var(--border); }
+  .tag { padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; background: var(--secondary); color: var(--secondary-fg); text-decoration: none; transition: all 0.2s; }
+  .tag:hover { background: var(--primary); color: var(--primary-fg); text-decoration: none; }
+
+  /* AUTHOR BIO */
+  .author-bio {
+    display: flex; gap: 20px; padding: 28px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-lg); margin: 32px 0;
+  }
+  .author-bio-avatar { width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: white; font-weight: 600;
+  }
+  .author-bio-name { font-family: var(--font-heading); font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .author-bio-role { font-size: 14px; color: var(--primary); margin-bottom: 8px; }
+  .author-bio-desc { font-size: 14px; color: var(--muted-fg); line-height: 1.6; }
+  .author-bio-social { display: flex; gap: 8px; margin-top: 12px; }
+  .author-bio-social a { color: var(--muted-fg); text-decoration: none; font-size: 13px; padding: 4px 8px; border-radius: 4px; background: var(--secondary); transition: all 0.2s; }
+  .author-bio-social a:hover { background: var(--primary); color: var(--primary-fg); text-decoration: none; }
+
+  /* POST NAV */
+  .post-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 32px 0; }
+  .post-nav-item {
+    padding: 20px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); cursor: pointer; transition: all 0.25s;
+  }
+  .post-nav-item:hover { border-color: rgba(217,119,87,0.3); box-shadow: var(--shadow-md); }
+  .post-nav-label { font-size: 12px; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .post-nav-title { font-family: var(--font-heading); font-size: 15px; font-weight: 600; line-height: 1.4; }
+  .post-nav-item.next { text-align: right; }
+  .post-nav-item.next .post-nav-label { justify-content: flex-end; }
+
+  /* RELATED POSTS */
+  .related-section { padding: 48px 0; border-top: 1px solid var(--border); }
+  .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .related-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.25s; cursor: pointer; }
+  .related-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .related-card-image { width: 100%; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; font-size: 12px; color: rgba(255,255,255,0.7); }
+  .related-card-image.ai { background: linear-gradient(135deg, #D97757, #C4713E); }
+  .related-card-image.tech { background: linear-gradient(135deg, #5B8C7B, #3D8B6E); }
+  .related-card-image.tutorial { background: linear-gradient(135deg, #8B7355, #6B5B3E); }
+  .related-card-body { padding: 16px; }
+  .related-card-meta { font-size: 12px; color: var(--muted-fg); margin-bottom: 6px; }
+  .related-card-title { font-family: var(--font-heading); font-size: 15px; font-weight: 600; line-height: 1.35; }
+
+  /* COMMENTS */
+  .comments-section { padding: 48px 0 0; max-width: 800px; margin: 0 auto; }
+  .comments-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .comments-count { font-family: var(--font-heading); font-size: 24px; font-weight: 600; }
+
+  .comment-form { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 32px; }
+  .comment-textarea {
+    width: 100%; min-height: 100px; padding: 14px 16px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+    font-family: var(--font-body); font-size: 14px; resize: vertical; outline: none; line-height: 1.6;
+  }
+  .comment-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(217,119,87,0.1); }
+  .comment-form-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .comment-form-note { font-size: 13px; color: var(--muted-fg); }
+
+  .comment-list { display: flex; flex-direction: column; gap: 24px; }
+  .comment { display: flex; gap: 14px; }
+  .comment-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--secondary); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--secondary-fg); flex-shrink: 0; }
+  .comment-body { flex: 1; }
+  .comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .comment-name { font-weight: 600; font-size: 14px; }
+  .comment-date { font-size: 12px; color: var(--muted-fg); }
+  .comment-text { font-size: 14px; color: var(--card-fg); line-height: 1.6; }
+  .comment-actions { display: flex; gap: 16px; margin-top: 8px; }
+  .comment-action { font-size: 12px; color: var(--muted-fg); cursor: pointer; display: flex; align-items: center; gap: 4px; background: none; border: none; font-family: var(--font-body); }
+  .comment-action:hover { color: var(--primary); }
+  .comment-reply { margin-left: 54px; margin-top: 16px; padding-left: 20px; border-left: 2px solid var(--border); }
+
+  /* FOOTER */
+  .footer { padding: 48px 0 24px; border-top: 1px solid var(--border); margin-top: 48px; }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted-fg); }
+  .footer-brand { font-family: var(--font-heading); font-weight: 700; }
+  .footer-brand span { color: var(--primary); }
+  .footer-links-row { display: flex; gap: 24px; }
+  .footer-links-row a { color: var(--muted-fg); text-decoration: none; font-size: 13px; }
+  .footer-links-row a:hover { color: var(--primary); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .article-layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static; margin-bottom: 32px; padding: 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .toc-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  }
+  @media (max-width: 768px) {
+    .navbar-links { display: none; }
+    .navbar .container { grid-template-columns: auto 1fr auto; }
+    .article-title { font-size: 28px; }
+    .article-header { padding: 32px 16px 0; }
+    .article-hero { padding: 0 16px; }
+    .article-layout { padding: 24px 16px 48px; }
+    .related-grid { grid-template-columns: 1fr; }
+    .post-nav { grid-template-columns: 1fr; }
+    .article-info { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .article-stats { margin-left: 0; }
+    .author-bio { flex-direction: column; align-items: center; text-align: center; }
+    .toc-list { grid-template-columns: 1fr; }
+    .comments-section { padding: 32px 16px 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- READING PROGRESS -->
+<div class="reading-progress" id="reading-progress"></div>
+
+<!-- NAVBAR (Anthropic-style) -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="navbar-brand">GTK<span>Blog</span></a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Trang chủ</a></li>
+      <li><a href="blog.html" class="active">Bài viết</a></li>
+      <li><a href="products.html">Sản phẩm</a></li>
+      <li><a href="#">Khóa học</a></li>
+      <li><a href="#">Giới thiệu</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <button class="lang-toggle">VI / EN</button>
+      <button class="theme-btn" onclick="document.body.classList.toggle('dark'); this.querySelector('span').textContent = document.body.classList.contains('dark') ? '\u2600' : '\u263D';" title="Toggle dark mode"><span>&#9789;</span></button>
+      <a href="#" class="navbar-login">Đăng nhập</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ARTICLE HEADER -->
+<header class="article-header">
+  <div class="breadcrumb">
+    <a href="index.html">Trang chủ</a>
+    <span>/</span>
+    <a href="blog.html">Bài viết</a>
+    <span>/</span>
+    <span>AI</span>
+  </div>
+  <div class="article-meta-top">
+    <span class="badge badge-primary">AI</span>
+    <span class="badge badge-accent">Featured</span>
+  </div>
+  <h1 class="article-title">Tổng quan GPT-5: Những thay đổi đột phá trong xử lý ngôn ngữ tự nhiên</h1>
+  <p class="article-subtitle">Phân tích chi tiết những cải tiến mới của GPT-5, so sánh với các phiên bản trước và tác động đến ngành công nghiệp AI trong năm 2026.</p>
+  <div class="article-info">
+    <div class="article-author">
+      <div class="article-avatar">G</div>
+      <div>
+        <div class="article-author-name">GTK</div>
+        <div class="article-author-role">Tech Writer & AI Enthusiast</div>
+      </div>
+    </div>
+    <div class="article-stats">
+      <div class="article-stat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        15 Tháng 3, 2026
+      </div>
+      <div class="article-stat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        8 phút đọc
+      </div>
+      <div class="article-stat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        2.4K lượt đọc
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO IMAGE -->
+<div class="article-hero">
+  <div class="article-hero-img">16:9 — Article Featured Image (AI/GPT-5 Illustration)</div>
+</div>
+
+<!-- ARTICLE BODY with TOC sidebar -->
+<div class="container">
+  <div class="article-layout">
+
+    <!-- TABLE OF CONTENTS -->
+    <aside>
+      <nav class="toc">
+        <div class="toc-title">Mục lục</div>
+        <ol class="toc-list">
+          <li class="active"><a href="#section-1">Giới thiệu</a></li>
+          <li><a href="#section-2">GPT-5 có gì mới?</a></li>
+          <li class="toc-h3"><a href="#section-2-1">Khả năng suy luận</a></li>
+          <li class="toc-h3"><a href="#section-2-2">Đa phương thức</a></li>
+          <li><a href="#section-3">So sánh với GPT-4</a></li>
+          <li><a href="#section-4">Tác động đến ngành</a></li>
+          <li><a href="#section-5">Kết luận</a></li>
+        </ol>
+      </nav>
+    </aside>
+
+    <!-- ARTICLE CONTENT -->
+    <article class="article-content">
+
+      <h2 id="section-1">Giới thiệu</h2>
+      <p>OpenAI vừa chính thức ra mắt GPT-5 vào tháng 2 năm 2026, đánh dấu một bước ngoặt lớn trong lĩnh vực xử lý ngôn ngữ tự nhiên (NLP). Sau hơn một năm phát triển, phiên bản mới này mang đến nhiều cải tiến đáng kể so với GPT-4 và GPT-4o.</p>
+
+      <div class="callout">
+        <span class="callout-icon">&#128161;</span>
+        <div>
+          <strong>Lưu ý:</strong> Bài viết này dựa trên các thông tin đã được OpenAI công bố chính thức và các bài benchmark độc lập. Chúng tôi sẽ cập nhật khi có thêm thông tin mới.
+        </div>
+      </div>
+
+      <p>Trong bài viết này, chúng ta sẽ phân tích chi tiết những điểm mới của GPT-5, so sánh hiệu suất với các mô hình trước đó, và đánh giá tác động của nó đến ngành công nghệ và các lĩnh vực ứng dụng khác nhau.</p>
+
+      <h2 id="section-2">GPT-5 có gì mới?</h2>
+      <p>GPT-5 mang đến nhiều cải tiến đột phá, từ khả năng suy luận nâng cao đến hỗ trợ đa phương thức toàn diện hơn. Dưới đây là những điểm nổi bật:</p>
+
+      <h3 id="section-2-1">Khả năng suy luận nâng cao</h3>
+      <p>Một trong những cải tiến lớn nhất của GPT-5 là khả năng suy luận logic. Mô hình mới có thể giải quyết các bài toán phức tạp, phân tích vấn đề đa tầng và đưa ra kết luận chính xác hơn 40% so với GPT-4.</p>
+
+      <ul>
+        <li>Giải quyết bài toán toán học cấp độ thi Olympic quốc tế</li>
+        <li>Phân tích code phức tạp và đề xuất tối ưu hóa</li>
+        <li>Hiểu và xử lý các yêu cầu nhiều bước chính xác hơn</li>
+        <li>Khả năng tự kiểm tra và sửa lỗi suy luận</li>
+      </ul>
+
+      <div class="img-placeholder">Chart: So sánh hiệu suất suy luận GPT-4 vs GPT-5</div>
+
+      <h3 id="section-2-2">Hỗ trợ đa phương thức</h3>
+      <p>GPT-5 hỗ trợ xử lý đồng thời nhiều loại dữ liệu khác nhau, bao gồm văn bản, hình ảnh, âm thanh và video. Đây là bước tiến lớn so với GPT-4o với chất lượng xử lý tốt hơn đáng kể.</p>
+
+      <blockquote>
+        "GPT-5 không chỉ là một bước tiến về mặt hiệu suất, mà là một sự thay đổi cơ bản trong cách AI hiểu và tương tác với thế giới." — Sam Altman, CEO OpenAI
+      </blockquote>
+
+      <pre><code>// Ví dụ sử dụng GPT-5 API với multimodal input
+const response = await openai.chat.completions.create({
+  model: "gpt-5",
+  messages: [{
+    role: "user",
+    content: [
+      { type: "text", text: "Phân tích biểu đồ này" },
+      { type: "image_url", image_url: { url: chartUrl } },
+      { type: "audio", audio: { url: audioUrl } }
+    ]
+  }]
+});</code></pre>
+
+      <h2 id="section-3">So sánh với GPT-4</h2>
+      <p>Để hiểu rõ hơn những cải tiến của GPT-5, hãy cùng xem bảng so sánh chi tiết giữa hai phiên bản:</p>
+
+      <div style="overflow-x:auto; margin: 24px 0;">
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border);">
+              <th style="padding:12px 16px; text-align:left; font-family:var(--font-heading); font-weight:600;">Tiêu chí</th>
+              <th style="padding:12px 16px; text-align:center;">GPT-4</th>
+              <th style="padding:12px 16px; text-align:center; color:var(--primary);">GPT-5</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:12px 16px;">Suy luận logic</td>
+              <td style="padding:12px 16px; text-align:center;">85%</td>
+              <td style="padding:12px 16px; text-align:center; font-weight:600; color:var(--primary);">96%</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:12px 16px;">Đa phương thức</td>
+              <td style="padding:12px 16px; text-align:center;">Text + Image</td>
+              <td style="padding:12px 16px; text-align:center; font-weight:600; color:var(--primary);">All modalities</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:12px 16px;">Context window</td>
+              <td style="padding:12px 16px; text-align:center;">128K</td>
+              <td style="padding:12px 16px; text-align:center; font-weight:600; color:var(--primary);">1M tokens</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 16px;">Tốc độ xử lý</td>
+              <td style="padding:12px 16px; text-align:center;">Baseline</td>
+              <td style="padding:12px 16px; text-align:center; font-weight:600; color:var(--primary);">2.5x nhanh hơn</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="section-4">Tác động đến ngành công nghệ</h2>
+      <p>Với những cải tiến vượt bậc, GPT-5 sẽ tạo ra nhiều thay đổi lớn trong ngành công nghệ. Các lĩnh vực được tác động nhiều nhất bao gồm:</p>
+
+      <ol>
+        <li><strong>Phát triển phần mềm:</strong> AI pair programming sẽ chính xác và hiệu quả hơn, giảm thời gian phát triển lên đến 60%.</li>
+        <li><strong>Y tế:</strong> Khả năng phân tích hình ảnh y tế và dữ liệu bệnh nhân để hỗ trợ chẩn đoán.</li>
+        <li><strong>Giáo dục:</strong> Gia sư AI cá nhân hóa, có khả năng tương tác đa phương thức với học sinh.</li>
+        <li><strong>Nghiên cứu khoa học:</strong> Hỗ trợ phân tích dữ liệu lớn và đề xuất giả thuyết nghiên cứu.</li>
+      </ol>
+
+      <h2 id="section-5">Kết luận</h2>
+      <p>GPT-5 là một bước tiến quan trọng trong lĩnh vực AI, mang đến nhiều khả năng mới mà trước đây chỉ tồn tại trong khoa học viễn tưởng. Với khả năng suy luận nâng cao, hỗ trợ đa phương thức toàn diện và tốc độ xử lý vượt trội, GPT-5 sẽ mở ra nhiều cơ hội mới cho các nhà phát triển và doanh nghiệp.</p>
+      <p>Tuy nhiên, cũng cần lưu ý rằng với sức mạnh lớn cũng đi kèm trách nhiệm lớn. Việc sử dụng AI một cách có trách nhiệm và đạo đức vẫn là điều quan trọng nhất.</p>
+
+      <!-- TAGS -->
+      <div class="article-tags">
+        <a href="#" class="tag">AI</a>
+        <a href="#" class="tag">GPT-5</a>
+        <a href="#" class="tag">OpenAI</a>
+        <a href="#" class="tag">NLP</a>
+        <a href="#" class="tag">Machine Learning</a>
+        <a href="#" class="tag">LLM</a>
+      </div>
+
+      <!-- SHARE ROW -->
+      <div style="display:flex; align-items:center; gap:12px; padding: 20px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin-bottom: 32px;">
+        <span style="font-size:14px; font-weight:600;">Chia sẻ:</span>
+        <button class="share-btn" title="Facebook" style="width:36px;height:36px;">f</button>
+        <button class="share-btn" title="Twitter/X" style="width:36px;height:36px;">X</button>
+        <button class="share-btn" title="LinkedIn" style="width:36px;height:36px;">in</button>
+        <button class="share-btn" title="Copy link" style="width:36px;height:36px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>
+
+      <!-- AUTHOR BIO -->
+      <div class="author-bio">
+        <div class="author-bio-avatar">G</div>
+        <div>
+          <div class="author-bio-name">GTK</div>
+          <div class="author-bio-role">Tech Writer & AI Enthusiast</div>
+          <div class="author-bio-desc">Chia sẻ kiến thức về công nghệ, AI và lập trình. Trên 10 năm kinh nghiệm phát triển phần mềm, đam mê nghiên cứu và ứng dụng trí tuệ nhân tạo.</div>
+          <div class="author-bio-social">
+            <a href="#">GitHub</a>
+            <a href="#">Twitter</a>
+            <a href="#">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREV/NEXT NAV -->
+      <div class="post-nav">
+        <div class="post-nav-item prev">
+          <div class="post-nav-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Bài trước
+          </div>
+          <div class="post-nav-title">Next.js 16 và tương lai của Server Components</div>
+        </div>
+        <div class="post-nav-item next">
+          <div class="post-nav-label">
+            Bài tiếp
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="post-nav-title">So sánh chi tiết Claude 4 vs GPT-5 vs Gemini 3</div>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</div>
+
+<!-- RELATED POSTS -->
+<section class="related-section">
+  <div class="container">
+    <h2 style="font-size:24px; margin-bottom:24px;">Bài viết liên quan</h2>
+    <div class="related-grid">
+      <div class="related-card">
+        <div class="related-card-image ai">16:9 — AI Thumbnail</div>
+        <div class="related-card-body">
+          <div class="related-card-meta">AI &middot; 5 Tháng 3, 2026</div>
+          <div class="related-card-title">So sánh chi tiết Claude 4 vs GPT-5 vs Gemini 3: Mô hình nào tốt nhất?</div>
+        </div>
+      </div>
+      <div class="related-card">
+        <div class="related-card-image tutorial">16:9 — Tutorial</div>
+        <div class="related-card-body">
+          <div class="related-card-meta">Hướng dẫn &middot; 10 Tháng 3, 2026</div>
+          <div class="related-card-title">Xây dựng chatbot AI với LangChain và Next.js từ A-Z</div>
+        </div>
+      </div>
+      <div class="related-card">
+        <div class="related-card-image tech">16:9 — Tech</div>
+        <div class="related-card-body">
+          <div class="related-card-meta">Tech &middot; 1 Tháng 3, 2026</div>
+          <div class="related-card-title">RAG là gì? Hướng dẫn xây dựng hệ thống RAG hiệu quả</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENTS -->
+<section class="comments-section">
+  <div class="comments-header">
+    <h2 class="comments-count">Bình luận (24)</h2>
+    <select style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:13px;font-family:var(--font-body);">
+      <option>Mới nhất</option>
+      <option>Cũ nhất</option>
+      <option>Nhiều thích nhất</option>
+    </select>
+  </div>
+
+  <!-- Comment Form -->
+  <div class="comment-form">
+    <textarea class="comment-textarea" placeholder="Viết bình luận của bạn..."></textarea>
+    <div class="comment-form-footer">
+      <span class="comment-form-note">Markdown được hỗ trợ</span>
+      <button class="btn btn-primary btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Gửi bình luận
+      </button>
+    </div>
+  </div>
+
+  <!-- Comments List -->
+  <div class="comment-list">
+    <!-- Comment 1 -->
+    <div class="comment">
+      <div class="comment-avatar">N</div>
+      <div class="comment-body">
+        <div class="comment-header">
+          <span class="comment-name">Nguyễn Văn A</span>
+          <span class="comment-date">2 giờ trước</span>
+        </div>
+        <div class="comment-text">Bài viết rất chi tiết và hữu ích! Mình đang rất mong chờ được sử dụng GPT-5 API. Có ai đã thử chưa?</div>
+        <div class="comment-actions">
+          <button class="comment-action">&#9825; 12</button>
+          <button class="comment-action">Trả lời</button>
+          <button class="comment-action">Báo cáo</button>
+        </div>
+
+        <!-- Reply -->
+        <div class="comment-reply">
+          <div class="comment">
+            <div class="comment-avatar" style="background:linear-gradient(135deg, var(--primary), var(--accent)); color:white;">G</div>
+            <div class="comment-body">
+              <div class="comment-header">
+                <span class="comment-name">GTK</span>
+                <span class="badge badge-primary" style="font-size:10px; padding:2px 8px;">Tác giả</span>
+                <span class="comment-date">1 giờ trước</span>
+              </div>
+              <div class="comment-text">Cảm ơn bạn! Mình đã thử API beta rồi, performance rất ấn tượng. Sẽ viết bài review chi tiết sớm.</div>
+              <div class="comment-actions">
+                <button class="comment-action">&#9825; 5</button>
+                <button class="comment-action">Trả lời</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment 2 -->
+    <div class="comment">
+      <div class="comment-avatar">T</div>
+      <div class="comment-body">
+        <div class="comment-header">
+          <span class="comment-name">Trần Thị B</span>
+          <span class="comment-date">5 giờ trước</span>
+        </div>
+        <div class="comment-text">Context window 1M tokens là thay đổi game-changing thật sự. Cuối cùng cũng có thể xử lý toàn bộ codebase trong một request. Cảm ơn tác giả đã tổng hợp rất đầy đủ!</div>
+        <div class="comment-actions">
+          <button class="comment-action">&#9825; 8</button>
+          <button class="comment-action">Trả lời</button>
+          <button class="comment-action">Báo cáo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment 3 -->
+    <div class="comment">
+      <div class="comment-avatar">P</div>
+      <div class="comment-body">
+        <div class="comment-header">
+          <span class="comment-name">Phạm Văn C</span>
+          <span class="comment-date">1 ngày trước</span>
+        </div>
+        <div class="comment-text">Bài viết hay nhưng mình thấy giá API của GPT-5 khá cao. Bạn có thể viết thêm về chi phí sử dụng thực tế không?</div>
+        <div class="comment-actions">
+          <button class="comment-action">&#9825; 3</button>
+          <button class="comment-action">Trả lời</button>
+          <button class="comment-action">Báo cáo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center; padding:32px 0;">
+    <button class="btn btn-ghost">Xem thêm bình luận</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">GTK<span>Blog</span> &middot; <span style="font-weight:400;color:var(--muted-fg);">&copy; 2026</span></div>
+      <div class="footer-links-row">
+        <a href="#">Giới thiệu</a>
+        <a href="#">Liên hệ</a>
+        <a href="#">Bảo mật</a>
+        <a href="#">Điều khoản</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark');
+    const s = document.querySelector('.theme-btn span');
+    if (s) s.textContent = '\u2600';
+  }
+
+  // Reading progress
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const p = (window.scrollY / h) * 100;
+    document.getElementById('reading-progress').style.width = p + '%';
+  });
+</script>
+
+</body>
+</html>
