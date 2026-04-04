@@ -1,18 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
+import createMiddleware from 'next-intl/middleware'
+import { routing } from '@/i18n/routing'
+import { type NextRequest, NextResponse } from 'next/server'
 
-// =============================================================================
-// Composable Middleware Skeleton
-//
-// EXTENSION POINTS:
-//   Phase 4 (Auth)  — replaces the middleware body to integrate Better Auth
-//   Phase 5 (i18n)  — chains next-intl createMiddleware before auth checks
-//
-// HOW TO EXTEND (future phases):
-//   Import your middleware factory, compose via the chain below.
-//   Do NOT rewrite this file from scratch — extend the middleware() function body.
-// =============================================================================
+// Paths that require an authenticated session (without locale prefix)
+const PROTECTED_PATHS = ['/profile', '/checkout', '/downloads']
 
-export async function middleware(request: NextRequest) {
+// next-intl middleware handles locale detection, prefix enforcement, and redirects
+const i18nMiddleware = createMiddleware(routing)
+
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip Payload admin, API routes, Next.js internals, and static assets
@@ -20,24 +16,43 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/admin') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
     /\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)$/.test(pathname)
   ) {
     return NextResponse.next()
   }
 
-  // --- Phase 5 slot: i18n routing (next-intl) ---
-  // Replace this comment with: return i18nMiddleware(request)
+  // Auth check: strip locale prefix to get canonical path
+  // e.g. /vi/profile → /profile, /en/checkout → /checkout
+  const segments = pathname.split('/')
+  const localeInPath = ['vi', 'en'].includes(segments[1]) ? segments[1] : null
+  const cleanPath = localeInPath
+    ? '/' + segments.slice(2).join('/')
+    : pathname
 
-  // --- Phase 4 slot: auth session check (Better Auth) ---
-  // Replace this comment with auth redirect logic
+  const isProtected = PROTECTED_PATHS.some(
+    (p) => cleanPath === p || cleanPath.startsWith(p + '/')
+  )
 
-  return NextResponse.next()
+  if (isProtected) {
+    // Lightweight cookie check — no full auth SDK needed at edge
+    // Cookie name uses the prefix configured in auth-config.ts: 'gtkblog'
+    const sessionCookie =
+      request.cookies.get('gtkblog.session_token') ??
+      request.cookies.get('better-auth.session_token')
+
+    if (!sessionCookie?.value) {
+      const locale = localeInPath ?? 'vi'
+      return NextResponse.redirect(new URL(`/${locale}/login`, request.url))
+    }
+  }
+
+  // Delegate all locale routing (detection, prefix, redirection) to next-intl
+  return i18nMiddleware(request)
 }
 
 export const config = {
-  // Match all paths except Next.js static files and images
   matcher: [
+    // Match all paths except Next.js static files and optimized images
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

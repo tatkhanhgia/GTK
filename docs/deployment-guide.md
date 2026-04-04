@@ -1,0 +1,691 @@
+# GTKBlog Deployment Guide
+
+> Production setup for Next.js 15 + Payload CMS 3 on Node.js 22 with PM2 cluster, Docker, and Cloudflare CDN.
+
+## Pre-Deployment Checklist
+
+- [ ] PostgreSQL database provisioned (AWS RDS, DigitalOcean, self-hosted)
+- [ ] Environment variables configured (see **Environment Setup**)
+- [ ] Stripe account + API keys obtained
+- [ ] SePay API keys obtained (if using VietQR)
+- [ ] Google OAuth credentials set up (optional)
+- [ ] GitHub OAuth credentials set up (optional)
+- [ ] Resend email account verified + API key
+- [ ] SSL certificate obtained (Let's Encrypt recommended)
+- [ ] Domain configured with DNS (Cloudflare recommended)
+- [ ] All tests passing locally (`npm test`)
+- [ ] Build succeeds (`npm run build`)
+
+## Environment Setup
+
+### 1. Create `.env.production` on Server
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:password@db-host:5432/gtkblog
+
+# Payload CMS
+PAYLOAD_SECRET=your-payload-secret-min-32-chars-use-openssl-rand-hex-32
+
+# Better Auth
+BETTER_AUTH_SECRET=your-better-auth-secret-min-32-chars
+BETTER_AUTH_URL=https://yourdomain.com
+
+# Auth - Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Auth - GitHub OAuth
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# Payment - Stripe
+STRIPE_SECRET_KEY=sk_live_... (not sk_test_)
+STRIPE_PUBLISHABLE_KEY=pk_live_... (not pk_test_)
+STRIPE_WEBHOOK_SECRET=whsec_... (from Stripe Dashboard → Webhooks)
+
+# Payment - SePay
+SEPAY_API_KEY=your-sepay-api-key
+SEPAY_WEBHOOK_SECRET=your-sepay-webhook-secret
+SEPAY_BANK_ACCOUNT=account-number-for-qr-generation
+
+# Email - Resend
+RESEND_API_KEY=re_... (from Resend Dashboard)
+RESEND_FROM_EMAIL=noreply@yourdomain.com
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+NODE_ENV=production
+```
+
+### 2. Generate Secure Secrets
+
+```bash
+# On your local machine (before deployment)
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Use output for PAYLOAD_SECRET and BETTER_AUTH_SECRET
+```
+
+### 3. Verify `.env.local` (Git-ignored)
+
+Ensure `.env.local` is NOT tracked in git:
+```bash
+git check-ignore .env.local
+# Should return: .env.local
+```
+
+## Docker Deployment
+
+### Option A: Docker Compose (Single Machine)
+
+#### 1. Build Docker Image
+
+```bash
+docker build -t gtkblog:latest .
+```
+
+**Dockerfile Breakdown:**
+- **Stage 1 (deps):** Install production dependencies only
+- **Stage 2 (builder):** Full build with all dev dependencies + Turbopack
+- **Stage 3 (runner):** Minimal runtime image (only prod deps + .next/standalone)
+
+#### 2. Docker Compose Stack
+
+```bash
+# Review docker-compose.yml (includes PostgreSQL service)
+cat docker-compose.yml
+
+# Start services
+docker-compose up -d
+
+# Verify running
+docker-compose ps
+
+# View logs
+docker-compose logs -f gtkblog
+```
+
+**docker-compose.yml includes:**
+- PostgreSQL 16 (port 5432)
+- Next.js app (port 3000)
+- Persistent volumes for database data
+
+#### 3. Initialize Database
+
+```bash
+# Run migrations (inside container)
+docker-compose exec gtkblog npm run drizzle:migrate
+
+# Or from host (if PostgreSQL accessible)
+npm run drizzle:migrate
+```
+
+### Option B: Kubernetes (Multi-Machine)
+
+See `deployment-guide-k8s.md` (future) for Kubernetes manifests.
+
+## PM2 Cluster Deployment
+
+### Prerequisites
+
+- Node.js 22.x installed
+- PM2 installed globally: `npm install -g pm2`
+- PostgreSQL accessible
+- All env vars in `.env.production`
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/yourusername/gtkblog.git
+cd gtkblog
+
+# Install production dependencies
+npm ci --omit=dev
+
+# Or full install (for development)
+npm install
+```
+
+### 2. Build for Production
+
+```bash
+npm run build
+
+# Verify build succeeded
+ls -la .next/standalone/
+```
+
+### 3. Start PM2 Cluster
+
+```bash
+# Load ecosystem config (2 instances in cluster mode)
+pm2 start ecosystem.config.js --env production
+
+# Verify
+pm2 status
+
+# Expected output:
+# ┌────┬──────────┬──────────┬──────┬───────┬────────┐
+# │ id │ name     │ mode     │ ↺    │ status│ cpu    │
+# ├────┼──────────┼──────────┼──────┼───────┼────────┤
+# │ 0  │ gtkblog  │ cluster  │ 0    │ online│ 0%     │
+# │ 1  │ gtkblog  │ cluster  │ 0    │ online│ 0%     │
+# └────┴──────────┴──────────┴──────┴───────┴────────┘
+```
+
+### 4. Configure PM2 Auto-Start
+
+```bash
+# Generate startup script for your init system
+pm2 startup
+
+# (Runs a command like:)
+# sudo env PATH=$PATH:/path/to/node pm2 startup -u username --hp /home/username
+
+# Save PM2 process list to auto-start
+pm2 save
+```
+
+### 5. Monitor PM2 Instances
+
+```bash
+# View real-time dashboard
+pm2 monit
+
+# Tail logs
+pm2 logs gtkblog
+
+# Watch specific instance
+pm2 logs gtkblog --lines 100
+
+# Check health
+pm2 describe 0  # Instance 0 details
+```
+
+### 6. Graceful Restart/Reload
+
+```bash
+# Zero-downtime reload (one instance restarts at a time)
+pm2 reload gtkblog
+
+# Restart with downtime
+pm2 restart gtkblog
+
+# Restart all apps
+pm2 kill && pm2 start ecosystem.config.js --env production
+```
+
+### 7. PM2 Log Rotation (Optional)
+
+```bash
+# Install log rotation
+pm2 install pm2-logrotate
+
+# Configure
+pm2 set pm2-logrotate:max_size 10M
+pm2 set pm2-logrotate:retain 30
+```
+
+## Reverse Proxy Setup (Nginx)
+
+### Configuration
+
+```nginx
+upstream gtkblog_cluster {
+  server 127.0.0.1:3000;
+  server 127.0.0.1:3000;  # Both PM2 instances on same port (PM2 load balances)
+  keepalive 64;
+}
+
+server {
+  listen 80;
+  server_name yourdomain.com;
+
+  # Redirect HTTP to HTTPS
+  return 301 https://$server_name$request_uri;
+}
+
+server {
+  listen 443 ssl http2;
+  server_name yourdomain.com;
+
+  # SSL certificates (Let's Encrypt)
+  ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+  # Security headers
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header X-XSS-Protection "1; mode=block" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+  # Gzip compression
+  gzip on;
+  gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+  gzip_min_length 1000;
+
+  # Client upload limit (e.g., for media uploads to Payload)
+  client_max_body_size 50M;
+
+  location / {
+    proxy_pass http://gtkblog_cluster;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_cache_bypass $http_upgrade;
+  }
+
+  # Static asset caching (let browser cache)
+  location ~* \.(js|css|png|jpg|jpeg|gif|ico|woff|woff2|ttf|svg)$ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+  }
+}
+```
+
+### Enable Nginx Configuration
+
+```bash
+# Symlink to sites-enabled
+sudo ln -s /etc/nginx/sites-available/gtkblog /etc/nginx/sites-enabled/gtkblog
+
+# Test configuration
+sudo nginx -t
+
+# Reload Nginx
+sudo systemctl reload nginx
+```
+
+## SSL/TLS Certificate Setup
+
+### Let's Encrypt with Certbot
+
+```bash
+# Install Certbot
+sudo apt-get install certbot python3-certbot-nginx
+
+# Generate certificate (auto-renew via cron)
+sudo certbot certonly --webroot -w /var/www/yourdomain -d yourdomain.com -d www.yourdomain.com
+
+# Auto-renewal (runs twice daily)
+sudo systemctl enable certbot.timer
+sudo systemctl start certbot.timer
+```
+
+## Database Migrations
+
+### Initial Setup
+
+```bash
+# Run all pending migrations (Payload + custom tables)
+npm run drizzle:migrate
+
+# Or with environment variable
+DATABASE_URL="postgresql://..." npm run drizzle:migrate
+```
+
+### Payload CMS Migrations
+
+```bash
+# Payload migrations are automatic on startup
+# But can force with:
+npm run payload:migrate  # (if script exists in package.json)
+```
+
+### Custom Table Migrations (Drizzle)
+
+```bash
+# Create new migration
+npm run drizzle:generate
+
+# Review migration file in drizzle/ folder
+cat drizzle/*.sql
+
+# Apply migrations
+npm run drizzle:migrate
+```
+
+## Health Checks & Monitoring
+
+### Basic Health Check Endpoint
+
+```bash
+curl -I https://yourdomain.com/
+# Should return: HTTP/1.1 200 OK
+```
+
+### PM2 Dashboard (Web UI)
+
+```bash
+# Install PM2 Plus (optional, paid)
+pm2 install pm2-auto-pull
+
+# Or use free web dashboard
+pm2 web
+# Access at http://localhost:9615
+```
+
+### Database Connection Check
+
+```bash
+# From app server
+psql -h db-host -U user -d gtkblog -c "SELECT version();"
+
+# Or test from Node
+node -e "
+const { drizzle } = require('drizzle-orm/postgres-js');
+const postgres = require('postgres');
+const sql = postgres(process.env.DATABASE_URL);
+const db = drizzle(sql);
+db.execute(sql\`SELECT 1\`).then(() => console.log('✓ DB OK')).catch(e => console.log('✗ DB FAIL', e.message));
+"
+```
+
+### CPU & Memory Monitoring
+
+```bash
+# View in real-time
+pm2 monit
+
+# Or via PM2 logs
+pm2 logs gtkblog | grep -i memory
+
+# View historical data
+pm2 describe gtkblog
+```
+
+## Backup & Recovery
+
+### Database Backups (PostgreSQL)
+
+```bash
+# Full backup (daily via cron)
+pg_dump -h db-host -U user -F c gtkblog > backups/gtkblog-$(date +%Y%m%d).dump
+
+# Or with AWS RDS
+aws rds create-db-snapshot \
+  --db-instance-identifier gtkblog-db \
+  --db-snapshot-identifier gtkblog-$(date +%Y%m%d)
+
+# Restore from backup
+pg_restore -h db-host -U user -d gtkblog backups/gtkblog-20240101.dump
+```
+
+### Automated Backup (Cron)
+
+```bash
+# Add to crontab
+0 2 * * * /usr/bin/pg_dump -h db-host -U user -F c gtkblog > /backups/gtkblog-$(date +\%Y\%m\%d).dump
+
+# Keep last 30 days
+30 2 * * * find /backups -name "gtkblog-*.dump" -mtime +30 -delete
+```
+
+## Deployment Workflow (Recommended)
+
+### 1. Pre-Deployment
+
+```bash
+# On your local machine
+npm test                    # Run tests
+npm run lint               # Check linting
+npm run build             # Build locally
+git push origin main      # Push to main
+```
+
+### 2. Pull & Build on Server
+
+```bash
+cd /var/www/gtkblog
+git pull origin main
+npm ci --omit=dev         # Install prod dependencies
+npm run build             # Build Next.js
+```
+
+### 3. Database Migrations
+
+```bash
+npm run drizzle:migrate   # Apply migrations (safe if no pending)
+```
+
+### 4. Restart PM2
+
+```bash
+pm2 reload gtkblog       # Zero-downtime reload (instances restart one-by-one)
+pm2 save                 # Persist to auto-restart on reboot
+```
+
+### 5. Verify
+
+```bash
+pm2 status               # Check all instances online
+curl -I https://yourdomain.com
+pm2 logs gtkblog | tail  # Check for errors
+```
+
+## Rollback Procedure
+
+```bash
+# If new deployment has issues, rollback to previous commit
+git log --oneline | head  # View recent commits
+git revert <bad-commit>   # Create revert commit
+git push origin main
+
+# On server
+git pull origin main
+npm run build
+npm run drizzle:migrate   # If migrations, ensure backward compatible
+pm2 reload gtkblog
+```
+
+## Common Issues & Troubleshooting
+
+### PM2 Instance Stuck in "Stopping" State
+
+```bash
+# Force kill and restart
+pm2 kill
+pm2 start ecosystem.config.js --env production
+```
+
+### Database Connection Pool Exhausted
+
+**Symptoms:** `error: remaining connection slots reserved for non-replication superuser connections`
+
+**Fix:**
+```bash
+# Check active connections
+psql -h db-host -U user -d gtkblog -c "SELECT count(*) FROM pg_stat_activity;"
+
+# Increase pool size (in auth-config.ts)
+const sql = postgres(process.env.DATABASE_URL, {
+  max: 20,  // Increase from default
+})
+
+# Or at database level
+ALTER DATABASE gtkblog SET max_connections = 200;
+```
+
+### High Memory Usage
+
+```bash
+# Check PM2 memory limit
+pm2 describe gtkblog | grep memory
+
+# Increase limit in ecosystem.config.js
+max_memory_restart: '1G'  // Increase from 512M
+
+# Restart
+pm2 restart gtkblog
+```
+
+### Slow API Requests
+
+```bash
+# Check if database is slow
+npm run db:analyze-queries
+
+# Or manually check Payload collections
+# In Payload admin: Dashboard → Performance metrics
+
+# Check Stripe/SePay API response times
+# Review PM2 logs for slow routes
+pm2 logs gtkblog | grep "took.*ms"
+```
+
+### Email Not Sending
+
+```bash
+# Verify Resend API key is valid
+curl -H "Authorization: Bearer $RESEND_API_KEY" https://api.resend.com/emails
+
+# Check if email is in allowed domain (for Resend trial)
+# On production: use verified domain
+
+# Review email logs in app
+pm2 logs gtkblog | grep -i email
+```
+
+### Download Token Expired
+
+```bash
+# Check download_tokens table
+psql -h db-host -U user -d gtkblog -c "
+  SELECT id, created_at, expires_at, downloaded_at 
+  FROM download_tokens 
+  ORDER BY created_at DESC LIMIT 10;
+"
+
+# Manually extend token (for support)
+UPDATE download_tokens SET expires_at = NOW() + INTERVAL '48 hours' WHERE id = '<token-id>';
+```
+
+## Performance Optimization
+
+### Next.js Build Optimization
+
+Already configured in `next.config.ts`:
+- Turbopack for fast dev
+- SWC minification (default)
+- Dynamic imports for large components
+- Image optimization (next/image)
+
+### Database Optimization
+
+```sql
+-- Create indexes for common queries
+CREATE INDEX idx_posts_published_at ON posts(published_at DESC) WHERE published = true;
+CREATE INDEX idx_posts_category_id ON posts(category_id) WHERE published = true;
+CREATE INDEX idx_orders_user_id_created_at ON orders(user_id, created_at DESC);
+CREATE INDEX idx_comments_post_id_approved ON comments(post_id, approved) WHERE approved = true;
+
+-- Analyze query performance
+EXPLAIN ANALYZE SELECT * FROM posts WHERE published = true ORDER BY published_at DESC LIMIT 20;
+```
+
+### Caching Strategy
+
+```typescript
+// In app/[locale]/blog/page.tsx
+export const revalidate = 3600  // 1 hour ISR
+```
+
+```typescript
+// In Nginx config
+location ~* \.(js|css|svg|woff2)$ {
+  expires 1y;
+  add_header Cache-Control "public, immutable";
+}
+```
+
+## Security Checklist
+
+- [ ] `.env.production` not in git
+- [ ] HTTPS/TLS enabled (Let's Encrypt or paid)
+- [ ] Security headers set (Nginx config above)
+- [ ] Database password is strong (20+ chars, random)
+- [ ] Stripe/SePay webhook secrets rotate periodically
+- [ ] API keys not logged (check PM2 logs)
+- [ ] Rate limiting enabled (Upstash configured)
+- [ ] Payload admin password is strong
+- [ ] PostgreSQL runs with restricted user (not root)
+- [ ] Firewall: Only ports 80, 443 open to public
+- [ ] Firewall: Port 5432 (PostgreSQL) restricted to app server only
+
+## Post-Deployment Steps
+
+1. **Test Login Flow**
+   ```bash
+   curl -X POST https://yourdomain.com/api/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"email":"test@example.com","password":"Test1234"}'
+   ```
+
+2. **Test Blog**
+   ```bash
+   curl https://yourdomain.com/en/blog
+   ```
+
+3. **Test Payment (Stripe Test Mode)**
+   - Use test card: `4242 4242 4242 4242`
+   - Any future date, any CVC
+
+4. **Test Email (Resend Test)**
+   - Check email logs in PM2
+
+5. **Test Download Token**
+   - Complete test order
+   - Verify download link works
+   - Verify token expires in 48 hours
+
+6. **Monitor for 24 Hours**
+   - Watch error logs
+   - Monitor CPU/memory
+   - Check slow query log
+   - Review Stripe webhook deliveries
+
+## Monitoring & Alerting (Optional)
+
+### Sentry (Error Tracking)
+
+```bash
+npm install @sentry/nextjs
+
+# Configure in next.config.ts
+import * as Sentry from "@sentry/nextjs";
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: 'production',
+});
+```
+
+### New Relic (APM)
+
+```bash
+npm install newrelic
+
+# Create newrelic.js and require at app startup
+```
+
+### Uptime Monitoring
+
+- **UptimeRobot:** Free HTTP/HTTPS monitoring
+- **Healthchecks.io:** Lightweight ping checks
+
+Configure to hit: `https://yourdomain.com/health` every 5 minutes
+
+## Next Steps
+
+1. Deploy staging environment (same setup, different domain)
+2. Test all workflows (auth, payments, email, downloads)
+3. Load test with k6 or Artillery
+4. Set up monitoring/alerting
+5. Create runbook for common operations
+6. Document your infrastructure (IaC with Terraform optional)
+7. Schedule regular security audits and backups
+

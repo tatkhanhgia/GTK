@@ -1,0 +1,104 @@
+'use client'
+
+import Link from 'next/link'
+import { useState } from 'react'
+import { Menu } from 'lucide-react'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
+
+const navLinks = [
+  { href: '/blog', label: 'Blog', labelVi: 'Blog' },
+  { href: '/products', label: 'Products', labelVi: 'Sản phẩm' },
+  { href: '/about', label: 'About', labelVi: 'Về mình' },
+]
+
+interface NavbarProps {
+  locale?: string
+}
+
+export function Navbar({ locale = 'vi' }: NavbarProps) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
+      <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 font-heading font-bold text-xl">
+          <span className="gradient-text-brand">GTKBlog</span>
+        </Link>
+
+        {/* Desktop Nav — center */}
+        <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={`/${locale}${link.href}`}
+              className={cn(
+                'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
+                'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              )}
+            >
+              {locale === 'vi' ? link.labelVi : link.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Desktop Actions — right */}
+        <div className="hidden md:flex items-center gap-2">
+          {/* Language switcher placeholder — Phase 5 will replace with real switcher */}
+          <Button variant="ghost" size="sm" className="text-xs font-medium">
+            {locale === 'vi' ? 'EN' : 'VI'}
+          </Button>
+          <ThemeToggle />
+          {/* Use <a> styled as button since base-nova Button has no asChild prop */}
+          <Link
+            href="/login"
+            className={cn(buttonVariants({ size: 'sm' }))}
+          >
+            {locale === 'vi' ? 'Đăng nhập' : 'Login'}
+          </Link>
+        </div>
+
+        {/* Mobile hamburger */}
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            {/* SheetTrigger renders as <button> natively via @base-ui/react */}
+            <SheetTrigger
+              render={
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              }
+            />
+            <SheetContent side="right" className="w-[280px]">
+              <nav className="flex flex-col gap-2 mt-6" aria-label="Mobile navigation">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={`/${locale}${link.href}`}
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-3 rounded-lg font-medium hover:bg-secondary transition-colors"
+                  >
+                    {locale === 'vi' ? link.labelVi : link.label}
+                  </Link>
+                ))}
+                <div className="pt-4 border-t border-border">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className={cn(buttonVariants(), 'w-full justify-center')}
+                  >
+                    {locale === 'vi' ? 'Đăng nhập' : 'Login'}
+                  </Link>
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
+  )
+}
