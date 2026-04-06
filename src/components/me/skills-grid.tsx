@@ -31,8 +31,9 @@ export function SkillsGrid({ skills, locale }: SkillsGridProps) {
               {group.items?.map((item) => (
                 <span
                   key={item.name}
-                  className="bg-secondary text-secondary-foreground rounded-full px-3 py-1 text-sm"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-gradient-to-r from-primary/10 to-accent/10 px-3 py-1.5 text-sm font-medium text-foreground transition-all hover:border-primary/40 hover:from-primary/15 hover:to-accent/15"
                 >
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                   {item.name}
                 </span>
               ))}

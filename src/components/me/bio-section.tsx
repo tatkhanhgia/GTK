@@ -1,5 +1,5 @@
 import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
-import { Code2, Link, ExternalLink, Video, Mail } from 'lucide-react'
+import { Code2, Link, AtSign, Globe, Video, Mail } from 'lucide-react'
 import Image from 'next/image'
 
 interface SocialLink {
@@ -21,8 +21,8 @@ interface BioSectionProps {
 const platformIcons: Record<string, typeof Code2> = {
   github: Code2,
   linkedin: Link,
-  x: ExternalLink,
-  facebook: Link,
+  x: AtSign,
+  facebook: Globe,
   youtube: Video,
   email: Mail,
 }
@@ -72,7 +72,7 @@ export function BioSection({ name, title, heroSentence, avatar, bio, socialLinks
       )}
 
       {socialLinks && socialLinks.length > 0 && (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {socialLinks.map((link, i) => {
             const Icon = platformIcons[link.platform] || Mail
             const href = getSafeHref(link)
@@ -83,7 +83,7 @@ export function BioSection({ name, title, heroSentence, avatar, bio, socialLinks
                 href={href}
                 target={link.platform === 'email' ? undefined : '_blank'}
                 rel={link.platform === 'email' ? undefined : 'noopener noreferrer'}
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/50 text-muted-foreground transition-all duration-200 hover:scale-110 hover:bg-primary/20 hover:text-primary"
                 aria-label={link.platform}
               >
                 <Icon className="h-5 w-5" />

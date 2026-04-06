@@ -6,6 +6,7 @@ import { BioSection } from '@/components/me/bio-section'
 import { SkillsGrid } from '@/components/me/skills-grid'
 import { TimelineSection } from '@/components/me/timeline-section'
 import { ContactForm } from '@/components/me/contact-form'
+import { QuickStats } from '@/components/me/quick-stats'
 import { BlogCard } from '@/components/ui/blog-card'
 import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
 
@@ -207,7 +208,8 @@ export default async function MePage({ params }: Props) {
         }}
       />
 
-      <div className="space-y-16">
+      <div className="space-y-16 md:space-y-20">
+        {/* Hero Section */}
         <section className="gradient-brand-subtle relative overflow-hidden rounded-3xl border border-border/60 px-6 py-12 md:px-10 md:py-14">
           <div className="ambient-warm absolute inset-0" />
           <div className="relative z-10">
@@ -222,47 +224,34 @@ export default async function MePage({ params }: Props) {
           </div>
         </section>
 
-        {Boolean(buildingNow) && (
-          <section className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
-            <h2 className="mb-4 font-heading text-2xl font-semibold">{t.buildingNow}</h2>
-            <RichTextRenderer content={buildingNow} />
-          </section>
+        {/* Quick Stats */}
+        <QuickStats
+          yearsOfExperience={profile.yearsOfExperience}
+          projectsCompleted={profile.projectsCompleted}
+          postsPublished={writingToRender.length}
+          locale={loc}
+        />
+
+        {/* Timeline - Career Journey */}
+        {profile.timeline?.length > 0 && (
+          <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
         )}
 
-        {writingToRender.length > 0 && (
-          <section>
-            <div className="mb-6">
-              <h2 className="font-heading text-2xl font-semibold">{t.selectedWriting}</h2>
-              {curatedWriting.length === 0 && (
-                <p className="mt-1 text-sm text-muted-foreground">{t.selectedWritingFallback}</p>
-              )}
-            </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {writingToRender.map((post) => (
-                <div key={post.slug} className="space-y-2">
-                  <BlogCard
-                    title={post.title}
-                    slug={post.slug}
-                    excerpt={post.excerpt}
-                    featuredImage={post.featuredImage}
-                    category={post.category}
-                    publishedAt={post.publishedAt}
-                    readingTime={post.readingTime}
-                    locale={loc}
-                  />
-                  {post.note && <p className="px-1 text-sm text-muted-foreground">{post.note}</p>}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Skills - Tools */}
+        {profile.skills?.length > 0 && <SkillsGrid skills={profile.skills} locale={loc} />}
 
+        {/* Principles - Work Style */}
         {principles.length > 0 && (
           <section>
-            <h2 className="mb-6 font-heading text-2xl font-semibold">{t.principles}</h2>
+            <div className="mb-8">
+              <h2 className="font-heading text-3xl font-bold tracking-tight">{t.principles}</h2>
+              <p className="mt-2 text-muted-foreground">
+                {loc === 'vi' ? 'Những nguyên tắc hướng dẫn cách mình tiếp cận công việc' : 'The principles that guide how I approach my work'}
+              </p>
+            </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {principles.map((principle) => (
-                <article key={principle.title} className="rounded-2xl border border-border bg-card p-5">
+                <article key={principle.title} className="rounded-2xl border-l-4 border-l-primary border-y border-r border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
                   <h3 className="font-heading text-lg font-semibold">{principle.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
                     {principle.description}
@@ -273,12 +262,46 @@ export default async function MePage({ params }: Props) {
           </section>
         )}
 
-        {profile.skills?.length > 0 && <SkillsGrid skills={profile.skills} locale={loc} />}
-
-        {profile.timeline?.length > 0 && (
-          <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
+        {/* Currently Building */}
+        {Boolean(buildingNow) && (
+          <section className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
+            <h2 className="mb-4 font-heading text-2xl font-semibold">{t.buildingNow}</h2>
+            <RichTextRenderer content={buildingNow} />
+          </section>
         )}
 
+        {/* Blog Posts */}
+        {writingToRender.length > 0 && (
+          <section>
+            <div className="mb-8">
+              <h2 className="font-heading text-3xl font-bold tracking-tight">{t.selectedWriting}</h2>
+              {curatedWriting.length === 0 && (
+                <p className="mt-2 text-muted-foreground">{t.selectedWritingFallback}</p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {writingToRender.map((post) => (
+                <div key={post.slug} className="group space-y-2">
+                  <div className="transition-transform duration-300 group-hover:-translate-y-1">
+                    <BlogCard
+                      title={post.title}
+                      slug={post.slug}
+                      excerpt={post.excerpt}
+                      featuredImage={post.featuredImage}
+                      category={post.category}
+                      publishedAt={post.publishedAt}
+                      readingTime={post.readingTime}
+                      locale={loc}
+                    />
+                  </div>
+                  {post.note && <p className="px-1 text-sm text-muted-foreground">{post.note}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Contact Form */}
         <ContactForm locale={loc} translations={t} ctaText={contactCtaText} />
       </div>
     </div>

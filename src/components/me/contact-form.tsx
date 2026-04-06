@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, User, Mail, MessageSquare } from 'lucide-react'
 
 interface Translations {
   contact: string
@@ -71,42 +71,51 @@ export function ContactForm({ locale, translations: t, ctaText }: ContactFormPro
           <label htmlFor="contact-name" className="block text-sm font-medium mb-1">
             {t.contactName}
           </label>
-          <input
-            id="contact-name"
-            type="text"
-            required
-            maxLength={100}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+          <div className="relative">
+            <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground pointer-events-none" />
+            <input
+              id="contact-name"
+              type="text"
+              required
+              maxLength={100}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors"
+            />
+          </div>
         </div>
         <div>
           <label htmlFor="contact-email" className="block text-sm font-medium mb-1">
             {t.contactEmail}
           </label>
-          <input
-            id="contact-email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground pointer-events-none" />
+            <input
+              id="contact-email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors"
+            />
+          </div>
         </div>
         <div>
           <label htmlFor="contact-message" className="block text-sm font-medium mb-1">
             {t.contactMessage}
           </label>
-          <textarea
-            id="contact-message"
-            required
-            maxLength={2000}
-            rows={5}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-y"
-          />
+          <div className="relative">
+            <MessageSquare className="absolute left-3 top-3 h-5 w-5 text-muted-foreground pointer-events-none" />
+            <textarea
+              id="contact-message"
+              required
+              maxLength={2000}
+              rows={5}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary resize-y transition-colors"
+            />
+          </div>
         </div>
         <Button type="submit" disabled={isLoading} className="gap-2">
           {isLoading ? (

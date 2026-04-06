@@ -15,6 +15,18 @@ export const AuthorProfile: GlobalConfig = {
     { name: 'name', type: 'text', required: true },
     { name: 'title', type: 'text', required: true, localized: true },
     {
+      name: 'yearsOfExperience',
+      type: 'number',
+      min: 0,
+      admin: { description: 'Years of professional experience (displayed in Quick Stats)' },
+    },
+    {
+      name: 'projectsCompleted',
+      type: 'number',
+      min: 0,
+      admin: { description: 'Number of projects completed (displayed in Quick Stats)' },
+    },
+    {
       name: 'avatar',
       type: 'upload',
       relationTo: 'media',
