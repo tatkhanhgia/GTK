@@ -93,15 +93,17 @@ async function seed() {
   }
 
   // 3. Posts (idempotent by slug, published, with author)
+  const postMap: Record<string, number | string> = {}
   for (const post of posts) {
     const exists = await payload.find({ collection: 'posts', where: { slug: { equals: post.slug } }, limit: 1, draft: true })
     if (exists.docs.length > 0) {
+      postMap[post.slug] = exists.docs[0].id
       console.log(`= Post "${post.slug}" exists, skipping`)
       continue
     }
     const publishedAt = new Date()
     publishedAt.setDate(publishedAt.getDate() - post.daysAgo)
-    await createLocalized(
+    const created = await createLocalized(
       payload, 'posts',
       {
         title: post.vi.title, slug: post.slug, excerpt: post.vi.excerpt,
@@ -112,6 +114,7 @@ async function seed() {
       { title: post.en.title, excerpt: post.en.excerpt, content: createRichText(post.en.content) },
       { draft: false },
     )
+    postMap[post.slug] = created.id
     console.log(`+ Post "${post.slug}" created`)
   }
 
@@ -156,6 +159,108 @@ async function seed() {
       },
     )
     console.log(`+ Page "${page.slug}" created`)
+  }
+
+  // 6. Author Profile Global (idempotent — Globals always exist, just update)
+  try {
+    await payload.updateGlobal({
+      slug: 'author-profile',
+      locale: 'vi',
+      data: {
+        name: 'GTK',
+        title: 'Software Engineer & AI Enthusiast',
+        bio: createRichText(['Xin chào! Mình là GTK, tác giả của GTKBlog.', 'Mình đam mê công nghệ, AI, và chia sẻ kiến thức qua blog và sản phẩm số.']),
+        socialLinks: [
+          { platform: 'github', url: 'https://github.com/example' },
+          { platform: 'linkedin', url: 'https://linkedin.com/in/example' },
+          { platform: 'x', url: 'https://x.com/example' },
+        ],
+        skills: [
+          { category: 'Languages', items: [{ name: 'TypeScript' }, { name: 'Python' }, { name: 'Go' }] },
+          { category: 'Frameworks', items: [{ name: 'Next.js' }, { name: 'React' }, { name: 'Payload CMS' }] },
+          { category: 'Tools', items: [{ name: 'Docker' }, { name: 'PostgreSQL' }, { name: 'Cloudflare' }] },
+        ],
+        timeline: [
+          { year: '2024', title: 'Ra mắt GTKBlog', description: 'Blog cá nhân + sản phẩm số', type: 'project' },
+          { year: '2023', title: 'Senior Software Engineer', description: 'Full-stack development', type: 'work' },
+        ],
+        meEditorial: {
+          heroSentence: 'Mình tập trung xây sản phẩm AI tối giản, hữu dụng và dễ triển khai trong công việc thật.',
+          buildingNow: createRichText([
+            'Hiện tại mình đang phát triển GTKBlog thành một nền tảng nội dung + sản phẩm số gọn, rõ, và thực dụng.',
+            'Trọng tâm là workflow AI, automation cho dev, và tài liệu hóa kinh nghiệm triển khai thực tế.',
+          ]),
+          principles: [
+            {
+              title: 'Đơn giản trước',
+              description: 'Ưu tiên giải pháp ít moving parts, dễ vận hành, dễ mở rộng khi thật sự cần.',
+            },
+            {
+              title: 'Viết để dùng được ngay',
+              description: 'Mỗi nội dung đều hướng tới việc áp dụng lại được trong dự án thật, không chỉ lý thuyết.',
+            },
+            {
+              title: 'Làm rõ trade-off',
+              description: 'Luôn nêu chi phí và giới hạn kỹ thuật để quyết định thực tế hơn.',
+            },
+          ],
+          selectedWriting: [
+            { post: postMap['xay-dung-blog-voi-nextjs'], note: 'Bài nền tảng để hiểu kiến trúc stack hiện tại.' },
+            { post: postMap['payload-cms-3-review'], note: 'Góc nhìn thực chiến khi chọn CMS cho Next.js.' },
+            { post: postMap['nextjs-16-co-gi-moi'], note: 'Tóm tắt thay đổi quan trọng ảnh hưởng DX và performance.' },
+          ].filter((item) => Boolean(item.post)),
+          timelineContext: 'Một vài cột mốc giúp bạn hiểu vì sao mình chọn hướng xây sản phẩm hiện tại.',
+          contactCtaText: 'Nếu bạn muốn trao đổi về AI workflow, sản phẩm số, hoặc hợp tác kỹ thuật, cứ nhắn mình.',
+        },
+        contactEmail: 'contact@gtkblog.com',
+        meta: { metaTitle: 'Về tác giả', metaDescription: 'Tìm hiểu về tác giả GTKBlog' },
+      },
+    })
+    // Update English locale
+    await payload.updateGlobal({
+      slug: 'author-profile',
+      locale: 'en',
+      data: {
+        title: 'Software Engineer & AI Enthusiast',
+        bio: createRichText(["Hello! I'm GTK, the author of GTKBlog.", 'I love technology, AI, and sharing knowledge through blog posts and digital products.']),
+        timeline: [
+          { year: '2024', title: 'Launched GTKBlog', description: 'Personal blog + digital products', type: 'project' },
+          { year: '2023', title: 'Senior Software Engineer', description: 'Full-stack development', type: 'work' },
+        ],
+        meEditorial: {
+          heroSentence: 'I focus on building minimal, practical AI products that teams can actually use in real workflows.',
+          buildingNow: createRichText([
+            'Right now, I am shaping GTKBlog into a lean platform that combines practical writing and digital products.',
+            'Main focus: AI workflows, developer automation, and implementation notes grounded in real project delivery.',
+          ]),
+          principles: [
+            {
+              title: 'Simplicity first',
+              description: 'Prefer fewer moving parts, clear operations, and scalable decisions only when needed.',
+            },
+            {
+              title: 'Write for immediate use',
+              description: 'Every piece should help readers apply ideas directly in their own projects.',
+            },
+            {
+              title: 'Make trade-offs explicit',
+              description: 'I always highlight costs and constraints so decisions stay practical.',
+            },
+          ],
+          selectedWriting: [
+            { post: postMap['xay-dung-blog-voi-nextjs'], note: 'A foundation piece for the current stack architecture.' },
+            { post: postMap['payload-cms-3-review'], note: 'Practical perspective on choosing CMS for Next.js.' },
+            { post: postMap['nextjs-16-co-gi-moi'], note: 'Key updates affecting DX and performance.' },
+          ].filter((item) => Boolean(item.post)),
+          timelineContext: 'A few milestones that explain why I build products this way today.',
+          contactCtaText: 'If you want to discuss AI workflows, digital products, or technical collaboration, send me a message.',
+        },
+        meta: { metaTitle: 'About Me', metaDescription: 'Learn about the author of GTKBlog' },
+      },
+    })
+    console.log('+ Author Profile global seeded')
+  } catch {
+    console.log('= Author Profile seed skipped (Global may not exist yet — run migration first)')
   }
 
   console.log('\nSeeding complete!')

@@ -34,7 +34,8 @@ export function Footer({ locale = 'vi' }: FooterProps) {
               {[
                 { href: '/blog', label: isVi ? 'Blog' : 'Blog' },
                 { href: '/products', label: isVi ? 'Sản phẩm' : 'Products' },
-                { href: '/about', label: isVi ? 'Về mình' : 'About' },
+                { href: '/about', label: isVi ? 'Về blog' : 'About' },
+                { href: '/me', label: isVi ? 'Tác giả' : 'Me' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={`/${locale}${link.href}`} className="hover:text-foreground transition-colors">

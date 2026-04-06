@@ -9,6 +9,7 @@ import { Media } from './src/collections/media'
 import { Posts } from './src/collections/posts'
 import { Products } from './src/collections/products'
 import { Pages } from './src/collections/pages'
+import { AuthorProfile } from './src/globals/author-profile'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -18,6 +19,7 @@ export default buildConfig({
     user: 'users',
   },
   collections: [Users, Categories, Media, Posts, Products, Pages],
+  globals: [AuthorProfile],
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',

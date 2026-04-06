@@ -34,6 +34,7 @@ src/
 │   │   └── api/[...slug]/route.ts
 │   ├── api/                      # Custom API routes
 │   │   ├── auth/[...all]/route.ts       # Better Auth catch-all
+│   │   ├── contact/route.ts             # Contact form (POST, rate-limited 3/60s)
 │   │   ├── webhooks/stripe/route.ts     # Stripe webhook handler
 │   │   ├── webhooks/sepay/route.ts      # SePay webhook handler
 │   │   ├── download/[token]/route.ts    # Secure file download
@@ -44,10 +45,10 @@ src/
 │   │       ├── unsubscribe/route.ts
 │   │       └── confirm/route.ts
 │   ├── [locale]/                 # Locale-prefixed routes (vi/en)
-│   │   ├── blog/                 # Blog listing & articles
+│   │   ├── blog/                 # Editorial blog hub, post pages, legacy category redirect
 │   │   │   ├── page.tsx
 │   │   │   ├── [slug]/page.tsx
-│   │   │   ├── category/[slug]/page.tsx
+│   │   │   ├── category/[slug]/page.tsx  # Redirects to ?category={slug}
 │   │   │   └── feed.xml/route.ts  # RSS feed
 │   │   ├── products/             # Product listing & checkout
 │   │   │   ├── page.tsx
@@ -58,7 +59,9 @@ src/
 │   │   │   ├── orders/page.tsx   # Order history
 │   │   │   ├── downloads/page.tsx # Download manager
 │   │   │   └── settings/page.tsx # User settings
-│   │   ├── about/page.tsx        # About page
+│   │   ├── me/                   # Author profile page
+│   │   │   └── page.tsx          # Bio, skills, timeline, contact form
+│   │   ├── about/page.tsx        # Editorial About page with blog mission, topics, author card
 │   │   └── layout.tsx            # Locale layout wrapper
 │   ├── layout.tsx                # Root layout
 │   ├── page.tsx                  # Home page redirect
@@ -74,17 +77,34 @@ src/
 │   ├── pages.ts                  # Custom pages
 │   └── index.ts                  # Collection exports
 │
+├── globals/                      # Payload CMS globals (singletons)
+│   ├── author-profile.ts         # Author bio, skills, timeline, social links
+│   └── index.ts                  # Global exports
+│
+├── scripts/                      # Development & utility scripts
+│   ├── seed.ts                   # Seed database with dev data (Payload CMS)
+│   └── seed-data.ts              # Bilingual seed data definitions
+│
 ├── components/
+│   ├── about/                    # About page editorial sections
+│   │   ├── about-hero-section.tsx
+│   │   └── topics-grid.tsx
 │   ├── blog/                     # Blog-specific components
 │   │   ├── rich-text-renderer.tsx
 │   │   ├── table-of-contents.tsx
 │   │   ├── share-buttons.tsx
-│   │   └── comment-section.tsx
+│   │   ├── comment-section.tsx
+│   │   └── featured-post-hero.tsx
+│   ├── me/                       # Author profile page components
+│   │   ├── bio-section.tsx       # Author bio with avatar
+│   │   ├── skills-grid.tsx       # Skills in grid layout
+│   │   ├── timeline-section.tsx  # Career/milestone timeline
+│   │   └── contact-form.tsx      # Contact form with rate limit feedback
 │   ├── products/                 # Product components
 │   │   ├── payment-buttons.tsx   # Stripe + SePay toggles
 │   │   └── sepay-qr-modal.tsx    # QR code display
 │   ├── layout/                   # Layout components
-│   │   ├── navbar.tsx            # Sticky header
+│   │   ├── navbar.tsx            # Sticky header (includes /me link)
 │   │   ├── sidebar.tsx           # Content sidebar (categories, TOC)
 │   │   └── footer.tsx            # Footer
 │   └── ui/                       # shadcn-based components
@@ -94,8 +114,12 @@ src/
 │       ├── form.tsx
 │       ├── dialog.tsx
 │       ├── theme-toggle.tsx      # Dark/light mode
+│       ├── author-mini-card.tsx  # Shared author summary CTA for about/blog
 │       ├── blog-card.tsx         # Blog listing card
+│       ├── category-badge.tsx    # Category links for query-param filtering
+│       ├── newsletter-section.tsx # Subscription CTA wired to newsletter API
 │       ├── product-card.tsx      # Product grid card
+│       ├── search-input.tsx      # Client-side blog search field shell
 │       └── ...
 │
 ├── db/
@@ -132,14 +156,16 @@ src/
 │   │   ├── get-user-orders.ts    # Order history
 │   │   ├── get-user-downloads.ts # Available downloads
 │   │   └── update-profile-action.ts
+│   ├── author/
+│   │   └── get-author-profile.ts # Fetch author-profile global from Payload
 │   ├── email/
 │   │   ├── resend-client.ts      # Resend email service
-│   │   ├── send-email.ts         # Generic email function
+│   │   ├── send-email.ts         # Generic email function (supports replyTo param)
 │   │   └── newsletter-actions.ts # Subscribe/unsubscribe
 │   ├── seo/
 │   │   ├── structured-data.ts    # JSON-LD helpers
 │   │   └── metadata-helpers.ts   # Dynamic metadata
-│   ├── rate-limit.ts             # Upstash rate limiting
+│   ├── rate-limit.ts             # Upstash rate limiting (auth, payment, contact)
 │   └── utils.ts                  # Common helpers (cn, formatDate, etc.)
 │
 ├── i18n/
@@ -154,7 +180,8 @@ src/
 │   ├── welcome-email.tsx         # Localized welcome
 │   ├── order-confirmation-email.tsx
 │   ├── password-reset-email.tsx
-│   └── newsletter-post-email.tsx
+│   ├── newsletter-post-email.tsx
+│   └── contact-notification.tsx  # Contact form notification to author
 │
 └── types/                        # Shared TypeScript types
     ├── auth.ts
@@ -173,7 +200,7 @@ tests/
 └── ...                           # ~37 total tests
 
 Configuration Files
-├── payload.config.ts             # Payload CMS config (PostgreSQL)
+├── payload.config.ts             # Payload CMS config (PostgreSQL, collections, globals)
 ├── next.config.ts                # Next.js config + Payload integration
 ├── drizzle.config.ts             # Drizzle migrations
 ├── tailwind.config.ts            # Tailwind + custom theme
@@ -218,15 +245,25 @@ Configuration Files
 - Respects locale prefix: `/vi/profile`, `/en/checkout`
 - Skips auth for: `/admin/*`, `/api/*`, `/_next/*`, static assets
 
-### 5. **i18n Architecture**
+### 5. **Author Content Reuse**
+- `src/lib/author/get-author-profile.ts` fetches the Payload `author-profile` global for localized author metadata
+- `/[locale]/me`, `/[locale]/about`, and `/[locale]/blog` reuse the same author source instead of duplicating profile content
+- `AuthorMiniCard` standardizes the author CTA in compact and full variants
+
+### 6. **Editorial Content Routing**
+- `/[locale]/about` combines static editorial sections with rich text pulled from the `pages` collection slug `about`
+- `/[locale]/blog` now acts as the canonical category-browsing surface via `?category={slug}` query params
+- Legacy `/[locale]/blog/category/[slug]` requests are redirected server-side to the query-param listing URL
+
+### 7. **i18n Architecture**
 - **Routing:** `/vi/*` for Vietnamese, `/en/*` for English
 - **Default:** Vietnamese (`vi`)
 - **Fallback:** Enable (use vi if en missing)
 - **Server-side:** `getRequestConfig()` from `src/i18n/request.ts`
-- **Client-side:** `useTranslations()` hook
+- **Client-side:** `next-intl` translation hooks in locale-aware React components
 - **Messages:** Separate JSON files in `messages/`
 
-### 6. **Payment Strategy**
+### 8. **Payment Strategy**
 - **Stripe:** Primary USD/foreign currency checkout
   - Server-side session creation
   - Webhook at `/api/webhooks/stripe`
@@ -238,7 +275,7 @@ Configuration Files
   - Single-use per token request
   - Stored in `download_tokens` table with `created_at`, `expires_at`
 
-### 7. **Authentication Flow**
+### 9. **Authentication Flow**
 ```
 User Login → Better Auth → ba_users table → Session Cookie (gtkblog.session_token)
   ↓
@@ -249,7 +286,7 @@ User Profile → user_profiles table (extended data, preferences)
 Orders/Downloads → Linked via user ID
 ```
 
-### 8. **Email & Localization**
+### 10. **Email & Localization**
 - **Resend service:** Single API for all email
 - **React Email templates:** Four types
   1. Welcome (on signup)
@@ -282,6 +319,9 @@ cp .env.example .env.local
 # Run database migrations (Payload + custom tables)
 npm run drizzle:migrate
 
+# Seed development data (categories, posts, products, pages)
+npm run seed
+
 # Start dev server (with Turbopack)
 npm run dev
 
@@ -294,6 +334,18 @@ npm run build
 # Start PM2 cluster (2 instances)
 pm2 start ecosystem.config.js --env production
 ```
+
+### Development Scripts
+
+| Script | Command | Purpose |
+|--------|---------|---------|
+| **seed** | `npm run seed` (via `tsx src/scripts/seed.ts`) | Populate development database with bilingual sample data (categories, blog posts, products, pages, author profile) |
+| **dev** | `npm run dev` | Start Next.js dev server with Turbopack |
+| **build** | `npm run build` | Production build with Turbopack optimization |
+| **test** | `npm run test` | Run unit tests with Vitest |
+| **test:watch** | `npm run test:watch` | Run tests in watch mode |
+| **test:coverage** | `npm run test:coverage` | Run tests with coverage report |
+| **lint** | `npm run lint` | Run ESLint code quality checks |
 
 ## Performance & Security
 

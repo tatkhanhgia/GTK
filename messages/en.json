@@ -3,6 +3,7 @@
     "blog": "Blog",
     "products": "Products",
     "about": "About",
+    "me": "Me",
     "login": "Login",
     "register": "Sign Up",
     "logout": "Logout",
@@ -111,6 +112,20 @@
     "orderAmount": "Amount",
     "downloadProduct": "Download",
     "reDownload": "Re-download"
+  },
+  "me": {
+    "title": "About Me",
+    "skills": "Skills & Tech Stack",
+    "timeline": "Journey",
+    "contact": "Contact",
+    "contactName": "Name",
+    "contactEmail": "Email",
+    "contactMessage": "Message",
+    "contactSend": "Send Message",
+    "contactSending": "Sending...",
+    "contactSuccess": "Message sent! Thank you.",
+    "contactError": "Failed to send. Please try again.",
+    "contactRateLimit": "Too many messages. Please try again later."
   },
   "footer": {
     "description": "Personal tech & AI blog. Sharing knowledge and digital products.",

@@ -16,6 +16,16 @@ export const ratelimit = new Ratelimit({
   ephemeralCache: new Map(),
 })
 
+// Contact form: 3 requests / 60 seconds per IP
+export const contactRatelimit = new Ratelimit({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  redis: undefined as any,
+  limiter: Ratelimit.slidingWindow(3, '60 s'),
+  analytics: false,
+  prefix: 'rl:contact',
+  ephemeralCache: new Map(),
+})
+
 // Stricter limiter for auth endpoints (login, register, password reset)
 export const authRatelimit = new Ratelimit({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

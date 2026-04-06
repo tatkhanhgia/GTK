@@ -6,18 +6,20 @@ interface SendEmailOptions {
   subject: string
   react: ReactElement
   from?: string
+  replyTo?: string
 }
 
 /**
  * Generic email sending wrapper over Resend.
  * Throws on API error so callers can handle or suppress.
  */
-export async function sendEmail({ to, subject, react, from = FROM_EMAIL }: SendEmailOptions) {
+export async function sendEmail({ to, subject, react, from = FROM_EMAIL, replyTo }: SendEmailOptions) {
   const result = await resend.emails.send({
     from,
     to: Array.isArray(to) ? to : [to],
     subject,
     react,
+    ...(replyTo ? { replyTo } : {}),
   })
 
   if (result.error) {

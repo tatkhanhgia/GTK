@@ -18,7 +18,7 @@ export function CategoryBadge({ name, slug, locale = 'vi', className, asLink = t
 
   if (asLink) {
     return (
-      <Link href={`/${locale}/blog/category/${slug}`} className={classes}>
+      <Link href={`/${locale}/blog?category=${slug}`} className={classes}>
         {name}
       </Link>
     )

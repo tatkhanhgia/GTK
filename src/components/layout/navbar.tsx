@@ -11,7 +11,8 @@ import { cn } from '@/lib/utils'
 const navLinks = [
   { href: '/blog', label: 'Blog', labelVi: 'Blog' },
   { href: '/products', label: 'Products', labelVi: 'Sản phẩm' },
-  { href: '/about', label: 'About', labelVi: 'Về mình' },
+  { href: '/about', label: 'About', labelVi: 'Về blog' },
+  { href: '/me', label: 'Me', labelVi: 'Tác giả' },
 ]
 
 interface NavbarProps {

@@ -11,12 +11,17 @@ const i18nMiddleware = createMiddleware(routing)
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip Payload admin, API routes, Next.js internals, and static assets
+  // Skip Payload admin, API routes, auth pages, Next.js internals, and static assets
+  // Auth pages live in (auth) route group — no locale prefix
   if (
     pathname.startsWith('/admin') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
-    /\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)$/.test(pathname)
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password') ||
+    /\.(?:svg|png|jpg|jpeg|gif|webp|ico|xml|txt|woff2?|ttf|otf)$/.test(pathname)
   ) {
     return NextResponse.next()
   }

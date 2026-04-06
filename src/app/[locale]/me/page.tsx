@@ -1,0 +1,286 @@
+import type { Metadata } from 'next'
+import type { Locale } from '@/i18n/config'
+import { getAuthorProfile } from '@/lib/author/get-author-profile'
+import { getPosts } from '@/lib/blog/get-posts'
+import { BioSection } from '@/components/me/bio-section'
+import { SkillsGrid } from '@/components/me/skills-grid'
+import { TimelineSection } from '@/components/me/timeline-section'
+import { ContactForm } from '@/components/me/contact-form'
+import { BlogCard } from '@/components/ui/blog-card'
+import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
+
+interface Props {
+  params: Promise<{ locale: string }>
+}
+
+export const revalidate = 3600
+
+function getLocalizedText(value: unknown, locale: Locale) {
+  if (typeof value === 'string') return value
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>
+    const localized = record[locale]
+    if (typeof localized === 'string') return localized
+    const first = Object.values(record).find((item) => typeof item === 'string')
+    if (typeof first === 'string') return first
+  }
+  return undefined
+}
+
+const meTranslations = {
+  vi: {
+    about: 'Về tác giả',
+    contentSoon: 'Nội dung đang được cập nhật.',
+    buildingNow: 'Mình đang xây gì lúc này',
+    principles: 'Cách mình làm việc',
+    selectedWriting: 'Những gì mình đã viết',
+    selectedWritingFallback: 'Một vài bài gần đây mình nghĩ bạn sẽ thích',
+    contact: 'Gửi lời chào',
+    contactName: 'Tên của bạn',
+    contactEmail: 'Email',
+    contactMessage: 'Bạn muốn trao đổi gì?',
+    contactSend: 'Gửi lời chào',
+    contactSending: 'Đang gửi...',
+    contactSuccess: 'Mình đã nhận được tin nhắn. Cảm ơn bạn.',
+    contactError: 'Gửi thất bại. Vui lòng thử lại.',
+    contactRateLimit: 'Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau.',
+    defaultHeroSentence: 'Mình viết về công nghệ, AI và cách biến ý tưởng thành sản phẩm số hữu ích.',
+  },
+  en: {
+    about: 'About Me',
+    contentSoon: 'Content coming soon.',
+    buildingNow: "What I'm building now",
+    principles: 'How I like to work',
+    selectedWriting: "Things I've written",
+    selectedWritingFallback: 'A few recent notes you might enjoy',
+    contact: 'Say hello',
+    contactName: 'Your name',
+    contactEmail: 'Email',
+    contactMessage: 'What would you like to talk about?',
+    contactSend: 'Say hello',
+    contactSending: 'Sending...',
+    contactSuccess: 'Got your message. Thank you.',
+    contactError: 'Failed to send. Please try again.',
+    contactRateLimit: 'Too many messages. Please try again later.',
+    defaultHeroSentence: 'I write about technology, AI, and how to turn ideas into practical digital products.',
+  },
+}
+
+interface MePostCard {
+  slug: string
+  title: string
+  excerpt?: string
+  featuredImage: {
+    url: string
+    alt: string
+  } | null
+  category: {
+    name: string
+    slug: string
+  } | null
+  publishedAt?: string
+  readingTime?: number
+}
+
+interface MeWritingCard extends MePostCard {
+  note: string | undefined
+}
+
+function mapPostForCard(post: unknown, locale: Locale): MePostCard | null {
+  if (!post || typeof post !== 'object') return null
+  const p = post as Record<string, unknown>
+  const slug = typeof p.slug === 'string' ? p.slug : null
+  if (!slug) return null
+
+  const featuredImageObj = p.featuredImage
+  const featuredImage =
+    featuredImageObj && typeof featuredImageObj === 'object'
+      ? {
+          url: ((featuredImageObj as { url?: string }).url ?? ''),
+          alt: ((featuredImageObj as { alt?: string }).alt ?? slug),
+        }
+      : null
+
+  const categoryObj = p.category
+  const category =
+    categoryObj && typeof categoryObj === 'object'
+      ? {
+          name: getLocalizedText((categoryObj as { name?: unknown }).name, locale) || '',
+          slug: (categoryObj as { slug?: string }).slug || '',
+        }
+      : null
+
+  return {
+    slug,
+    title: getLocalizedText(p.title, locale) || slug,
+    excerpt: getLocalizedText(p.excerpt, locale),
+    featuredImage,
+    category: category && category.slug ? category : null,
+    publishedAt: typeof p.publishedAt === 'string' ? p.publishedAt : undefined,
+    readingTime: typeof p.readingTime === 'number' ? p.readingTime : undefined,
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  const loc = locale as Locale
+  const profile = await getAuthorProfile(loc)
+
+  return {
+    title: getLocalizedText(profile?.meta?.metaTitle, loc) || (loc === 'vi' ? 'Về tác giả' : 'About Me'),
+    description: getLocalizedText(profile?.meta?.metaDescription, loc) || '',
+  }
+}
+
+export default async function MePage({ params }: Props) {
+  const { locale } = await params
+  const loc = locale as Locale
+  const t = meTranslations[loc] || meTranslations.en
+
+  const [profile, latestPostsResult] = await Promise.all([
+    getAuthorProfile(loc),
+    getPosts({ locale: loc, page: 1, limit: 3 }).catch(() => ({ docs: [] })),
+  ])
+
+  if (!profile) {
+    return (
+      <div className="mx-auto max-w-[800px] px-6 py-16 text-muted-foreground">
+        <h1 className="mb-4 font-heading text-4xl font-bold">{t.about}</h1>
+        <p>{t.contentSoon}</p>
+      </div>
+    )
+  }
+
+  const editorial = profile.meEditorial && typeof profile.meEditorial === 'object'
+    ? (profile.meEditorial as Record<string, unknown>)
+    : null
+
+  const heroSentence = getLocalizedText(editorial?.heroSentence, loc) || t.defaultHeroSentence
+  const buildingNow = editorial?.buildingNow
+  const timelineContext = getLocalizedText(editorial?.timelineContext, loc)
+  const contactCtaText = getLocalizedText(editorial?.contactCtaText, loc)
+
+  const principlesRaw = Array.isArray(editorial?.principles) ? editorial.principles : []
+  const principles = principlesRaw
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const principle = item as Record<string, unknown>
+      const title = getLocalizedText(principle.title, loc)
+      const description = getLocalizedText(principle.description, loc)
+      if (!title || !description) return null
+      return { title, description }
+    })
+    .filter((item): item is { title: string; description: string } => Boolean(item))
+
+  const selectedWritingRaw = Array.isArray(editorial?.selectedWriting) ? editorial.selectedWriting : []
+  const curatedWriting = selectedWritingRaw
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null
+      const writing = entry as Record<string, unknown>
+      const post = mapPostForCard(writing.post, loc)
+      if (!post) return null
+      const note = getLocalizedText(writing.note, loc)
+      return { ...post, note }
+    })
+    .filter((item): item is MeWritingCard => Boolean(item))
+
+  const fallbackWriting = (latestPostsResult.docs || [])
+    .map((post) => mapPostForCard(post, loc))
+    .filter((item): item is MePostCard => Boolean(item))
+    .map((post) => ({ ...post, note: undefined }))
+
+  const writingToRender: MeWritingCard[] =
+    curatedWriting.length > 0 ? curatedWriting : fallbackWriting
+
+  return (
+    <div className="mx-auto max-w-[1200px] px-6 py-10 md:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            name: profile.name || 'GTKBlog Author',
+            url: process.env.NEXT_PUBLIC_APP_URL,
+            sameAs: profile.socialLinks?.map((l: { url: string }) => l.url) || [],
+          }),
+        }}
+      />
+
+      <div className="space-y-16">
+        <section className="gradient-brand-subtle relative overflow-hidden rounded-3xl border border-border/60 px-6 py-12 md:px-10 md:py-14">
+          <div className="ambient-warm absolute inset-0" />
+          <div className="relative z-10">
+            <BioSection
+              name={profile.name || 'GTKBlog Author'}
+              title={getLocalizedText(profile.title, loc) || 'Software Engineer'}
+              heroSentence={heroSentence}
+              avatar={profile.avatar}
+              bio={profile.bio}
+              socialLinks={profile.socialLinks}
+            />
+          </div>
+        </section>
+
+        {Boolean(buildingNow) && (
+          <section className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
+            <h2 className="mb-4 font-heading text-2xl font-semibold">{t.buildingNow}</h2>
+            <RichTextRenderer content={buildingNow} />
+          </section>
+        )}
+
+        {writingToRender.length > 0 && (
+          <section>
+            <div className="mb-6">
+              <h2 className="font-heading text-2xl font-semibold">{t.selectedWriting}</h2>
+              {curatedWriting.length === 0 && (
+                <p className="mt-1 text-sm text-muted-foreground">{t.selectedWritingFallback}</p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {writingToRender.map((post) => (
+                <div key={post.slug} className="space-y-2">
+                  <BlogCard
+                    title={post.title}
+                    slug={post.slug}
+                    excerpt={post.excerpt}
+                    featuredImage={post.featuredImage}
+                    category={post.category}
+                    publishedAt={post.publishedAt}
+                    readingTime={post.readingTime}
+                    locale={loc}
+                  />
+                  {post.note && <p className="px-1 text-sm text-muted-foreground">{post.note}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {principles.length > 0 && (
+          <section>
+            <h2 className="mb-6 font-heading text-2xl font-semibold">{t.principles}</h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {principles.map((principle) => (
+                <article key={principle.title} className="rounded-2xl border border-border bg-card p-5">
+                  <h3 className="font-heading text-lg font-semibold">{principle.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+                    {principle.description}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {profile.skills?.length > 0 && <SkillsGrid skills={profile.skills} locale={loc} />}
+
+        {profile.timeline?.length > 0 && (
+          <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
+        )}
+
+        <ContactForm locale={loc} translations={t} ctaText={contactCtaText} />
+      </div>
+    </div>
+  )
+}

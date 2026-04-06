@@ -3,6 +3,7 @@
     "blog": "Blog",
     "products": "Sản phẩm",
     "about": "Về mình",
+    "me": "Tác giả",
     "login": "Đăng nhập",
     "register": "Đăng ký",
     "logout": "Đăng xuất",
@@ -111,6 +112,20 @@
     "orderAmount": "Số tiền",
     "downloadProduct": "Tải xuống",
     "reDownload": "Tải lại"
+  },
+  "me": {
+    "title": "Về tác giả",
+    "skills": "Kỹ năng & Công nghệ",
+    "timeline": "Hành trình",
+    "contact": "Liên hệ",
+    "contactName": "Họ tên",
+    "contactEmail": "Email",
+    "contactMessage": "Tin nhắn",
+    "contactSend": "Gửi tin nhắn",
+    "contactSending": "Đang gửi...",
+    "contactSuccess": "Tin nhắn đã được gửi! Cảm ơn bạn.",
+    "contactError": "Gửi thất bại. Vui lòng thử lại.",
+    "contactRateLimit": "Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau."
   },
   "footer": {
     "description": "Blog công nghệ & AI cá nhân. Chia sẻ kiến thức, sản phẩm số.",

@@ -50,7 +50,7 @@ Redirect to profile or checkout
 | **Better Auth** | Session creation, password hashing, OAuth flow |
 | **Cookie** | `gtkblog.session_token` (30-day expiry) |
 | **Middleware** | Lightweight cookie check on protected routes |
-| **Auth Helpers** | `getSession()`, `isAuthenticated()`, role checks |
+| **Auth Helpers** | `getSession()`, `requireAuth()`, `requireAdmin()` |
 
 ### Protected Routes
 
@@ -80,6 +80,11 @@ Managed internally by Payload; accessed via Payload SDK:
 users (CMS admins only)
 ├─ id, email, password_hash, role, created_at
 ├─ Keys: PK(id), UNIQUE(email)
+
+author-profile (singleton global)
+├─ bio, avatar_url, email, skills (array), social_links (array)
+├─ timeline (array: year, title, description)
+├─ Keys: PK(id), single record
 
 posts
 ├─ id, title, slug, content (Lexical), excerpt
@@ -174,7 +179,8 @@ newsletter
 
 | Layer | Method | Usage |
 |-------|--------|-------|
-| **Payload Collections** | Payload SDK in server components | Blog posts, products, categories, media |
+| **Payload Collections** | Payload SDK in server components | Blog posts, products, categories, media, about-page content |
+| **Payload Global** | `getAuthorProfile(locale)` helper | Localized author identity reused across `/me`, `/about`, and `/blog` |
 | **Custom Tables** | Drizzle ORM in server actions/functions | Orders, comments, profiles, tokens |
 | **Direct SQL** | `db.execute()` for complex queries | Aggregations (post counts, order totals) |
 
@@ -184,9 +190,15 @@ newsletter
 
 ```
 /              → Detect browser locale → Redirect to /vi or /en
-/vi/blog       → Vietnamese blog listing
-/en/blog       → English blog listing
+/vi/blog       → Vietnamese editorial blog hub (?category=slug, featured hero, newsletter CTA)
+/en/blog       → English editorial blog hub
+/vi/blog/category/[slug] → Legacy category URL, redirected to /vi/blog?category={slug}
+/en/blog/category/[slug] → Legacy category URL, redirected to /en/blog?category={slug}
+/vi/about      → About page with editorial sections, CMS rich text, and author CTA
+/en/about      → About page (English)
 /vi/products   → Vietnamese products
+/vi/me         → Author profile (bio, skills, timeline, contact)
+/en/me         → Author profile (English)
 /admin         → Payload admin (no locale)
 /api/auth      → Better Auth (no locale)
 ```
@@ -206,9 +218,15 @@ newsletter
 |-------|---------|------|--------|
 | `(auth)` | Login, register, password reset | None | None |
 | `(payload)` | Admin dashboard, Payload API | Payload only | None |
-| `[locale]` | All customer-facing routes | Optional | Required |
+| `[locale]` | All customer-facing routes, including editorial About/Blog surfaces | Optional | Required |
 | `api/auth` | Better Auth catch-all | Varies | None |
 | `api/webhooks` | Payment webhooks | Verify signature | None |
+
+### Editorial Surface Composition
+
+- `/[locale]/about` combines hard-coded section components (`AboutHeroSection`, `TopicsGrid`), localized author data from the `author-profile` global, and rich text from the Payload `pages` collection entry with slug `about`.
+- `/[locale]/blog` resolves category state from `searchParams.category`, highlights the first post as a featured hero on the default listing, and appends `AuthorMiniCard` plus `NewsletterSection` below the post grid.
+- `AuthorMiniCard` provides a shared CTA path from editorial surfaces back to `/[locale]/me`.
 
 ## Payment Processing
 
@@ -273,6 +291,7 @@ pending → [webhook received] → completed → [token valid until 48h]
 | `order-confirmation-email.tsx` | After payment | order_id, items[], total, download_urls, locale |
 | `password-reset-email.tsx` | Password reset flow | reset_url, expires_at, locale |
 | `newsletter-post-email.tsx` | New post published | post_title, excerpt, read_more_url, locale |
+| `contact-notification.tsx` | Contact form submission via /me | sender_name, sender_email, message, locale |
 
 ### Localization
 
@@ -449,6 +468,7 @@ POST /api/auth/register       → 5 per day per IP
 POST /api/auth/login          → 10 per hour per IP
 POST /api/newsletter/subscribe → 100 per day per IP
 POST /api/payment/create-*    → 50 per hour per user
+POST /api/contact             → 3 per 60 seconds per IP
 ```
 
 ### Password Security

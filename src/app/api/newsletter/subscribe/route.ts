@@ -27,7 +27,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Email required' }, { status: 400 })
   }
 
-  const result = await subscribeNewsletter(email.trim().toLowerCase(), locale)
+  const normalizedLocale = locale === 'en' ? 'en' : locale === 'vi' ? 'vi' : null
+  if (!normalizedLocale) {
+    return NextResponse.json({ error: 'Invalid locale' }, { status: 400 })
+  }
+
+  const result = await subscribeNewsletter(email.trim().toLowerCase(), normalizedLocale)
 
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: 400 })

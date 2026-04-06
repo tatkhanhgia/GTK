@@ -159,6 +159,10 @@ code, pre, kbd, samp {
   background: linear-gradient(135deg, #D97757 0%, #C4713E 100%);
 }
 
+.gradient-brand-subtle {
+  background: linear-gradient(135deg, rgba(217, 119, 87, 0.08) 0%, rgba(196, 113, 62, 0.08) 100%);
+}
+
 .gradient-text-brand {
   background: linear-gradient(135deg, #D97757, #C4713E);
   -webkit-background-clip: text;
