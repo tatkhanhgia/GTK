@@ -32,9 +32,10 @@ const meTranslations = {
   vi: {
     about: 'Về tác giả',
     contentSoon: 'Nội dung đang được cập nhật.',
-    buildingNow: 'Mình đang xây gì lúc này',
-    principles: 'Cách mình làm việc',
-    selectedWriting: 'Những gì mình đã viết',
+    buildingNow: 'Hiện tại mình đang',
+    principles: 'Những điều mình tin',
+    principlesSubtitle: 'Nguyên tắc hướng dẫn cách mình sống và làm việc',
+    selectedWriting: 'Bài viết',
     selectedWritingFallback: 'Một vài bài gần đây mình nghĩ bạn sẽ thích',
     contact: 'Gửi lời chào',
     contactName: 'Tên của bạn',
@@ -50,9 +51,10 @@ const meTranslations = {
   en: {
     about: 'About Me',
     contentSoon: 'Content coming soon.',
-    buildingNow: "What I'm building now",
-    principles: 'How I like to work',
-    selectedWriting: "Things I've written",
+    buildingNow: "What I'm up to these days",
+    principles: 'What I believe',
+    principlesSubtitle: 'Principles that guide how I live and work',
+    selectedWriting: 'Writing',
     selectedWritingFallback: 'A few recent notes you might enjoy',
     contact: 'Say hello',
     contactName: 'Your name',
@@ -224,30 +226,66 @@ export default async function MePage({ params }: Props) {
           </div>
         </section>
 
-        {/* Quick Stats */}
-        <QuickStats
-          yearsOfExperience={profile.yearsOfExperience}
-          projectsCompleted={profile.projectsCompleted}
-          postsPublished={writingToRender.length}
-          locale={loc}
-        />
+        {/* At a Glance */}
+        <section>
+          <div className="mb-8">
+            <h2 className="font-heading text-3xl font-bold tracking-tight">
+              {loc === 'vi' ? 'Nhìn nhanh' : 'At a glance'}
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              {loc === 'vi'
+                ? 'Một chút về con số, nhưng số không nói lên tất cả'
+                : 'Some numbers, but numbers never tell the whole story'}
+            </p>
+          </div>
+          <QuickStats
+            yearsOfExperience={profile.yearsOfExperience}
+            projectsCompleted={profile.projectsCompleted}
+            postsPublished={writingToRender.length}
+            locale={loc}
+          />
+        </section>
 
-        {/* Timeline - Career Journey */}
+        {/* Timeline - Moments that matter */}
         {profile.timeline?.length > 0 && (
-          <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
+          <section>
+            <div className="mb-8">
+              <h2 className="font-heading text-3xl font-bold tracking-tight">
+                {loc === 'vi' ? 'Những cột mốc' : 'Moments that matter'}
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                {loc === 'vi'
+                  ? 'Những quyết định và khoảnh khắc đã định hình mình'
+                  : 'Decisions and turning points that shaped who I am'}
+              </p>
+            </div>
+            <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
+          </section>
         )}
 
-        {/* Skills - Tools */}
-        {profile.skills?.length > 0 && <SkillsGrid skills={profile.skills} locale={loc} />}
+        {/* Skills - My Stack */}
+        {profile.skills?.length > 0 && (
+          <section>
+            <div className="mb-8">
+              <h2 className="font-heading text-3xl font-bold tracking-tight">
+                {loc === 'vi' ? 'Công cụ mình dùng' : 'My stack'}
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                {loc === 'vi'
+                  ? 'Không phải để khoe, mà là để chia sẻ những gì đang giúp mình'
+                  : "Not to brag, but to share what's actually helping me"}
+              </p>
+            </div>
+            <SkillsGrid skills={profile.skills} locale={loc} />
+          </section>
+        )}
 
-        {/* Principles - Work Style */}
+        {/* Principles - What I Believe */}
         {principles.length > 0 && (
           <section>
             <div className="mb-8">
               <h2 className="font-heading text-3xl font-bold tracking-tight">{t.principles}</h2>
-              <p className="mt-2 text-muted-foreground">
-                {loc === 'vi' ? 'Những nguyên tắc hướng dẫn cách mình tiếp cận công việc' : 'The principles that guide how I approach my work'}
-              </p>
+              <p className="mt-2 text-muted-foreground">{t.principlesSubtitle}</p>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {principles.map((principle) => (

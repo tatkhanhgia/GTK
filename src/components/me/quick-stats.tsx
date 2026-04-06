@@ -15,14 +15,14 @@ export function QuickStats({
 }: QuickStatsProps) {
   const t = {
     vi: {
-      years: 'Năm kinh nghiệm',
-      projects: 'Dự án hoàn thành',
-      posts: 'Bài viết đã xuất bản',
+      years: 'năm xây dựng',
+      projects: 'thứ đã tạo ra',
+      posts: 'bài viết',
     },
     en: {
-      years: 'Years of experience',
-      projects: 'Projects completed',
-      posts: 'Posts published',
+      years: 'years building',
+      projects: 'things shipped',
+      posts: 'pieces written',
     },
   }
 

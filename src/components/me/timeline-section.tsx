@@ -28,10 +28,7 @@ export function TimelineSection({ timeline, locale, context }: TimelineSectionPr
 
   return (
     <section>
-      <h2 className="font-heading font-bold text-2xl mb-4">
-        {locale === 'vi' ? 'Những cột mốc đáng nhớ' : 'Moments that shaped me'}
-      </h2>
-      {context && <p className="mb-6 text-sm leading-relaxed text-muted-foreground md:text-base">{context}</p>}
+      {context && <p className="mb-8 text-sm leading-relaxed text-muted-foreground md:text-base">{context}</p>}
       <div className="relative border-l-2 border-primary/30 pl-8 space-y-10">
         {timeline.map((entry, i) => {
           const type = entry.type && entry.type in typeBadgeStyles ? entry.type : 'work'
