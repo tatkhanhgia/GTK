@@ -122,6 +122,24 @@ src/
 │       ├── search-input.tsx      # Client-side blog search field shell
 │       └── ...
 │
+├── admin/                        # Payload admin custom surface
+│   ├── styles/                   # Anthropic-inspired theme vars & overrides
+│   │   ├── admin-theme.css        # CSS variables for dark/light tokens
+│   │   └── component-overrides.css # Payload component overrides for sidebar, tables, forms
+│   ├── hooks/                    # Theme utilities
+│   │   └── use-system-theme.ts    # System theme detection hook (prefers-color-scheme)
+│   ├── components/               # Theme-aware UI primitives & layouts
+│   │   ├── providers/
+│   │   │   └── theme-provider.tsx # Theme context provider toggling .admin-dark
+│   │   ├── layout/
+│   │   │   ├── custom-sidebar.tsx
+│   │   │   └── custom-header.tsx
+│   │   ├── ui/
+│   │   │   └── card.tsx
+│   │   └── views/
+│   │       └── custom-dashboard.tsx # Anthropic-style dashboard home view
+│   └── testing-checklist.md      # QA checklist for admin UI (colors, layout, accessibility)
+│
 ├── db/
 │   ├── index.ts                  # Drizzle client
 │   └── schema/                   # Custom tables (non-Payload)

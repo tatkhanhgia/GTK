@@ -151,5 +151,56 @@ export const Products: CollectionConfig = {
         description: 'Stripe Price ID',
       },
     },
+    {
+      name: 'problemSolved',
+      type: 'textarea',
+      localized: true,
+      label: 'Problem Solved',
+      admin: {
+        description: 'What problem does this product solve? (1-2 sentences)',
+      },
+    },
+    {
+      name: 'technologies',
+      type: 'array',
+      labels: { singular: 'Technology', plural: 'Technologies' },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'category',
+          type: 'select',
+          options: [
+            { label: 'Frontend', value: 'frontend' },
+            { label: 'Backend', value: 'backend' },
+            { label: 'Database', value: 'database' },
+            { label: 'DevOps', value: 'devops' },
+            { label: 'AI/ML', value: 'ai' },
+            { label: 'Other', value: 'other' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'keyFeatures',
+      type: 'array',
+      labels: { singular: 'Feature', plural: 'Key Features' },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          localized: true,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          localized: true,
+        },
+      ],
+    },
   ],
 }

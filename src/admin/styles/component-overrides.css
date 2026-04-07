@@ -1,0 +1,1494 @@
+/* Payload Admin Component Overrides */
+
+.payload-admin {
+  min-height: 100dvh;
+  overflow-x: clip;
+  background-color: var(--admin-bg-primary);
+  color: var(--admin-text-primary);
+}
+
+.payload-admin,
+.payload-admin *::before,
+.payload-admin *::after {
+  border-color: var(--admin-border);
+}
+
+.payload-admin-header {
+  background: transparent;
+}
+
+/* Hide Payload default nav components - we use custom sidebar instead */
+.template-default__nav-toggler-wrapper,
+.app-header {
+  display: none !important;
+}
+
+/* Hide Payload's default Nav component (but not custom sidebar) */
+.template-default .nav:not(.custom-sidebar),
+.template-default__nav,
+.payload-admin > .nav:first-of-type {
+  display: none !important;
+}
+
+/* Floating Header Enhancements */
+.payload-admin-header > div {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient border effect */
+.payload-admin-header > div::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(217, 119, 87, 0.15) 0%,
+    transparent 50%,
+    rgba(217, 119, 87, 0.08) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Dark mode gradient border */
+html.dark .payload-admin-header > div::before,
+html.admin-dark .payload-admin-header > div::before {
+  background: linear-gradient(
+    135deg,
+    rgba(224, 144, 112, 0.2) 0%,
+    transparent 50%,
+    rgba(224, 144, 112, 0.1) 100%
+  );
+}
+
+.payload-admin :where(h1, h2, h3, h4) {
+  color: var(--admin-text-primary);
+}
+
+.payload-admin :where(p, label, small, time) {
+  color: var(--admin-text-secondary);
+}
+
+.payload-admin .payload-admin-content,
+.payload-admin .dashboard-content {
+  min-width: 0;
+  animation: fade-in-up 0.25s ease;
+}
+
+.payload-admin .payload-admin-header > div,
+.payload-admin .dashboard-content > div {
+  min-width: 0;
+}
+
+.payload-admin .dashboard-content .admin-card,
+.payload-admin .dashboard-content [data-admin-card='true'] {
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+}
+
+.payload-admin .payload-admin-header button,
+.payload-admin .custom-sidebar button,
+.payload-admin .dashboard-content button,
+.payload-admin .dashboard-content .btn {
+  min-height: 44px;
+  min-width: 44px;
+  transition:
+    background-color var(--admin-transition-fast),
+    color var(--admin-transition-fast),
+    border-color var(--admin-transition-fast),
+    box-shadow var(--admin-transition-normal),
+    transform var(--admin-transition-normal);
+}
+
+.payload-admin .custom-sidebar nav a {
+  position: relative;
+  overflow: hidden;
+}
+
+.payload-admin .custom-sidebar nav a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  border-radius: 0 999px 999px 0;
+  background-color: var(--admin-accent);
+  transform: translateY(-50%);
+  transition: height var(--admin-transition-fast);
+}
+
+.payload-admin .custom-sidebar nav a:hover::before,
+.payload-admin .custom-sidebar nav a[aria-current='page']::before {
+  height: 60%;
+}
+
+.payload-admin .dashboard-content .admin-card.card-hover {
+  transition: transform var(--admin-transition-normal), box-shadow var(--admin-transition-normal);
+}
+
+.payload-admin .dashboard-content .admin-card.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--admin-shadow-lg);
+}
+
+.payload-admin .payload-admin-header button:active,
+.payload-admin .custom-sidebar button:active,
+.payload-admin .dashboard-content button:active,
+.payload-admin .dashboard-content .btn:active {
+  transform: scale(0.98);
+}
+
+.payload-admin .dashboard-content .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--admin-bg-secondary) 25%,
+    var(--admin-bg-tertiary) 50%,
+    var(--admin-bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.payload-admin *:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--admin-accent-light);
+}
+
+/* Enhanced Input Field Styling */
+.payload-admin input[type="text"],
+.payload-admin input[type="email"],
+.payload-admin input[type="password"],
+.payload-admin input[type="number"],
+.payload-admin input[type="search"],
+.payload-admin input[type="url"],
+.payload-admin textarea,
+.payload-admin select {
+  background-color: var(--admin-bg-tertiary);
+  border: 1.5px solid var(--admin-border-strong);
+  border-radius: var(--admin-radius-md);
+  color: var(--admin-text-primary);
+  padding: 0.625rem 0.875rem;
+  transition: border-color var(--admin-transition-fast),
+              box-shadow var(--admin-transition-fast);
+}
+
+.payload-admin input:focus,
+.payload-admin textarea:focus,
+.payload-admin select:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-light);
+  outline: none;
+}
+
+/* Button Hierarchy */
+.payload-admin .btn--primary,
+.payload-admin button[type="submit"].btn--style-primary,
+.payload-admin .payload-admin-header .btn--primary {
+  background-color: var(--admin-accent);
+  color: white;
+  border: 1.5px solid var(--admin-accent);
+  font-weight: 600;
+}
+
+.payload-admin .btn--primary:hover {
+  background-color: var(--admin-accent-hover);
+  border-color: var(--admin-accent-hover);
+}
+
+.payload-admin .btn--secondary,
+.payload-admin button.btn--style-secondary {
+  background-color: transparent;
+  color: var(--admin-text-primary);
+  border: 1.5px solid var(--admin-border-strong);
+}
+
+.payload-admin .btn--secondary:hover {
+  background-color: var(--admin-bg-tertiary);
+  border-color: var(--admin-text-tertiary);
+}
+
+/* Enhanced Sidebar Active State */
+.payload-admin .custom-sidebar nav a[aria-current='page'] {
+  background-color: var(--admin-accent-light);
+  border-left-color: var(--admin-accent);
+  box-shadow: var(--admin-shadow-sm);
+}
+
+.payload-admin .custom-sidebar nav a[aria-current='page'] span:first-of-type {
+  background-color: var(--admin-accent);
+  color: white;
+}
+
+/* Table Row Hover */
+.payload-admin table tbody tr:hover {
+  background-color: var(--admin-accent-light);
+}
+
+/* Price formatting helper */
+.payload-admin .formatted-price::after {
+  content: ' VND';
+}
+
+.payload-admin .sr-only,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.payload-admin .custom-sidebar {
+  flex-shrink: 0;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Fix sidebar text overlap when collapsed */
+.payload-admin .custom-sidebar nav a span:last-child,
+.payload-admin .custom-sidebar .sidebar-brand-text,
+.payload-admin .custom-sidebar aside > div:first-child > a > div {
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+/* When sidebar is in collapsed state (mobile hidden or narrow mode) */
+@media (max-width: 767px) {
+  .payload-admin .custom-sidebar {
+    width: 280px;
+  }
+}
+
+/* Ensure sidebar overlay doesn't block content */
+.payload-admin .sidebar-overlay {
+  z-index: 35;
+}
+
+/* Fix Payload's default sidebar styles if they conflict */
+.payload-admin .nav-group__toggle-content,
+.payload-admin .nav-group__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================================
+   SIDEBAR COLLAPSED STATE - Semi-collapsed with icon-only
+   ============================================================ */
+
+/* Semi-collapsed sidebar width - optimal for icon-only display */
+.admin-sidebar-collapsed .nav,
+html.admin-sidebar-collapsed .nav,
+.custom-sidebar.w-[72px] {
+  width: 72px !important;
+  min-width: 72px !important;
+  max-width: 72px !important;
+}
+
+/* Center all content in collapsed state */
+.admin-sidebar-collapsed .nav__link,
+html.admin-sidebar-collapsed .nav__link,
+.admin-sidebar-collapsed .nav-group__toggle-content,
+html.admin-sidebar-collapsed .nav-group__toggle-content {
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: center !important;
+}
+
+/* Hide text labels but keep icons */
+.admin-sidebar-collapsed .nav-group__label,
+.admin-sidebar-collapsed .nav__group-label,
+.admin-sidebar-collapsed .nav__link span:not(.icon):not(.nav__link-icon),
+.admin-sidebar-collapsed .nav-group__toggle-content span:not(.icon),
+html.admin-sidebar-collapsed .nav-group__label,
+html.admin-sidebar-collapsed .nav__group-label,
+html.admin-sidebar-collapsed .nav__link span:not(.icon):not(.nav__link-icon),
+html.admin-sidebar-collapsed .nav-group__toggle-content span:not(.icon) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Center icons and remove margins */
+.admin-sidebar-collapsed .nav__link .icon,
+.admin-sidebar-collapsed .nav-group__toggle-content .icon,
+html.admin-sidebar-collapsed .nav__link .icon,
+html.admin-sidebar-collapsed .nav-group__toggle-content .icon {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Active item indicator - accent bar on left */
+.admin-sidebar-collapsed .nav__link--active::before,
+html.admin-sidebar-collapsed .nav__link--active::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 3px !important;
+  height: 24px !important;
+  background-color: var(--admin-accent) !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* Enhanced tooltip for collapsed sidebar */
+.admin-sidebar-collapsed .nav__link:hover::after,
+.admin-sidebar-collapsed .nav-group__toggle-content:hover::after,
+html.admin-sidebar-collapsed .nav__link:hover::after,
+html.admin-sidebar-collapsed .nav-group__toggle-content:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 14px;
+  background: var(--admin-bg-tertiary);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  animation: tooltip-fade-in 200ms ease forwards;
+  animation-delay: 150ms;
+  pointer-events: none;
+}
+
+/* Tooltip arrow */
+.admin-sidebar-collapsed .nav__link:hover::before,
+.admin-sidebar-collapsed .nav-group__toggle-content:hover::before,
+html.admin-sidebar-collapsed .nav__link:hover::before,
+html.admin-sidebar-collapsed .nav-group__toggle-content:hover::before {
+  content: '';
+  position: absolute;
+  left: calc(100% + 3px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid var(--admin-bg-tertiary);
+  z-index: 101;
+  opacity: 0;
+  animation: tooltip-fade-in 200ms ease forwards;
+  animation-delay: 150ms;
+  pointer-events: none;
+}
+
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Custom sidebar collapsed improvements */
+.custom-sidebar.w-[72px] .sidebar-brand-text,
+.custom-sidebar.w-[72px] nav a span:last-child {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  display: none;
+}
+
+/* Collapsed sidebar logo/icon styling */
+.admin-sidebar-collapsed .sidebar-logo,
+html.admin-sidebar-collapsed .sidebar-logo {
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 auto !important;
+}
+
+/* Group spacing adjustment in collapsed mode */
+.admin-sidebar-collapsed .nav__group,
+html.admin-sidebar-collapsed .nav__group {
+  margin-bottom: 4px !important;
+}
+
+/* Divider in collapsed mode */
+.admin-sidebar-collapsed .nav-divider,
+html.admin-sidebar-collapsed .nav-divider {
+  margin: 12px 16px !important;
+  opacity: 0.3;
+}
+
+html.dark .payload-admin,
+html.admin-dark .payload-admin {
+  background-color: var(--admin-bg-primary);
+  color: var(--admin-text-primary);
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  .payload-admin .custom-sidebar {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (min-width: 40rem) {
+  .payload-admin .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .payload-admin .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  body.sidebar-open {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  .payload-admin .dashboard-content {
+    padding-bottom: 2.5rem;
+  }
+}
+
+@media (pointer: coarse) {
+  .payload-admin .payload-admin-header button,
+  .payload-admin .custom-sidebar button,
+  .payload-admin .custom-sidebar nav a,
+  .payload-admin .dashboard-content button,
+  .payload-admin .dashboard-content .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .payload-admin .dashboard-content input,
+  .payload-admin .dashboard-content select,
+  .payload-admin .dashboard-content textarea {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-contrast: high) {
+  :root {
+    --admin-border: rgba(20, 20, 19, 0.3);
+    --admin-border-strong: rgba(20, 20, 19, 0.5);
+  }
+
+  html.dark,
+  html.admin-dark {
+    --admin-border: rgba(245, 240, 232, 0.3);
+    --admin-border-strong: rgba(245, 240, 232, 0.5);
+  }
+}
+
+@media print {
+  .custom-sidebar,
+  .payload-admin-header,
+  .mobile-menu-toggle,
+  button[aria-label*='theme'],
+  .btn-ghost {
+    display: none !important;
+  }
+
+  .payload-admin {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .payload-admin .dashboard-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  .payload-admin .dashboard-content .admin-card,
+  .payload-admin .dashboard-content [data-admin-card='true'] {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payload-admin,
+  .payload-admin *,
+  .payload-admin *::before,
+  .payload-admin *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .payload-admin .custom-sidebar {
+    transition: none !important;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Table Styling Enhancements */
+.payload-admin table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.payload-admin table th {
+  background-color: var(--admin-bg-secondary);
+  color: var(--admin-text-secondary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.875rem 1rem;
+  border-bottom: 1.5px solid var(--admin-border-strong);
+  text-align: left;
+}
+
+.payload-admin table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text-primary);
+  vertical-align: middle;
+}
+
+.payload-admin table tbody tr {
+  transition: background-color var(--admin-transition-fast);
+}
+
+.payload-admin table tbody tr:hover {
+  background-color: var(--admin-accent-light);
+}
+
+/* Action Buttons in Tables */
+.payload-admin table .cell-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.payload-admin table .cell-actions button {
+  min-height: 36px;
+  min-width: 36px;
+  padding: 0.5rem;
+  border-radius: var(--admin-radius-md);
+  background-color: transparent;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
+  transition: all var(--admin-transition-fast);
+}
+
+.payload-admin table .cell-actions button:hover {
+  background-color: var(--admin-bg-tertiary);
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+}
+
+/* Status Badges */
+.payload-admin .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.payload-admin .status-badge--published {
+  background-color: rgba(61, 139, 110, 0.15);
+  color: var(--admin-success);
+}
+
+.payload-admin .status-badge--draft {
+  background-color: rgba(212, 149, 43, 0.15);
+  color: var(--admin-warning);
+}
+
+.payload-admin .status-badge--admin {
+  background-color: var(--admin-accent-light);
+  color: var(--admin-accent);
+}
+
+/* Empty State Styling */
+.payload-admin .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.payload-admin .empty-state-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+  color: var(--admin-text-muted);
+}
+
+.payload-admin .empty-state-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.payload-admin .empty-state-description {
+  font-size: 0.875rem;
+  color: var(--admin-text-secondary);
+  margin-bottom: 1.5rem;
+  max-width: 320px;
+}
+
+/* Role Badges */
+.payload-admin .role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Breadcrumb Improvements */
+.payload-admin .breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.payload-admin .breadcrumb-separator {
+  color: var(--admin-text-muted);
+}
+
+.payload-admin .breadcrumb-current {
+  font-weight: 600;
+  color: var(--admin-text-primary);
+}
+
+/* ============================================
+   LOGIN PAGE STYLES
+   ============================================ */
+
+/* Login Container */
+.payload-admin .login,
+.payload-admin .login__wrapper,
+.payload-admin .template-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--admin-bg-primary);
+  padding: 1.5rem;
+}
+
+/* Login Card */
+.payload-admin .login__form,
+.payload-admin .template-login form {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--admin-bg-secondary);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-xl);
+  padding: 2.5rem;
+  box-shadow: var(--admin-shadow-lg);
+}
+
+/* Login Logo */
+.payload-admin .login__logo,
+.payload-admin .template-login .logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+/* Custom GTKBlog Logo for Login */
+.payload-admin .login__logo::before,
+.payload-admin .template-login .logo::before {
+  content: 'GTK';
+  font-family: var(--admin-font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--admin-accent);
+  letter-spacing: -0.02em;
+}
+
+.payload-admin .login__logo::after,
+.payload-admin .template-login .logo::after {
+  content: 'Blog';
+  font-family: var(--admin-font-heading);
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--admin-text-primary);
+  margin-left: 0.25rem;
+}
+
+/* Hide default Payload logo image */
+.payload-admin .login__logo img,
+.payload-admin .template-login .logo img {
+  display: none;
+}
+
+/* Login Title */
+.payload-admin .login__title,
+.payload-admin .template-login h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Login Subtitle */
+.payload-admin .login__subtitle,
+.payload-admin .template-login p {
+  font-size: 0.875rem;
+  color: var(--admin-text-secondary);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Login Form Fields */
+.payload-admin .login__form input[type="email"],
+.payload-admin .login__form input[type="password"],
+.payload-admin .template-login input[type="email"],
+.payload-admin .template-login input[type="password"] {
+  width: 100%;
+  background-color: var(--admin-bg-tertiary);
+  border: 1.5px solid var(--admin-border-strong);
+  border-radius: var(--admin-radius-md);
+  padding: 0.875rem 1rem;
+  color: var(--admin-text-primary);
+  font-size: 1rem;
+  transition: border-color var(--admin-transition-fast), box-shadow var(--admin-transition-fast);
+  margin-bottom: 1rem;
+}
+
+.payload-admin .login__form input:focus,
+.payload-admin .template-login input:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-light);
+  outline: none;
+}
+
+.payload-admin .login__form input::placeholder,
+.payload-admin .template-login input::placeholder {
+  color: var(--admin-text-muted);
+}
+
+/* Login Labels */
+.payload-admin .login__form label,
+.payload-admin .template-login label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--admin-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+/* Login Submit Button */
+.payload-admin .login__form button[type="submit"],
+.payload-admin .template-login button[type="submit"] {
+  width: 100%;
+  background-color: var(--admin-accent);
+  color: white;
+  border: none;
+  border-radius: var(--admin-radius-md);
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--admin-transition-fast), transform var(--admin-transition-fast);
+  margin-top: 1rem;
+}
+
+.payload-admin .login__form button[type="submit"]:hover,
+.payload-admin .template-login button[type="submit"]:hover {
+  background-color: var(--admin-accent-hover);
+}
+
+.payload-admin .login__form button[type="submit"]:active,
+.payload-admin .template-login button[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+.payload-admin .login__form button[type="submit"]:focus-visible,
+.payload-admin .template-login button[type="submit"]:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--admin-accent-light);
+}
+
+/* Forgot Password Link */
+.payload-admin .login__forgot-password,
+.payload-admin .template-login a[href*="forgot"] {
+  display: inline-block;
+  font-size: 0.875rem;
+  color: var(--admin-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--admin-transition-fast);
+  margin-top: 1.5rem;
+}
+
+.payload-admin .login__forgot-password:hover,
+.payload-admin .template-login a[href*="forgot"]:hover {
+  color: var(--admin-accent);
+}
+
+/* Login Error Messages */
+.payload-admin .login__error,
+.payload-admin .template-login .error {
+  background-color: rgba(217, 79, 79, 0.1);
+  border: 1px solid rgba(217, 79, 79, 0.3);
+  border-radius: var(--admin-radius-md);
+  padding: 0.875rem 1rem;
+  color: var(--admin-error);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Login Loading State */
+.payload-admin .login__form button[type="submit"][disabled],
+.payload-admin .template-login button[type="submit"][disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive Login */
+@media (max-width: 480px) {
+  .payload-admin .login__form,
+  .payload-admin .template-login form {
+    padding: 1.5rem;
+  }
+}
+
+/* ============================================
+   COLLECTION PAGE STYLES
+   ============================================ */
+
+/* Collection Header */
+.payload-admin .collection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.payload-admin .collection-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+}
+
+/* Search Input Enhancement */
+.payload-admin .collection-search input {
+  min-width: 280px;
+  background-color: var(--admin-bg-tertiary);
+  border: 1.5px solid var(--admin-border-strong);
+  border-radius: var(--admin-radius-md);
+  padding: 0.625rem 1rem;
+  color: var(--admin-text-primary);
+  transition: border-color var(--admin-transition-fast), box-shadow var(--admin-transition-fast);
+}
+
+.payload-admin .collection-search input:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-light);
+  outline: none;
+}
+
+.payload-admin .collection-search input::placeholder {
+  color: var(--admin-text-muted);
+}
+
+/* Create Button - Always top-right */
+.payload-admin .collection-create-btn {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+}
+
+/* Vietnamese Text Support */
+.payload-admin .collection-content,
+.payload-admin table td {
+  font-family: var(--admin-font-sans);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Status Column */
+.payload-admin .cell-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.payload-admin .cell-status--published {
+  background-color: rgba(61, 139, 110, 0.15);
+  color: var(--admin-success);
+}
+
+.payload-admin .cell-status--draft {
+  background-color: rgba(212, 149, 43, 0.15);
+  color: var(--admin-warning);
+}
+
+/* Price Column Formatting */
+.payload-admin .cell-price {
+  font-family: var(--admin-font-mono);
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  white-space: nowrap;
+}
+
+.payload-admin .cell-price::after {
+  content: ' VND';
+  font-size: 0.875em;
+  color: var(--admin-text-muted);
+  margin-left: 0.25rem;
+}
+
+/* Type Column with Icons */
+.payload-admin .cell-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--admin-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--admin-bg-tertiary);
+  color: var(--admin-text-secondary);
+}
+
+/* Thumbnail Column */
+.payload-admin .cell-thumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--admin-radius-md);
+  object-fit: cover;
+  background-color: var(--admin-bg-tertiary);
+}
+
+.payload-admin .cell-thumbnail-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--admin-radius-md);
+  background-color: var(--admin-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-text-muted);
+}
+
+/* Title Column with Ellipsis */
+.payload-admin .cell-title {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payload-admin .cell-title:hover {
+  white-space: normal;
+  overflow: visible;
+}
+
+/* Category Column */
+.payload-admin .cell-category {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Checkbox Column Alignment */
+.payload-admin table th:first-child,
+.payload-admin table td:first-child {
+  width: 48px;
+  text-align: center;
+}
+
+.payload-admin table td:first-child input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--admin-accent);
+  cursor: pointer;
+}
+
+/* Pagination Styling */
+.payload-admin .collection-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--admin-border);
+  margin-top: 1rem;
+}
+
+.payload-admin .collection-pagination button {
+  min-height: 36px;
+  min-width: 36px;
+  padding: 0.5rem;
+  border-radius: var(--admin-radius-md);
+  background-color: transparent;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
+  font-size: 0.875rem;
+  transition: all var(--admin-transition-fast);
+}
+
+.payload-admin .collection-pagination button:hover:not(:disabled) {
+  background-color: var(--admin-bg-tertiary);
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+}
+
+.payload-admin .collection-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payload-admin .collection-pagination button.active {
+  background-color: var(--admin-accent);
+  border-color: var(--admin-accent);
+  color: white;
+}
+
+/* Filter Buttons */
+.payload-admin .collection-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.payload-admin .collection-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--admin-radius-md);
+  background-color: var(--admin-bg-secondary);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
+  font-size: 0.875rem;
+  transition: all var(--admin-transition-fast);
+}
+
+.payload-admin .collection-filters button:hover {
+  background-color: var(--admin-bg-tertiary);
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+}
+
+/* Empty Collection State */
+.payload-admin .collection-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background-color: var(--admin-bg-secondary);
+  border-radius: var(--admin-radius-lg);
+  border: 2px dashed var(--admin-border);
+}
+
+.payload-admin .collection-empty h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.payload-admin .collection-empty p {
+  color: var(--admin-text-secondary);
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+}
+
+/* Column Width Utilities */
+.payload-admin .col-narrow { width: 60px; }
+.payload-admin .col-icon { width: 48px; }
+.payload-admin .col-actions { width: 100px; }
+.payload-admin .col-date { width: 140px; }
+.payload-admin .col-status { width: 120px; }
+.payload-admin .col-price { width: 100px; }
+
+/* Responsive Table */
+@media (max-width: 768px) {
+  .payload-admin .collection-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .payload-admin .collection-search input {
+    min-width: 100%;
+  }
+
+  .payload-admin table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .payload-admin .cell-title {
+    max-width: 200px;
+  }
+}
+
+/* ============================================================
+   Vietnamese Text Rendering Fixes
+   ============================================================ */
+
+/* Force Vietnamese-supporting fonts for all text content */
+.payload-admin .field-type.rich-text .editor-shell,
+.payload-admin .field-type.rich-text .editor-container,
+.payload-admin .field-type.rich-text [contenteditable="true"] {
+  font-family: var(--admin-font-vietnamese-safe);
+  line-height: 1.8;
+}
+
+/* Ensure text areas have proper font for Vietnamese */
+.payload-admin .field-type textarea,
+.payload-admin .field-type.textarea .input-wrapper textarea {
+  font-family: var(--admin-font-vietnamese-safe);
+  line-height: 1.65;
+}
+
+/* Fix for form fields with Vietnamese content */
+.payload-admin .field-type input[type="text"],
+.payload-admin .field-type input[type="email"] {
+  font-family: var(--admin-font-vietnamese-safe);
+}
+
+/* Specific fix for Payload Lexical editor content */
+.payload-admin .rich-text-lexical .editor-container,
+.payload-admin .rich-text-lexical .editor-scroller,
+.payload-admin .rich-text-lexical .ContentEditable__root,
+.payload-admin .rich-text-lexical .ContentEditable__root *,
+.payload-admin .rich-text-lexical .LexicalEditorTheme__placeholder,
+.payload-admin .editor-container [contenteditable="true"] {
+  font-family: var(--admin-font-vietnamese-safe) !important;
+  line-height: 1.8 !important;
+  letter-spacing: normal !important;
+  text-rendering: auto;
+  -webkit-font-feature-settings: normal !important;
+  font-feature-settings: normal !important;
+  font-kerning: normal;
+}
+
+/* Headings inside the editor must stay on the Vietnamese-safe sans stack */
+.payload-admin .rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6, p, li, blockquote) {
+  font-family: var(--admin-font-vietnamese-safe) !important;
+  line-height: 1.8 !important;
+  letter-spacing: normal !important;
+}
+
+
+/* Final override: keep Lexical editor on a Windows-safe Vietnamese stack */
+.payload-admin .ContentEditable__root,
+.payload-admin .ContentEditable__root *,
+.payload-admin .ContentEditable__root [data-lexical-text="true"],
+.payload-admin .LexicalEditorTheme__paragraph,
+.payload-admin .LexicalEditorTheme__quote,
+.payload-admin .LexicalEditorTheme__h1,
+.payload-admin .LexicalEditorTheme__h2,
+.payload-admin .LexicalEditorTheme__h3,
+.payload-admin .LexicalEditorTheme__h4,
+.payload-admin .LexicalEditorTheme__h5,
+.payload-admin .LexicalEditorTheme__h6 {
+  font-family: var(--admin-font-vietnamese-safe) !important;
+  letter-spacing: normal !important;
+  line-height: 1.8 !important;
+  text-rendering: auto !important;
+  -webkit-font-feature-settings: normal !important;
+  font-feature-settings: normal !important;
+  font-kerning: normal !important;
+}
+
+/* ============================================================
+   COLLAPSED SIDEBAR - ENHANCED DESIGN
+   ============================================================ */
+
+/* Custom sidebar container styling */
+#custom-sidebar-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 50;
+}
+
+#custom-sidebar-container .custom-sidebar {
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+/* Semi-collapsed state - 72px width optimized for icon-only */
+.custom-sidebar.w-\[72px\] {
+  width: 72px;
+  min-width: 72px;
+  background: linear-gradient(180deg, var(--admin-bg-secondary) 0%, var(--admin-bg-primary) 100%);
+}
+
+/* Icon-only nav items styling */
+.custom-sidebar.w-\[72px\] nav a {
+  width: 44px;
+  height: 44px;
+  margin: 6px auto;
+  padding: 0;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Icon container */
+.custom-sidebar.w-\[72px\] nav a span:first-of-type {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 200ms ease;
+}
+
+/* Hover state - scale up with shadow */
+.custom-sidebar.w-\[72px\] nav a:hover span:first-of-type {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.25);
+}
+
+/* Active state - accent background */
+.custom-sidebar.w-\[72px\] nav a[aria-current="page"] span:first-of-type {
+  background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-hover) 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(217, 119, 87, 0.35);
+}
+
+/* Active indicator - left border */
+.custom-sidebar.w-\[72px\] nav a[aria-current="page"]::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: var(--admin-accent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 8px rgba(217, 119, 87, 0.5);
+}
+
+/* Inactive icon styling */
+.custom-sidebar.w-\[72px\] nav a:not([aria-current="page"]) span:first-of-type {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--admin-text-tertiary);
+}
+
+.custom-sidebar.w-\[72px\] nav a:not([aria-current="page"]):hover span:first-of-type {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--admin-accent);
+}
+
+/* Enhanced tooltip styling */
+.custom-sidebar.w-\[72px\] nav a:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 16px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+  padding: 10px 16px;
+  background: var(--admin-bg-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  animation: tooltip-appear 200ms ease forwards;
+  animation-delay: 100ms;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+
+/* Tooltip arrow */
+.custom-sidebar.w-\[72px\] nav a:hover::before {
+  content: '';
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid var(--admin-bg-tertiary);
+  z-index: 101;
+  opacity: 0;
+  animation: tooltip-appear 200ms ease forwards;
+  animation-delay: 100ms;
+  pointer-events: none;
+}
+
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.95) translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1) translateX(0);
+  }
+}
+
+/* Collapsed sidebar logo enhancements */
+.custom-sidebar.w-\[72px\] .sidebar-logo {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-hover) 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow:
+    0 4px 12px rgba(217, 119, 87, 0.3),
+    0 2px 4px rgba(217, 119, 87, 0.2);
+  transition: all 200ms ease;
+  cursor: pointer;
+}
+
+.custom-sidebar.w-\[72px\] .sidebar-logo:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 6px 20px rgba(217, 119, 87, 0.4),
+    0 3px 6px rgba(217, 119, 87, 0.3);
+}
+
+/* Navigation spacing in collapsed mode */
+.custom-sidebar.w-\[72px\] nav {
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Footer button in collapsed mode */
+.custom-sidebar.w-\[72px\] .sidebar-footer a {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--admin-text-tertiary);
+  transition: all 200ms ease;
+}
+
+.custom-sidebar.w-\[72px\] .sidebar-footer a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--admin-accent);
+  transform: translateY(-2px);
+}
+
+/* Dark mode specific enhancements */
+html.dark .custom-sidebar.w-\[72px\],
+html.admin-dark .custom-sidebar.w-\[72px\] {
+  background: linear-gradient(180deg, #1a1a18 0%, #141413 100%);
+}
+
+html.dark .custom-sidebar.w-\[72px\] nav a:not([aria-current="page"]) span:first-of-type,
+html.admin-dark .custom-sidebar.w-\[72px\] nav a:not([aria-current="page"]) span:first-of-type {
+  background: rgba(255, 255, 255, 0.05);
+  color: #857d74;
+}
+
+html.dark .custom-sidebar.w-\[72px\] nav a:hover::after,
+html.admin-dark .custom-sidebar.w-\[72px\] nav a:hover::after {
+  background: #242422;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+html.dark .custom-sidebar.w-\[72px\] nav a:hover::before,
+html.admin-dark .custom-sidebar.w-\[72px\] nav a:hover::before {
+  border-right-color: #242422;
+}

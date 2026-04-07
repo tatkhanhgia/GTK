@@ -3,6 +3,11 @@ import { ProductCard } from '@/components/ui/product-card'
 import { Sidebar, SidebarSection } from '@/components/layout/sidebar'
 import type { Locale } from '@/i18n/config'
 
+interface Technology {
+  name: string
+  category: 'frontend' | 'backend' | 'database' | 'devops' | 'ai' | 'other'
+}
+
 interface Props {
   params: Promise<{ locale: string }>
   searchParams: Promise<{ type?: string; page?: string }>
@@ -80,12 +85,39 @@ export default async function ProductsPage({ params, searchParams }: Props) {
                       }
                     : null
 
+                // Helper to get localized text
+                function getLocalizedText(value: unknown, locale: Locale): string | undefined {
+                  if (typeof value === 'string') return value
+                  if (value && typeof value === 'object') {
+                    const record = value as Record<string, unknown>
+                    const localized = record[locale]
+                    if (typeof localized === 'string') return localized
+                    const first = Object.values(record).find((item) => typeof item === 'string')
+                    if (typeof first === 'string') return first
+                  }
+                  return undefined
+                }
+
+                const problemSolvedText = getLocalizedText(product.problemSolved, loc)
+                const technologies = Array.isArray(product.technologies)
+                  ? product.technologies.map((t: unknown) => {
+                      if (!t || typeof t !== 'object') return null
+                      const tech = t as Record<string, unknown>
+                      return {
+                        name: typeof tech.name === 'string' ? tech.name : '',
+                        category: (typeof tech.category === 'string' ? tech.category : 'other') as Technology['category'],
+                      }
+                    }).filter((t): t is { name: string; category: Technology['category'] } => !!t?.name)
+                  : undefined
+
                 return (
                   <ProductCard
                     key={product.id}
                     name={typeof product.name === 'string' ? product.name : String(product.name)}
                     slug={product.slug}
                     excerpt={typeof product.excerpt === 'string' ? product.excerpt : undefined}
+                    problemSolved={problemSolvedText}
+                    technologies={technologies}
                     image={firstImage}
                     priceUSD={product.priceUSD}
                     priceVND={product.priceVND}

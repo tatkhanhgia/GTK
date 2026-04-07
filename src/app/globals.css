@@ -1,7 +1,7 @@
 /* ============================================================
    Google Fonts — must be first @import per CSS spec
    ============================================================ */
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap&subset=vietnamese");
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -71,20 +71,20 @@
    CSS Custom Properties — Light Mode
    ============================================================ */
 :root {
-  --background: #FAF8F5;
-  --foreground: #1A1715;
+  --background: #F5F0E8;
+  --foreground: #141413;
   --card: #FFFFFF;
   --card-foreground: #2C2825;
   --primary: #D97757;
   --primary-foreground: #FFFFFF;
-  --secondary: #F0EBE4;
+  --secondary: #FAF9F5;
   --secondary-foreground: #5C554D;
-  --accent: #C4713E;
+  --accent: #C86C4D;
   --accent-foreground: #FFFFFF;
   --muted: #F0EBE4;
   --muted-foreground: #8A817A;
-  --border: #E5DED5;
-  --input: #E5DED5;
+  --border: #DDD4C8;
+  --input: #DDD4C8;
   --ring: #D97757;
   --destructive: #D94F4F;
   --success: #3D8B6E;
@@ -98,22 +98,22 @@
    CSS Custom Properties — Dark Mode
    ============================================================ */
 .dark {
-  --background: #1A1614;
-  --foreground: #F0EBE4;
-  --card: #241F1C;
+  --background: #141413;
+  --foreground: #F5F0E8;
+  --card: #1A1A18;
   --card-foreground: #E0D8CF;
   --primary: #E09070;
-  --primary-foreground: #1A1614;
-  --secondary: #2E2824;
-  --secondary-foreground: #A69E96;
+  --primary-foreground: #141413;
+  --secondary: #242422;
+  --secondary-foreground: #D2C8BB;
   --accent: #E0955E;
-  --accent-foreground: #1A1614;
-  --muted: #2E2824;
-  --muted-foreground: #7A726A;
-  --border: #3A332E;
-  --input: #3A332E;
+  --accent-foreground: #141413;
+  --muted: #242422;
+  --muted-foreground: #918778;
+  --border: #38342F;
+  --input: #38342F;
   --ring: #E09070;
-  --popover: #241F1C;
+  --popover: #1A1A18;
   --popover-foreground: #E0D8CF;
 }
 
@@ -135,9 +135,21 @@ html.dark {
   color-scheme: dark;
 }
 
+html,
+html *,
+html *::before,
+html *::after {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 150ms ease,
+    box-shadow 200ms ease;
+}
+
 body {
   background-color: var(--background);
   font-family: var(--font-body);
+  font-size: 16px;
   /* Vietnamese diacritics need generous line height */
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
@@ -146,11 +158,20 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 
 code, pre, kbd, samp {
   font-family: var(--font-mono);
+  font-size: 0.875em;
 }
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.125rem; }
 
 /* ============================================================
    Gradient Utilities
@@ -244,4 +265,64 @@ code, pre, kbd, samp {
   html {
     @apply font-sans;
   }
+}
+
+/* ============================================================
+   Mobile Responsiveness — Animation Reduction
+   ============================================================ */
+
+/* Mobile: Reduce animations for performance */
+@media (max-width: 768px) {
+  .ambient-warm {
+    animation: none !important;
+    opacity: 0.3;
+  }
+
+  /* Simplify transitions */
+  * {
+    transition-duration: 0.15s !important;
+  }
+}
+
+/* Reduced motion preference — respect system settings */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* GPU-accelerated animations */
+.animate-gpu {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Touch target sizing — minimum 44px for accessibility */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Content-visibility for below-fold sections */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Image aspect ratios */
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-4-3 {
+  aspect-ratio: 4 / 3;
 }

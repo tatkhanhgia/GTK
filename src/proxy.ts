@@ -8,7 +8,7 @@ const PROTECTED_PATHS = ['/profile', '/checkout', '/downloads']
 // next-intl middleware handles locale detection, prefix enforcement, and redirects
 const i18nMiddleware = createMiddleware(routing)
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip Payload admin, API routes, auth pages, Next.js internals, and static assets

@@ -127,6 +127,37 @@
     "contactError": "Failed to send. Please try again.",
     "contactRateLimit": "Too many messages. Please try again later."
   },
+  "privacy": {
+    "title": "Privacy Policy",
+    "description": "Privacy policy and how we handle your data",
+    "sections": {
+      "intro": {
+        "title": "Introduction",
+        "content": "We are committed to protecting your privacy. This policy explains how we collect, use, and protect your personal information when using our website."
+      },
+      "dataCollection": {
+        "title": "Data Collection",
+        "content": "We may collect the following information:",
+        "items": {
+          "name": "Name and contact information",
+          "email": "Email address",
+          "usage": "Website usage data"
+        }
+      },
+      "cookies": {
+        "title": "Cookies",
+        "content": "This website uses cookies to improve user experience. You can adjust cookie settings in your browser."
+      },
+      "thirdParty": {
+        "title": "Third Parties",
+        "content": "We do not sell or share your personal information with third parties, except when necessary to provide services (such as payment processing) or as required by law."
+      },
+      "contact": {
+        "title": "Contact",
+        "content": "If you have questions about this privacy policy, please contact us via email or the contact form."
+      }
+    }
+  },
   "footer": {
     "description": "Personal tech & AI blog. Sharing knowledge and digital products.",
     "explore": "Explore",

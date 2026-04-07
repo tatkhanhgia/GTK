@@ -158,6 +158,51 @@ export const AuthorProfile: GlobalConfig = {
       access: { read: ({ req }) => !!req.user },
       admin: { description: 'Email address that receives contact form submissions' },
     },
+    // --- Philosophy ---
+    {
+      name: 'philosophy',
+      type: 'group',
+      label: 'Personal Philosophy',
+      fields: [
+        {
+          name: 'story',
+          type: 'richText',
+          localized: true,
+          label: 'My Story',
+          admin: {
+            description: 'Personal story/why I do this (shown on homepage)',
+          },
+        },
+        {
+          name: 'workingPrinciples',
+          type: 'array',
+          labels: { singular: 'Principle', plural: 'Working Principles' },
+          fields: [
+            { name: 'title', type: 'text', required: true, localized: true },
+            { name: 'description', type: 'textarea', required: true, localized: true },
+            {
+              name: 'icon',
+              type: 'select',
+              options: [
+                { label: 'Lightbulb', value: 'lightbulb' },
+                { label: 'Heart', value: 'heart' },
+                { label: 'Target', value: 'target' },
+                { label: 'Rocket', value: 'rocket' },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'heroTagline',
+          type: 'text',
+          localized: true,
+          label: 'Hero Tagline',
+          admin: {
+            description: 'Short punchy line for homepage hero (e.g., "Turning bugs into lessons")',
+          },
+        },
+      ],
+    },
     // --- SEO ---
     {
       name: 'meta',

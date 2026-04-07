@@ -1,6 +1,11 @@
+'use client'
+
 import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
 import { Code2, Link, AtSign, Globe, Video, Mail } from 'lucide-react'
 import Image from 'next/image'
+import { useIsMobile } from '@/hooks/use-media-query'
+import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { cn } from '@/lib/utils'
 
 interface SocialLink {
   platform: 'github' | 'linkedin' | 'x' | 'facebook' | 'youtube' | 'email'
@@ -45,6 +50,9 @@ function getSafeHref(link: SocialLink): string | null {
 
 export function BioSection({ name, title, heroSentence, avatar, bio, socialLinks }: BioSectionProps) {
   const avatarUrl = typeof avatar === 'object' && avatar?.url ? avatar.url : null
+  const isMobile = useIsMobile()
+  const reducedMotion = useReducedMotion()
+  const shouldAnimate = !isMobile && !reducedMotion
 
   return (
     <section className="flex flex-col items-center text-center">
@@ -54,19 +62,19 @@ export function BioSection({ name, title, heroSentence, avatar, bio, socialLinks
           alt={name}
           width={120}
           height={120}
-          className="rounded-full object-cover mb-6"
+          className="mb-6 rounded-full object-cover"
         />
       )}
-      <h1 className="font-heading font-bold text-4xl mb-2">{name}</h1>
-      <p className="text-muted-foreground text-lg mb-3">{title}</p>
+      <h1 className="mb-2 font-heading text-4xl font-bold">{name}</h1>
+      <p className="mb-3 text-lg text-muted-foreground">{title}</p>
       {heroSentence && (
-        <p className="max-w-2xl text-sm leading-relaxed text-foreground/90 md:text-base mb-6">
+        <p className="mb-6 max-w-2xl text-sm leading-relaxed text-foreground/90 md:text-base">
           {heroSentence}
         </p>
       )}
 
       {bio && (
-        <div className="text-left w-full mb-8">
+        <div className="mb-8 w-full text-left">
           <RichTextRenderer content={bio} />
         </div>
       )}
@@ -83,7 +91,11 @@ export function BioSection({ name, title, heroSentence, avatar, bio, socialLinks
                 href={href}
                 target={link.platform === 'email' ? undefined : '_blank'}
                 rel={link.platform === 'email' ? undefined : 'noopener noreferrer'}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/50 text-muted-foreground transition-all duration-200 hover:scale-110 hover:bg-primary/20 hover:text-primary"
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-full bg-secondary/50 text-muted-foreground transition-colors hover:bg-primary/20 hover:text-primary',
+                  'touch-target',
+                  shouldAnimate && 'hover:scale-110'
+                )}
                 aria-label={link.platform}
               >
                 <Icon className="h-5 w-5" />

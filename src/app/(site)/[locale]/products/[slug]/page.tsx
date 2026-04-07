@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { getProductBySlug } from '@/lib/products/get-product-by-slug'
 import { ProductPaymentSection } from '@/components/products/product-payment-section'
 import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
+import { TechStackBadges } from '@/components/ui/tech-stack-badges'
 import type { Locale } from '@/i18n/config'
 import type { Metadata } from 'next'
 import { Check } from 'lucide-react'
@@ -47,6 +48,44 @@ export default async function ProductDetailPage({ params }: Props) {
       : null
 
   const typeLabel = typeMap[product.type]?.[isVi ? 'vi' : 'en'] ?? product.type
+
+  // Helper to get localized text
+  function getLocalizedText(value: unknown): string | undefined {
+    if (typeof value === 'string') return value
+    if (value && typeof value === 'object') {
+      const record = value as Record<string, unknown>
+      const localized = record[loc]
+      if (typeof localized === 'string') return localized
+      const first = Object.values(record).find((item) => typeof item === 'string')
+      if (typeof first === 'string') return first
+    }
+    return undefined
+  }
+
+  const problemSolvedText = getLocalizedText(product.problemSolved)
+  const technologies = Array.isArray(product.technologies)
+    ? product.technologies.map((t: unknown) => {
+        if (!t || typeof t !== 'object') return null
+        const tech = t as Record<string, unknown>
+        return {
+          name: typeof tech.name === 'string' ? tech.name : '',
+          category: (typeof tech.category === 'string' ? tech.category : 'other') as 'frontend' | 'backend' | 'database' | 'devops' | 'ai' | 'other',
+        }
+      }).filter((t): t is { name: string; category: 'frontend' | 'backend' | 'database' | 'devops' | 'ai' | 'other' } => !!t?.name)
+    : []
+
+  const keyFeatures: { title: string; description?: string }[] = (Array.isArray(product.keyFeatures) ? product.keyFeatures : [])
+    .map((f: unknown) => {
+      if (!f || typeof f !== 'object') return null
+      const feature = f as Record<string, unknown>
+      const title = getLocalizedText(feature.title)
+      const description = getLocalizedText(feature.description)
+      if (!title) return null
+      const result: { title: string; description?: string } = { title }
+      if (description) result.description = description
+      return result
+    })
+    .filter((f): f is { title: string; description?: string } => f !== null)
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-10">
@@ -112,6 +151,48 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="prose-custom">
             <RichTextRenderer content={product.description} />
           </div>
+        </div>
+      )}
+
+      {/* Problem Solved */}
+      {problemSolvedText && (
+        <div className="mt-10 rounded-2xl border border-border bg-secondary/30 p-6 md:p-8">
+          <h2 className="mb-3 font-heading text-xl font-semibold">
+            {isVi ? 'Vấn đề được giải quyết' : 'Problem Solved'}
+          </h2>
+          <p className="text-muted-foreground">{problemSolvedText}</p>
+        </div>
+      )}
+
+      {/* Tech Stack */}
+      {technologies.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-4 font-heading text-xl font-semibold">
+            {isVi ? 'Công nghệ sử dụng' : 'Tech Stack'}
+          </h2>
+          <TechStackBadges technologies={technologies} />
+        </div>
+      )}
+
+      {/* Key Features */}
+      {keyFeatures.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-4 font-heading text-xl font-semibold">
+            {isVi ? 'Tính năng chính' : 'Key Features'}
+          </h2>
+          <ul className="space-y-4">
+            {keyFeatures.map((feature) => (
+              <li key={feature.title} className="flex gap-3">
+                <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-success" />
+                <div>
+                  <p className="font-medium">{feature.title}</p>
+                  {feature.description && (
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

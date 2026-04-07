@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/payment/stripe-config'
-import { fulfillOrder } from '@/lib/payment/fulfill-order'
 import Stripe from 'stripe'
+import { fulfillOrder } from '@/lib/payment/fulfill-order'
+import { stripe } from '@/lib/payment/stripe-config'
 
 /**
  * Stripe webhook handler.
- * SECURITY: Uses raw body for signature verification — body parsing is disabled.
+ * SECURITY: Reads the raw request body via request.text() for signature verification.
  * Idempotency is handled inside fulfillOrder.
  */
 export async function POST(request: NextRequest) {
-  const body = await request.text() // raw body required for Stripe signature verification
+  const body = await request.text()
   const sig = request.headers.get('stripe-signature')
 
   if (!sig) {
@@ -33,9 +33,4 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ received: true })
-}
-
-// Disable body parsing — raw body is required for Stripe signature verification
-export const config = {
-  api: { bodyParser: false },
 }

@@ -127,6 +127,37 @@
     "contactError": "Gửi thất bại. Vui lòng thử lại.",
     "contactRateLimit": "Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau."
   },
+  "privacy": {
+    "title": "Chính sách bảo mật",
+    "description": "Chính sách bảo mật và cách chúng tôi xử lý dữ liệu của bạn",
+    "sections": {
+      "intro": {
+        "title": "Giới thiệu",
+        "content": "Chúng tôi cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn khi sử dụng website."
+      },
+      "dataCollection": {
+        "title": "Thu thập thông tin",
+        "content": "Chúng tôi có thể thu thập các thông tin sau:",
+        "items": {
+          "name": "Tên và thông tin liên hệ",
+          "email": "Địa chỉ email",
+          "usage": "Dữ liệu sử dụng website"
+        }
+      },
+      "cookies": {
+        "title": "Cookies",
+        "content": "Website sử dụng cookies để cải thiện trải nghiệm ngưởi dùng. Bạn có thể điều chỉnh cài đặt cookies trong trình duyệt của mình."
+      },
+      "thirdParty": {
+        "title": "Bên thứ ba",
+        "content": "Chúng tôi không bán hoặc chia sẻ thông tin cá nhân của bạn với bên thứ ba, trừ khi cần thiết để cung cấp dịch vụ (như thanh toán) hoặc theo yêu cầu pháp lý."
+      },
+      "contact": {
+        "title": "Liên hệ",
+        "content": "Nếu bạn có câu hỏi về chính sách bảo mật này, vui lòng liên hệ với chúng tôi qua email hoặc form liên hệ."
+      }
+    }
+  },
   "footer": {
     "description": "Blog công nghệ & AI cá nhân. Chia sẻ kiến thức, sản phẩm số.",
     "explore": "Khám phá",

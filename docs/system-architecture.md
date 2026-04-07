@@ -27,6 +27,13 @@ External Services
     └─ Google/GitHub OAuth
 ```
 
+## Payload Admin Customizations
+
+- Payload boots inside the App Router group `(payload)` whose layout (`src/app/(payload)/layout.tsx`) now wraps `RootLayout` with a custom `ThemeProvider`, pulls in `src/admin/styles/admin-theme.css`, and loads `src/admin/styles/component-overrides.css` so the Anthropic variables and overrides can reach Payload's DOM.
+- `ThemeProvider` (`src/admin/components/providers/theme-provider.tsx`) exposes a context with `theme`, `setTheme`, and `resolvedTheme`, toggles the global `admin-dark` class, and listens for `prefers-color-scheme` changes while the `use-system-theme` helper (`src/admin/hooks/use-system-theme.ts`) keeps the resolved theme in sync with the user preference.
+- Custom layout pieces (`custom-header.tsx`, `custom-sidebar.tsx`) plus the reusable `Card` component (`src/admin/components/ui/card.tsx`) keep the navigation, header actions, and metric surfaces consistent with the new theme tokens, while `component-overrides.css` hides Payload's native sidebar/nav, restyles tables/forms/buttons, and applies the theme tokens to typography, borders, shadows, and animations.
+- The Anthropic-inspired dashboard view (`src/admin/components/views/custom-dashboard.tsx`) becomes the default admin landing page thanks to the `Dashboard` override in `payload.config.ts`, offering stat cards, quick actions, and activity/status regions that stay in sync with the dark/light palette.
+
 ## Authentication & Authorization
 
 ### Better Auth Flow

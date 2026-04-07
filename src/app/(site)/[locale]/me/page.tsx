@@ -9,6 +9,8 @@ import { ContactForm } from '@/components/me/contact-form'
 import { QuickStats } from '@/components/me/quick-stats'
 import { BlogCard } from '@/components/ui/blog-card'
 import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
+import { PhilosophySection } from '@/components/ui/philosophy-section'
+import { LazySection } from '@/components/ui/lazy-section'
 
 interface Props {
   params: Promise<{ locale: string }>
@@ -175,6 +177,26 @@ export default async function MePage({ params }: Props) {
     })
     .filter((item): item is { title: string; description: string } => Boolean(item))
 
+  // New philosophy fields from CMS
+  const philosophyStory = profile?.philosophy?.story as { root: { children: unknown[] } } | undefined
+  const philosophyPrinciplesRaw = Array.isArray(profile?.philosophy?.workingPrinciples)
+    ? profile.philosophy.workingPrinciples
+    : []
+  const philosophyPrinciples = philosophyPrinciplesRaw
+    .map((item: unknown) => {
+      if (!item || typeof item !== 'object') return null
+      const principle = item as Record<string, unknown>
+      const title = getLocalizedText(principle.title, loc)
+      const description = getLocalizedText(principle.description, loc)
+      if (!title || !description) return null
+      return {
+        title,
+        description,
+        icon: principle.icon as 'lightbulb' | 'heart' | 'target' | 'rocket' | undefined,
+      }
+    })
+    .filter((item: unknown): item is { title: string; description: string; icon?: 'lightbulb' | 'heart' | 'target' | 'rocket' } => Boolean(item))
+
   const selectedWritingRaw = Array.isArray(editorial?.selectedWriting) ? editorial.selectedWriting : []
   const curatedWriting = selectedWritingRaw
     .map((entry) => {
@@ -226,117 +248,147 @@ export default async function MePage({ params }: Props) {
           </div>
         </section>
 
-        {/* At a Glance */}
-        <section>
-          <div className="mb-8">
-            <h2 className="font-heading text-3xl font-bold tracking-tight">
-              {loc === 'vi' ? 'Nhìn nhanh' : 'At a glance'}
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              {loc === 'vi'
-                ? 'Một chút về con số, nhưng số không nói lên tất cả'
-                : 'Some numbers, but numbers never tell the whole story'}
-            </p>
-          </div>
-          <QuickStats
-            yearsOfExperience={profile.yearsOfExperience}
-            projectsCompleted={profile.projectsCompleted}
-            postsPublished={writingToRender.length}
-            locale={loc}
-          />
-        </section>
+        {/* At a Glance — Lazy loaded */}
+        <LazySection>
+          <section>
+            <div className="mb-8">
+              <h2 className="font-heading text-3xl font-bold tracking-tight">
+                {loc === 'vi' ? 'Nhìn nhanh' : 'At a glance'}
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                {loc === 'vi'
+                  ? 'Một chút về con số, nhưng số không nói lên tất cả'
+                  : 'Some numbers, but numbers never tell the whole story'}
+              </p>
+            </div>
+            <QuickStats
+              yearsOfExperience={profile.yearsOfExperience}
+              projectsCompleted={profile.projectsCompleted}
+              postsPublished={writingToRender.length}
+              locale={loc}
+            />
+          </section>
+        </LazySection>
 
-        {/* Timeline - Moments that matter */}
+        {/* Timeline - Moments that matter — Lazy loaded */}
         {profile.timeline?.length > 0 && (
-          <section>
-            <div className="mb-8">
-              <h2 className="font-heading text-3xl font-bold tracking-tight">
-                {loc === 'vi' ? 'Những cột mốc' : 'Moments that matter'}
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                {loc === 'vi'
-                  ? 'Những quyết định và khoảnh khắc đã định hình mình'
-                  : 'Decisions and turning points that shaped who I am'}
-              </p>
-            </div>
-            <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
-          </section>
+          <LazySection>
+            <section>
+              <div className="mb-8">
+                <h2 className="font-heading text-3xl font-bold tracking-tight">
+                  {loc === 'vi' ? 'Những cột mốc' : 'Moments that matter'}
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  {loc === 'vi'
+                    ? 'Những quyết định và khoảnh khắc đã định hình mình'
+                    : 'Decisions and turning points that shaped who I am'}
+                </p>
+              </div>
+              <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
+            </section>
+          </LazySection>
         )}
 
-        {/* Skills - My Stack */}
+        {/* Skills - My Stack — Lazy loaded */}
         {profile.skills?.length > 0 && (
-          <section>
-            <div className="mb-8">
-              <h2 className="font-heading text-3xl font-bold tracking-tight">
-                {loc === 'vi' ? 'Công cụ mình dùng' : 'My stack'}
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                {loc === 'vi'
-                  ? 'Không phải để khoe, mà là để chia sẻ những gì đang giúp mình'
-                  : "Not to brag, but to share what's actually helping me"}
-              </p>
-            </div>
-            <SkillsGrid skills={profile.skills} locale={loc} />
-          </section>
+          <LazySection>
+            <section>
+              <div className="mb-8">
+                <h2 className="font-heading text-3xl font-bold tracking-tight">
+                  {loc === 'vi' ? 'Công cụ mình dùng' : 'My stack'}
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  {loc === 'vi'
+                    ? 'Không phải để khoe, mà là để chia sẻ những gì đang giúp mình'
+                    : "Not to brag, but to share what's actually helping me"}
+                </p>
+              </div>
+              <SkillsGrid skills={profile.skills} locale={loc} />
+            </section>
+          </LazySection>
         )}
 
-        {/* Principles - What I Believe */}
-        {principles.length > 0 && (
-          <section>
-            <div className="mb-8">
-              <h2 className="font-heading text-3xl font-bold tracking-tight">{t.principles}</h2>
-              <p className="mt-2 text-muted-foreground">{t.principlesSubtitle}</p>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {principles.map((principle) => (
-                <article key={principle.title} className="rounded-2xl border-l-4 border-l-primary border-y border-r border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
-                  <h3 className="font-heading text-lg font-semibold">{principle.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
-                    {principle.description}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Currently Building */}
-        {Boolean(buildingNow) && (
-          <section className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
-            <h2 className="mb-4 font-heading text-2xl font-semibold">{t.buildingNow}</h2>
-            <RichTextRenderer content={buildingNow} />
-          </section>
-        )}
-
-        {/* Blog Posts */}
-        {writingToRender.length > 0 && (
-          <section>
-            <div className="mb-8">
-              <h2 className="font-heading text-3xl font-bold tracking-tight">{t.selectedWriting}</h2>
-              {curatedWriting.length === 0 && (
-                <p className="mt-2 text-muted-foreground">{t.selectedWritingFallback}</p>
-              )}
-            </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {writingToRender.map((post) => (
-                <div key={post.slug} className="group space-y-2">
-                  <div className="transition-transform duration-300 group-hover:-translate-y-1">
-                    <BlogCard
-                      title={post.title}
-                      slug={post.slug}
-                      excerpt={post.excerpt}
-                      featuredImage={post.featuredImage}
-                      category={post.category}
-                      publishedAt={post.publishedAt}
-                      readingTime={post.readingTime}
-                      locale={loc}
-                    />
-                  </div>
-                  {post.note && <p className="px-1 text-sm text-muted-foreground">{post.note}</p>}
+        {/* Principles - What I Believe — Lazy loaded */}
+        {(principles.length > 0 || philosophyPrinciples.length > 0) && (
+          <LazySection>
+            <section>
+              <div className="mb-8">
+                <h2 className="font-heading text-3xl font-bold tracking-tight">
+                  {loc === 'vi' ? 'Cách tôi làm việc' : 'How I Work'}
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  {loc === 'vi'
+                    ? 'Nguyên tắc hướng dẫn cách mình sống và làm việc'
+                    : 'Principles that guide how I live and work'}
+                </p>
+              </div>
+              {/* Use new philosophy data with icons if available, fall back to old principles */}
+              {philosophyPrinciples.length > 0 ? (
+                <PhilosophySection
+                  story={philosophyStory}
+                  principles={philosophyPrinciples}
+                  locale={loc}
+                />
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {principles.map((principle) => (
+                    <article
+                      key={principle.title}
+                      className="rounded-2xl border-l-4 border-l-primary border-y border-r border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+                    >
+                      <h3 className="font-heading text-lg font-semibold">{principle.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+                        {principle.description}
+                      </p>
+                    </article>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
+              )}
+            </section>
+          </LazySection>
+        )}
+
+        {/* Currently Building — Lazy loaded */}
+        {Boolean(buildingNow) && (
+          <LazySection>
+            <section className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
+              <h2 className="mb-4 font-heading text-2xl font-semibold">{t.buildingNow}</h2>
+              <RichTextRenderer content={buildingNow} />
+            </section>
+          </LazySection>
+        )}
+
+        {/* Blog Posts — Lazy loaded */}
+        {writingToRender.length > 0 && (
+          <LazySection>
+            <section>
+              <div className="mb-8">
+                <h2 className="font-heading text-3xl font-bold tracking-tight">{t.selectedWriting}</h2>
+                {curatedWriting.length === 0 && (
+                  <p className="mt-2 text-muted-foreground">{t.selectedWritingFallback}</p>
+                )}
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {writingToRender.map((post) => (
+                  <div key={post.slug} className="group space-y-2">
+                    <div className="transition-transform duration-300 group-hover:-translate-y-1">
+                      <BlogCard
+                        title={post.title}
+                        slug={post.slug}
+                        excerpt={post.excerpt}
+                        featuredImage={post.featuredImage}
+                        category={post.category}
+                        publishedAt={post.publishedAt}
+                        readingTime={post.readingTime}
+                        locale={loc}
+                      />
+                    </div>
+                    {post.note && <p className="px-1 text-sm text-muted-foreground">{post.note}</p>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          </LazySection>
         )}
 
         {/* Contact Form */}

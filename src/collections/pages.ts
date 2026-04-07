@@ -21,8 +21,12 @@ export const Pages: CollectionConfig = {
     },
     {
       name: 'content',
-      type: 'richText',
+      type: 'textarea',
       localized: true,
+      admin: {
+        rows: 10,
+        description: 'Page content (textarea for better Vietnamese font support)',
+      },
     },
     {
       name: 'seoTitle',
@@ -33,6 +37,14 @@ export const Pages: CollectionConfig = {
       name: 'seoDescription',
       type: 'textarea',
       localized: true,
+    },
+    {
+      name: 'heroImage',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Optional hero image for homepage',
+      },
     },
   ],
 }

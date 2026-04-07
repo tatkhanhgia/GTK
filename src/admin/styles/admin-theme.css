@@ -1,0 +1,687 @@
+/* Anthropic-inspired Admin Theme */
+
+:root {
+  /* Backgrounds */
+  --admin-bg-primary: #f6f1ea;
+  --admin-bg-secondary: #fff8f1;
+  --admin-bg-tertiary: #ffffff;
+  --admin-bg-elevated: #fffdf9;
+
+  /* Text */
+  --admin-text-primary: #181512;
+  --admin-text-secondary: #403730;
+  --admin-text-tertiary: #665c54;
+  --admin-text-muted: #8b8077;
+
+  /* Accent */
+  --admin-accent: #d97757;
+  --admin-accent-hover: #c86c4d;
+  --admin-accent-light: rgba(217, 119, 87, 0.12);
+
+  /* Status */
+  --admin-success: #3d8b6e;
+  --admin-warning: #d4952b;
+  --admin-error: #d94f4f;
+  --admin-info: #4a7bc1;
+
+  /* Borders */
+  --admin-border: rgba(24, 21, 18, 0.1);
+  --admin-border-strong: rgba(24, 21, 18, 0.18);
+
+  /* Typography */
+  --admin-font-heading: var(--font-heading), 'Space Grotesk', system-ui, sans-serif;
+  --admin-font-sans: var(--font-body), system-ui, -apple-system, sans-serif;
+  --admin-font-vietnamese-safe: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --admin-font-mono: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+  --admin-text-xs: 0.75rem;
+  --admin-text-sm: 0.875rem;
+  --admin-text-base: 1rem;
+  --admin-text-lg: 1.125rem;
+  --admin-text-xl: 1.25rem;
+  --admin-text-2xl: 1.5rem;
+  --admin-text-3xl: 2rem;
+  --admin-leading-tight: 1.3;
+  --admin-leading-snug: 1.5;
+  --admin-leading-normal: 1.65;
+  --admin-leading-relaxed: 1.8;
+  --admin-leading-loose: 2;
+  --admin-tracking-tight: -0.025em;
+  --admin-tracking-normal: 0;
+  --admin-tracking-wide: 0.03em;
+  --admin-tracking-wider: 0.05em;
+
+  /* Spacing */
+  --admin-space-0: 0;
+  --admin-space-1: 0.25rem;
+  --admin-space-2: 0.5rem;
+  --admin-space-3: 0.75rem;
+  --admin-space-4: 1rem;
+  --admin-space-5: 1.25rem;
+  --admin-space-6: 1.5rem;
+  --admin-space-8: 2rem;
+  --admin-space-10: 2.5rem;
+  --admin-space-12: 3rem;
+  --admin-space-16: 4rem;
+  --admin-space-20: 5rem;
+  --admin-space-24: 6rem;
+
+  /* Radius */
+  --admin-radius-sm: 0.5rem;
+  --admin-radius-md: 0.75rem;
+  --admin-radius-lg: 0.75rem;
+  --admin-radius-xl: 1rem;
+
+  /* Shadows */
+  --admin-shadow-sm: 0 1px 2px rgba(24, 21, 18, 0.05), 0 10px 24px rgba(24, 21, 18, 0.04);
+  --admin-shadow-md: 0 16px 38px rgba(24, 21, 18, 0.09), 0 6px 14px rgba(24, 21, 18, 0.06);
+  --admin-shadow-lg: 0 24px 54px rgba(24, 21, 18, 0.14), 0 12px 28px rgba(24, 21, 18, 0.08);
+
+  /* Motion */
+  --admin-transition-fast: 150ms ease;
+  --admin-transition-normal: 200ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --admin-bg-primary: #141413;
+    --admin-bg-secondary: #1a1a18;
+    --admin-bg-tertiary: #242422;
+    --admin-bg-elevated: #20201e;
+    --admin-text-primary: #f5f0e8;
+    --admin-text-secondary: #ddd5ca;
+    --admin-text-tertiary: #b4ac9f;
+    --admin-text-muted: #857d74;
+    --admin-accent: #e09070;
+    --admin-accent-hover: #eba487;
+    --admin-accent-light: rgba(224, 144, 112, 0.16);
+    --admin-border: rgba(245, 240, 232, 0.1);
+    --admin-border-strong: rgba(245, 240, 232, 0.18);
+    --admin-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+    --admin-shadow-md: 0 14px 30px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.22);
+    --admin-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.42), 0 10px 22px rgba(0, 0, 0, 0.28);
+  }
+}
+
+/* Explicit light mode class - overrides media query when user explicitly selects light */
+html.light,
+html.admin-light,
+html[data-theme='light'] {
+  --admin-bg-primary: #f6f1ea;
+  --admin-bg-secondary: #fff8f1;
+  --admin-bg-tertiary: #ffffff;
+  --admin-bg-elevated: #fffdf9;
+  --admin-text-primary: #181512;
+  --admin-text-secondary: #403730;
+  --admin-text-tertiary: #665c54;
+  --admin-text-muted: #8b8077;
+  --admin-accent: #d97757;
+  --admin-accent-hover: #c86c4d;
+  --admin-accent-light: rgba(217, 119, 87, 0.12);
+  --admin-border: rgba(24, 21, 18, 0.1);
+  --admin-border-strong: rgba(24, 21, 18, 0.18);
+  --admin-shadow-sm: 0 1px 2px rgba(24, 21, 18, 0.05), 0 10px 24px rgba(24, 21, 18, 0.04);
+  --admin-shadow-md: 0 16px 38px rgba(24, 21, 18, 0.09), 0 6px 14px rgba(24, 21, 18, 0.06);
+  --admin-shadow-lg: 0 24px 54px rgba(24, 21, 18, 0.14), 0 12px 28px rgba(24, 21, 18, 0.08);
+
+  /* Bridge Payload's core theme vars into the custom warm light palette */
+  --theme-bg: var(--admin-bg-primary);
+  --theme-input-bg: var(--admin-bg-tertiary);
+  --theme-text: var(--admin-text-primary);
+  --theme-border-color: var(--admin-border);
+  --theme-elevation-0: #fffdfa;
+  --theme-elevation-50: #fff8f1;
+  --theme-elevation-100: #f7efe6;
+  --theme-elevation-150: #efe5db;
+  --theme-elevation-200: #e5d9cd;
+  --theme-elevation-250: #d8cabd;
+  --theme-elevation-300: #cab9ab;
+  --theme-elevation-350: #b9a799;
+  --theme-elevation-400: #a39184;
+  --theme-elevation-450: #918073;
+  --theme-elevation-500: #7d6d61;
+  --theme-elevation-600: #66594f;
+  --theme-elevation-650: #5b5047;
+  --theme-elevation-700: #4c433b;
+  --theme-elevation-750: #413831;
+  --theme-elevation-800: #342d27;
+  --theme-elevation-900: #241e19;
+  --theme-elevation-950: #1b1612;
+  --theme-elevation-1000: #120f0c;
+  --theme-success-50: #eef8f3;
+  --theme-success-100: #e0f1e8;
+  --theme-success-150: #cae6d8;
+  --theme-success-200: #aed7c1;
+  --theme-success-300: #85bf9f;
+  --theme-success-400: #61a985;
+  --theme-success-500: #4b9975;
+  --theme-success-600: #3d8b6e;
+  --theme-success-650: #327b5f;
+  --theme-success-700: #2a6a51;
+  --theme-success-750: #215944;
+  --theme-success-800: #1a4837;
+  --theme-success-900: #133429;
+  --theme-error-50: #fff1f1;
+  --theme-error-100: #fde2e2;
+  --theme-error-150: #facaca;
+  --theme-error-200: #f5a9a9;
+  --theme-error-300: #ed7f7f;
+  --theme-error-400: #e46464;
+  --theme-error-500: #de5656;
+  --theme-error-600: #d94f4f;
+  --theme-error-650: #c54242;
+  --theme-error-700: #a93737;
+  --theme-error-750: #8e2d2d;
+  --theme-error-800: #722424;
+  --theme-error-900: #561a1a;
+  --theme-error-950: #3d1111;
+  --theme-warning-100: #fff1d6;
+  --theme-warning-200: #f7deb0;
+  --theme-warning-300: #efc679;
+  --theme-warning-400: #e3ad47;
+  --theme-warning-500: #d4952b;
+  --theme-warning-600: #ba7f1d;
+  --theme-warning-700: #976617;
+  --theme-warning-800: #744d13;
+  --theme-warning-900: #54370e;
+}
+
+html.dark,
+html.admin-dark,
+html[data-theme='dark'] {
+  --admin-bg-primary: #141413;
+  --admin-bg-secondary: #1a1a18;
+  --admin-bg-tertiary: #242422;
+  --admin-bg-elevated: #20201e;
+  --admin-text-primary: #f5f0e8;
+  --admin-text-secondary: #ddd5ca;
+  --admin-text-tertiary: #b4ac9f;
+  --admin-text-muted: #857d74;
+  --admin-accent: #e09070;
+  --admin-accent-hover: #eba487;
+  --admin-accent-light: rgba(224, 144, 112, 0.16);
+  --admin-border: rgba(245, 240, 232, 0.1);
+  --admin-border-strong: rgba(245, 240, 232, 0.18);
+  --admin-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+  --admin-shadow-md: 0 14px 30px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.22);
+  --admin-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.42), 0 10px 22px rgba(0, 0, 0, 0.28);
+}
+
+.payload-admin,
+.payload-admin button,
+.payload-admin input,
+.payload-admin select,
+.payload-admin textarea {
+  font-family: var(--admin-font-sans);
+}
+
+.payload-admin h1,
+.payload-admin h2,
+.payload-admin h3,
+.payload-admin h4 {
+  color: var(--admin-text-primary);
+  font-family: var(--admin-font-heading);
+  letter-spacing: var(--admin-tracking-tight);
+}
+
+.payload-admin p,
+.payload-admin li,
+.payload-admin span {
+  line-height: var(--admin-leading-relaxed);
+}
+
+.payload-admin code,
+.payload-admin pre {
+  font-family: var(--admin-font-mono);
+}
+
+/* ============================================================
+   Vietnamese Text Support - Rich Text Editor Fixes
+   ============================================================ */
+
+/* Ensure Vietnamese text in rich text editor renders correctly */
+.payload-admin .rich-text-editor,
+.payload-admin .lexical-editor,
+.payload-admin [data-lexical-editor="true"],
+.payload-admin .editor-shell {
+  font-family: var(--admin-font-vietnamese-safe);
+  line-height: var(--admin-leading-relaxed);
+}
+
+/* Vietnamese content needs extra line height for diacritics */
+.payload-admin .rich-text-editor p,
+.payload-admin .rich-text-editor li,
+.payload-admin .lexical-editor p,
+.payload-admin .lexical-editor li,
+.payload-admin [data-lexical-editor="true"] p,
+.payload-admin [data-lexical-editor="true"] li,
+.payload-admin [data-lexical-text="true"] {
+  line-height: var(--admin-leading-relaxed);
+  font-family: var(--admin-font-vietnamese-safe);
+}
+
+/* Ensure proper font inheritance for all text elements */
+.payload-admin textarea,
+.payload-admin .field-type.textarea textarea,
+.payload-admin .field-type.rich-text .editor-scroller {
+  font-family: var(--admin-font-vietnamese-safe);
+  line-height: var(--admin-leading-normal);
+}
+
+/* Fix for lexical editor content editable area */
+.payload-admin .ContentEditable__root,
+.payload-admin .ContentEditable__root *,
+.payload-admin .LexicalEditorTheme__paragraph,
+.payload-admin .LexicalEditorTheme__quote,
+.payload-admin .LexicalEditorTheme__h1,
+.payload-admin .LexicalEditorTheme__h2,
+.payload-admin .LexicalEditorTheme__h3,
+.payload-admin .LexicalEditorTheme__h4,
+.payload-admin .LexicalEditorTheme__h5,
+.payload-admin .LexicalEditorTheme__h6 {
+  font-family: var(--admin-font-vietnamese-safe);
+  line-height: var(--admin-leading-relaxed);
+  letter-spacing: normal;
+}
+
+/* ============================================================
+   Sidebar Collapsed State Styles - Enhanced Semi-Collapsed
+   ============================================================ */
+
+/* Smooth transition for sidebar width changes */
+.custom-sidebar {
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Semi-collapsed state - 72px width optimized for icon-only */
+.custom-sidebar.w-\[72px\] {
+  width: 72px;
+  min-width: 72px;
+}
+
+/* Collapsed state - ensure content is centered */
+.custom-sidebar.w-\[72px\] nav a,
+.custom-sidebar.w-\[72px\] .sidebar-header {
+  justify-content: center;
+}
+
+/* Collapsed sidebar navigation improvements */
+.custom-sidebar.w-\[72px\] nav {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.custom-sidebar.w-\[72px\] nav a {
+  margin-left: 12px;
+  margin-right: 12px;
+  padding-left: 0;
+  padding-right: 0;
+  justify-content: center;
+  border-radius: 12px;
+  position: relative;
+  overflow: visible;
+}
+
+/* Icon container in collapsed state */
+.custom-sidebar.w-\[72px\] nav a span:first-of-type {
+  margin: 0;
+}
+
+/* Enhanced tooltip for collapsed sidebar */
+.custom-sidebar.w-\[72px\] nav a:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 14px;
+  background: var(--admin-bg-tertiary);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: tooltip-slide-in 200ms ease forwards;
+  animation-delay: 100ms;
+  pointer-events: none;
+}
+
+/* Tooltip arrow */
+.custom-sidebar.w-\[72px\] nav a:hover::before {
+  content: '';
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid var(--admin-bg-tertiary);
+  z-index: 101;
+  opacity: 0;
+  animation: tooltip-slide-in 200ms ease forwards;
+  animation-delay: 100ms;
+  pointer-events: none;
+}
+
+@keyframes tooltip-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Collapsed sidebar logo styling */
+.custom-sidebar.w-\[72px\] .sidebar-logo {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-hover) 100%);
+  border-radius: 14px;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.custom-sidebar.w-\[72px\] .sidebar-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(217, 119, 87, 0.4);
+}
+
+/* Active indicator for collapsed state */
+.custom-sidebar.w-\[72px\] nav a[aria-current="page"]::after {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 32px;
+  background: var(--admin-accent);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Ensure tooltip doesn't get cut off */
+.admin-sidebar-collapsed .nav__link,
+html.admin-sidebar-collapsed .nav__link {
+  position: relative !important;
+}
+
+/* Adjust main content area when sidebar is collapsed */
+@media (min-width: 768px) {
+  .custom-sidebar.w-\[72px\] ~ main,
+  .custom-sidebar.w-\[72px\] ~ .main-content,
+  .custom-sidebar.w-\[72px\] ~ [class*="main"] {
+    margin-left: 0;
+  }
+}
+
+/* Mobile sidebar open state (controlled via CSS class) */
+html.admin-mobile-sidebar-open {
+  overflow: hidden;
+}
+
+html.admin-mobile-sidebar-open body {
+  overflow: hidden;
+}
+
+/* ============================================================
+   Payload Nav Sidebar Styling
+   ============================================================ */
+
+/* Main nav container */
+.nav {
+  background: linear-gradient(180deg, var(--admin-bg-secondary) 0%, var(--admin-bg-primary) 100%) !important;
+  border-right: 1px solid var(--admin-border) !important;
+}
+
+/* Nav groups */
+.nav__group {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Nav group label */
+.nav__group-label {
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--admin-text-muted) !important;
+  padding: 0.75rem 1rem 0.5rem !important;
+}
+
+/* Nav items */
+.nav__link {
+  position: relative !important;
+  margin: 0.125rem 0.75rem !important;
+  padding: 0.625rem 0.875rem !important;
+  border-radius: var(--admin-radius-md) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: var(--admin-text-secondary) !important;
+  transition: all 0.2s ease !important;
+  border-left: 2px solid transparent !important;
+}
+
+/* Nav item hover */
+.nav__link:hover {
+  background: var(--admin-accent-light) !important;
+  color: var(--admin-accent) !important;
+  border-left-color: var(--admin-accent) !important;
+}
+
+/* Active nav item */
+.nav__link--active {
+  background: var(--admin-accent-light) !important;
+  color: var(--admin-accent) !important;
+  border-left-color: var(--admin-accent) !important;
+  box-shadow: var(--admin-shadow-sm) !important;
+}
+
+/* Nav item icon */
+.nav__link .icon {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  margin-right: 0.75rem !important;
+  transition: transform 0.2s ease !important;
+}
+
+.nav__link:hover .icon {
+  transform: scale(1.1) !important;
+}
+
+/* Nav toggle button */
+.nav__toggle {
+  border-radius: var(--admin-radius-md) !important;
+  transition: all 0.2s ease !important;
+}
+
+.nav__toggle:hover {
+  background: var(--admin-accent-light) !important;
+  color: var(--admin-accent) !important;
+}
+
+/* ============================================================
+   Payload Admin UI Enhancements
+   ============================================================ */
+
+/* Cards and panels */
+.card,
+.panel {
+  background: var(--admin-bg-secondary) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: var(--admin-radius-lg) !important;
+  box-shadow: var(--admin-shadow-sm) !important;
+  transition: box-shadow 0.2s ease !important;
+}
+
+.card:hover,
+.panel:hover {
+  box-shadow: var(--admin-shadow-md) !important;
+}
+
+/* Buttons */
+.btn {
+  border-radius: var(--admin-radius-md) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-hover) 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.25) !important;
+}
+
+.btn--primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(217, 119, 87, 0.35) !important;
+}
+
+/* Form inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  background: var(--admin-bg-tertiary) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: var(--admin-radius-md) !important;
+  transition: all 0.2s ease !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+  outline: none !important;
+}
+
+/* Tables */
+.table {
+  border-radius: var(--admin-radius-lg) !important;
+  overflow: hidden !important;
+}
+
+.table thead th {
+  background: var(--admin-bg-tertiary) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.05em !important;
+  color: var(--admin-text-muted) !important;
+}
+
+.table tbody tr:hover {
+  background: var(--admin-accent-light) !important;
+}
+
+/* Status pills */
+.pill {
+  border-radius: 9999px !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.75rem !important;
+}
+
+/* Drawer/sidebar overlay */
+.drawer__overlay {
+  backdrop-filter: blur(4px) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Modal */
+.modal {
+  border-radius: var(--admin-radius-xl) !important;
+  box-shadow: var(--admin-shadow-lg) !important;
+}
+
+/* Toast notifications */
+.toast {
+  border-radius: var(--admin-radius-lg) !important;
+  box-shadow: var(--admin-shadow-lg) !important;
+}
+
+/* Collapsed sidebar indicator - Semi-collapsed 72px */
+.admin-sidebar-collapsed .nav,
+html.admin-sidebar-collapsed .nav {
+  width: 72px !important;
+  min-width: 72px !important;
+  max-width: 72px !important;
+}
+
+/* Center nav links in collapsed state */
+.admin-sidebar-collapsed .nav__link,
+html.admin-sidebar-collapsed .nav__link {
+  padding: 0.625rem 0 !important;
+  justify-content: center !important;
+  margin: 0 10px !important;
+  border-radius: 12px !important;
+  position: relative !important;
+}
+
+/* Remove icon margins when collapsed */
+.admin-sidebar-collapsed .nav__link .icon,
+html.admin-sidebar-collapsed .nav__link .icon {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Active indicator for collapsed state */
+.admin-sidebar-collapsed .nav__link--active::before,
+html.admin-sidebar-collapsed .nav__link--active::before {
+  content: '' !important;
+  position: absolute !important;
+  left: -10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 3px !important;
+  height: 24px !important;
+  background-color: var(--admin-accent) !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* Hide group labels and text when collapsed */
+.admin-sidebar-collapsed .nav__group-label,
+.admin-sidebar-collapsed .nav__link span:not(.icon):not(.nav__link-icon),
+html.admin-sidebar-collapsed .nav__group-label,
+html.admin-sidebar-collapsed .nav__link span:not(.icon):not(.nav__link-icon) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Also target Payload's newer class names */
+.admin-sidebar-collapsed .nav-group__label,
+.admin-sidebar-collapsed .nav-group__toggle-content span:not(.icon),
+html.admin-sidebar-collapsed .nav-group__label,
+html.admin-sidebar-collapsed .nav-group__toggle-content span:not(.icon) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Center toggle content in collapsed state */
+.admin-sidebar-collapsed .nav-group__toggle-content,
+html.admin-sidebar-collapsed .nav-group__toggle-content {
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 10px !important;
+  border-radius: 12px !important;
+}

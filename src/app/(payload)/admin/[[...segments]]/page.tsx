@@ -3,6 +3,9 @@ import { importMap } from '../../importMap'
 import config from '@payload-config'
 import type { Metadata } from 'next'
 
+// Force dynamic to avoid Turbopack static optimization issues with Payload
+export const dynamic = 'force-dynamic'
+
 type Args = {
   params: Promise<{ segments: string[] }>
   searchParams: Promise<{ [key: string]: string | string[] }>
