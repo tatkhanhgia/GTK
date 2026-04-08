@@ -206,31 +206,31 @@ html[data-theme='dark'] {
   --admin-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.42), 0 10px 22px rgba(0, 0, 0, 0.28);
 }
 
-.payload-admin,
-.payload-admin button,
-.payload-admin input,
-.payload-admin select,
-.payload-admin textarea {
+body,
+button,
+input,
+select,
+textarea {
   font-family: var(--admin-font-sans);
 }
 
-.payload-admin h1,
-.payload-admin h2,
-.payload-admin h3,
-.payload-admin h4 {
+h1,
+h2,
+h3,
+h4 {
   color: var(--admin-text-primary);
   font-family: var(--admin-font-heading);
   letter-spacing: var(--admin-tracking-tight);
 }
 
-.payload-admin p,
-.payload-admin li,
-.payload-admin span {
+p,
+li,
+span {
   line-height: var(--admin-leading-relaxed);
 }
 
-.payload-admin code,
-.payload-admin pre {
+code,
+pre {
   font-family: var(--admin-font-mono);
 }
 

@@ -1,15 +1,15 @@
 /* Payload Admin Component Overrides */
 
-.payload-admin {
+body {
   min-height: 100dvh;
   overflow-x: clip;
   background-color: var(--admin-bg-primary);
   color: var(--admin-text-primary);
 }
 
-.payload-admin,
-.payload-admin *::before,
-.payload-admin *::after {
+body,
+*::before,
+*::after {
   border-color: var(--admin-border);
 }
 
@@ -39,12 +39,18 @@
    wrappers. The width is driven by a single CSS variable that the
    AdminThemeProvider toggles based on collapsed state. */
 
+/* Sidebar width is a fixed pixel value that MUST match the Tailwind class
+   applied on `.custom-sidebar` in custom-sidebar-client.tsx. Do NOT use `rem`
+   units here: Payload v3 sets the root <html> font-size to 13px, so any
+   rem-based Tailwind class (e.g. `w-72` = 18rem) would resolve to 234px —
+   leaving a 54px gap between the sidebar's right edge and the content area
+   that uses this variable as `padding-left`. Keep both sides in pixels. */
 :root {
-  --admin-sidebar-width: 288px; /* w-72 = 18rem */
+  --admin-sidebar-width: 288px; /* matches w-[288px] on .custom-sidebar */
 }
 
 html.admin-sidebar-collapsed {
-  --admin-sidebar-width: 72px; /* w-[72px] */
+  --admin-sidebar-width: 72px; /* matches w-[72px] on .custom-sidebar */
 }
 
 /* Payload v3's .template-default uses CSS Grid with two columns:
@@ -60,7 +66,7 @@ html.admin-sidebar-collapsed {
    plain block element with padding-left, the inner __wrap fills
    the remaining width naturally and the hidden nav has no effect. */
 @media (min-width: 768px) {
-  .payload-admin,
+  body,
   .template-default,
   .payload-default-app {
     display: block !important;
@@ -80,7 +86,7 @@ html.admin-sidebar-collapsed {
 
 /* Mobile: sidebar is an overlay, no offset needed */
 @media (max-width: 767px) {
-  .payload-admin,
+  body,
   .template-default,
   .payload-default-app {
     display: block !important;
@@ -104,8 +110,41 @@ html.admin-sidebar-collapsed {
   -webkit-overflow-scrolling: touch;
 }
 
-.collection-list .table > table {
-  min-width: max-content;
+/* Desktop: force the table to fill its wrap and truncate long values so the
+   longest title can't stretch its column and bleed into adjacent badges. */
+@media (min-width: 768px) {
+  .collection-list .table > table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /* Ellipsis must be applied on the element that actually holds the text.
+     Payload wraps cell content in anchors/spans, so we also target the
+     direct children of each td. */
+  .collection-list .table > table td,
+  .collection-list .table > table th,
+  .collection-list .table > table td > a,
+  .collection-list .table > table td > span,
+  .collection-list .table > table td > button {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .collection-list .table > table td {
+    /* Ensure the td establishes the containing block for ellipsis */
+    position: relative;
+  }
+}
+
+/* Mobile: keep horizontal scroll so narrow screens can still see every
+   column. `max-content` lets the table grow beyond the 390px wrap and the
+   parent `.table` wrapper provides `overflow-x: auto`. */
+@media (max-width: 767px) {
+  .collection-list .table > table {
+    min-width: max-content;
+  }
 }
 
 /* Hide Payload default nav components - we use custom sidebar instead */
@@ -114,10 +153,13 @@ html.admin-sidebar-collapsed {
   display: none !important;
 }
 
-/* Hide Payload's default Nav component (but not custom sidebar) */
+/* Hide Payload's default Nav component (but not custom sidebar). The
+   former third selector (`.payload-admin > .nav:first-of-type`) targeted a
+   root class that Payload v3 no longer emits, so it has been dropped — the
+   remaining two selectors already cover every .nav Payload renders inside
+   `.template-default`. */
 .template-default .nav:not(.custom-sidebar),
-.template-default__nav,
-.payload-admin > .nav:first-of-type {
+.template-default__nav {
   display: none !important;
 }
 
@@ -162,35 +204,35 @@ html.admin-dark .payload-admin-header > div::before {
   );
 }
 
-.payload-admin :where(h1, h2, h3, h4) {
+:where(h1, h2, h3, h4) {
   color: var(--admin-text-primary);
 }
 
-.payload-admin :where(p, label, small, time) {
+:where(p, label, small, time) {
   color: var(--admin-text-secondary);
 }
 
-.payload-admin .payload-admin-content,
-.payload-admin .dashboard-content {
+.payload-admin-content,
+.dashboard-content {
   min-width: 0;
   animation: fade-in-up 0.25s ease;
 }
 
-.payload-admin .payload-admin-header > div,
-.payload-admin .dashboard-content > div {
+.payload-admin-header > div,
+.dashboard-content > div {
   min-width: 0;
 }
 
-.payload-admin .dashboard-content .admin-card,
-.payload-admin .dashboard-content [data-admin-card='true'] {
+.dashboard-content .admin-card,
+.dashboard-content [data-admin-card='true'] {
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius-lg);
 }
 
-.payload-admin .payload-admin-header button,
-.payload-admin .custom-sidebar button,
-.payload-admin .dashboard-content button,
-.payload-admin .dashboard-content .btn {
+.payload-admin-header button,
+.custom-sidebar button,
+.dashboard-content button,
+.dashboard-content .btn {
   min-height: 44px;
   min-width: 44px;
   transition:
@@ -201,12 +243,12 @@ html.admin-dark .payload-admin-header > div::before {
     transform var(--admin-transition-normal);
 }
 
-.payload-admin .custom-sidebar nav a {
+.custom-sidebar nav a {
   position: relative;
   overflow: hidden;
 }
 
-.payload-admin .custom-sidebar nav a::before {
+.custom-sidebar nav a::before {
   content: '';
   position: absolute;
   left: 0;
@@ -219,28 +261,28 @@ html.admin-dark .payload-admin-header > div::before {
   transition: height var(--admin-transition-fast);
 }
 
-.payload-admin .custom-sidebar nav a:hover::before,
-.payload-admin .custom-sidebar nav a[aria-current='page']::before {
+.custom-sidebar nav a:hover::before,
+.custom-sidebar nav a[aria-current='page']::before {
   height: 60%;
 }
 
-.payload-admin .dashboard-content .admin-card.card-hover {
+.dashboard-content .admin-card.card-hover {
   transition: transform var(--admin-transition-normal), box-shadow var(--admin-transition-normal);
 }
 
-.payload-admin .dashboard-content .admin-card.card-hover:hover {
+.dashboard-content .admin-card.card-hover:hover {
   transform: translateY(-2px);
   box-shadow: var(--admin-shadow-lg);
 }
 
-.payload-admin .payload-admin-header button:active,
-.payload-admin .custom-sidebar button:active,
-.payload-admin .dashboard-content button:active,
-.payload-admin .dashboard-content .btn:active {
+.payload-admin-header button:active,
+.custom-sidebar button:active,
+.dashboard-content button:active,
+.dashboard-content .btn:active {
   transform: scale(0.98);
 }
 
-.payload-admin .dashboard-content .skeleton {
+.dashboard-content .skeleton {
   background: linear-gradient(
     90deg,
     var(--admin-bg-secondary) 25%,
@@ -251,21 +293,21 @@ html.admin-dark .payload-admin-header > div::before {
   animation: shimmer 1.5s infinite;
 }
 
-.payload-admin *:focus-visible {
+*:focus-visible {
   outline: 2px solid var(--admin-accent);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--admin-accent-light);
 }
 
 /* Enhanced Input Field Styling */
-.payload-admin input[type="text"],
-.payload-admin input[type="email"],
-.payload-admin input[type="password"],
-.payload-admin input[type="number"],
-.payload-admin input[type="search"],
-.payload-admin input[type="url"],
-.payload-admin textarea,
-.payload-admin select {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+textarea,
+select {
   background-color: var(--admin-bg-tertiary);
   border: 1.5px solid var(--admin-border-strong);
   border-radius: var(--admin-radius-md);
@@ -275,64 +317,64 @@ html.admin-dark .payload-admin-header > div::before {
               box-shadow var(--admin-transition-fast);
 }
 
-.payload-admin input:focus,
-.payload-admin textarea:focus,
-.payload-admin select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 3px var(--admin-accent-light);
   outline: none;
 }
 
 /* Button Hierarchy */
-.payload-admin .btn--primary,
-.payload-admin button[type="submit"].btn--style-primary,
-.payload-admin .payload-admin-header .btn--primary {
+.btn--primary,
+button[type="submit"].btn--style-primary,
+.payload-admin-header .btn--primary {
   background-color: var(--admin-accent);
   color: white;
   border: 1.5px solid var(--admin-accent);
   font-weight: 600;
 }
 
-.payload-admin .btn--primary:hover {
+.btn--primary:hover {
   background-color: var(--admin-accent-hover);
   border-color: var(--admin-accent-hover);
 }
 
-.payload-admin .btn--secondary,
-.payload-admin button.btn--style-secondary {
+.btn--secondary,
+button.btn--style-secondary {
   background-color: transparent;
   color: var(--admin-text-primary);
   border: 1.5px solid var(--admin-border-strong);
 }
 
-.payload-admin .btn--secondary:hover {
+.btn--secondary:hover {
   background-color: var(--admin-bg-tertiary);
   border-color: var(--admin-text-tertiary);
 }
 
 /* Enhanced Sidebar Active State */
-.payload-admin .custom-sidebar nav a[aria-current='page'] {
+.custom-sidebar nav a[aria-current='page'] {
   background-color: var(--admin-accent-light);
   border-left-color: var(--admin-accent);
   box-shadow: var(--admin-shadow-sm);
 }
 
-.payload-admin .custom-sidebar nav a[aria-current='page'] span:first-of-type {
+.custom-sidebar nav a[aria-current='page'] span:first-of-type {
   background-color: var(--admin-accent);
   color: white;
 }
 
 /* Table Row Hover */
-.payload-admin table tbody tr:hover {
+table tbody tr:hover {
   background-color: var(--admin-accent-light);
 }
 
 /* Price formatting helper */
-.payload-admin .formatted-price::after {
+.formatted-price::after {
   content: ' VND';
 }
 
-.payload-admin .sr-only,
+.sr-only,
 .sr-only {
   position: absolute;
   width: 1px;
@@ -345,34 +387,34 @@ html.admin-dark .payload-admin-header > div::before {
   border: 0;
 }
 
-.payload-admin .custom-sidebar {
+.custom-sidebar {
   flex-shrink: 0;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 /* Fix sidebar text overlap when collapsed */
-.payload-admin .custom-sidebar nav a span:last-child,
-.payload-admin .custom-sidebar .sidebar-brand-text,
-.payload-admin .custom-sidebar aside > div:first-child > a > div {
+.custom-sidebar nav a span:last-child,
+.custom-sidebar .sidebar-brand-text,
+.custom-sidebar aside > div:first-child > a > div {
   transition: opacity 0.2s ease, width 0.2s ease;
 }
 
 /* When sidebar is in collapsed state (mobile hidden or narrow mode) */
 @media (max-width: 767px) {
-  .payload-admin .custom-sidebar {
+  .custom-sidebar {
     width: 280px;
   }
 }
 
 /* Ensure sidebar overlay doesn't block content */
-.payload-admin .sidebar-overlay {
+.sidebar-overlay {
   z-index: 35;
 }
 
 /* Fix Payload's default sidebar styles if they conflict */
-.payload-admin .nav-group__toggle-content,
-.payload-admin .nav-group__label {
+.nav-group__toggle-content,
+.nav-group__label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -528,27 +570,27 @@ html.admin-sidebar-collapsed .nav-divider {
   opacity: 0.3;
 }
 
-html.dark .payload-admin,
-html.admin-dark .payload-admin {
+html.dark body,
+html.admin-dark body {
   background-color: var(--admin-bg-primary);
   color: var(--admin-text-primary);
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
-  .payload-admin .custom-sidebar {
+  .custom-sidebar {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
 @media (min-width: 40rem) {
-  .payload-admin .stats-grid {
+  .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 64rem) {
-  .payload-admin .stats-grid {
+  .stats-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
@@ -560,24 +602,24 @@ html.admin-dark .payload-admin {
     width: 100%;
   }
 
-  .payload-admin .dashboard-content {
+  .dashboard-content {
     padding-bottom: 2.5rem;
   }
 }
 
 @media (pointer: coarse) {
-  .payload-admin .payload-admin-header button,
-  .payload-admin .custom-sidebar button,
-  .payload-admin .custom-sidebar nav a,
-  .payload-admin .dashboard-content button,
-  .payload-admin .dashboard-content .btn {
+  .payload-admin-header button,
+  .custom-sidebar button,
+  .custom-sidebar nav a,
+  .dashboard-content button,
+  .dashboard-content .btn {
     min-height: 44px;
     min-width: 44px;
   }
 
-  .payload-admin .dashboard-content input,
-  .payload-admin .dashboard-content select,
-  .payload-admin .dashboard-content textarea {
+  .dashboard-content input,
+  .dashboard-content select,
+  .dashboard-content textarea {
     font-size: 16px;
   }
 }
@@ -604,19 +646,19 @@ html.admin-dark .payload-admin {
     display: none !important;
   }
 
-  .payload-admin {
+  body {
     background: #fff !important;
     color: #000 !important;
   }
 
-  .payload-admin .dashboard-content {
+  .dashboard-content {
     margin: 0 !important;
     padding: 0 !important;
     max-width: none !important;
   }
 
-  .payload-admin .dashboard-content .admin-card,
-  .payload-admin .dashboard-content [data-admin-card='true'] {
+  .dashboard-content .admin-card,
+  .dashboard-content [data-admin-card='true'] {
     break-inside: avoid;
     box-shadow: none !important;
     border: 1px solid #ccc !important;
@@ -624,17 +666,17 @@ html.admin-dark .payload-admin {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .payload-admin,
-  .payload-admin *,
-  .payload-admin *::before,
-  .payload-admin *::after {
+  body,
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 
-  .payload-admin .custom-sidebar {
+  .custom-sidebar {
     transition: none !important;
   }
 }
@@ -662,13 +704,13 @@ html.admin-dark .payload-admin {
 }
 
 /* Table Styling Enhancements */
-.payload-admin table {
+table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
 }
 
-.payload-admin table th {
+table th {
   background-color: var(--admin-bg-secondary);
   color: var(--admin-text-secondary);
   font-weight: 600;
@@ -680,29 +722,29 @@ html.admin-dark .payload-admin {
   text-align: left;
 }
 
-.payload-admin table td {
+table td {
   padding: 1rem;
   border-bottom: 1px solid var(--admin-border);
   color: var(--admin-text-primary);
   vertical-align: middle;
 }
 
-.payload-admin table tbody tr {
+table tbody tr {
   transition: background-color var(--admin-transition-fast);
 }
 
-.payload-admin table tbody tr:hover {
+table tbody tr:hover {
   background-color: var(--admin-accent-light);
 }
 
 /* Action Buttons in Tables */
-.payload-admin table .cell-actions {
+table .cell-actions {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
 }
 
-.payload-admin table .cell-actions button {
+table .cell-actions button {
   min-height: 36px;
   min-width: 36px;
   padding: 0.5rem;
@@ -713,14 +755,14 @@ html.admin-dark .payload-admin {
   transition: all var(--admin-transition-fast);
 }
 
-.payload-admin table .cell-actions button:hover {
+table .cell-actions button:hover {
   background-color: var(--admin-bg-tertiary);
   border-color: var(--admin-accent);
   color: var(--admin-accent);
 }
 
 /* Status Badges */
-.payload-admin .status-badge {
+.status-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
@@ -730,23 +772,23 @@ html.admin-dark .payload-admin {
   font-weight: 600;
 }
 
-.payload-admin .status-badge--published {
+.status-badge--published {
   background-color: rgba(61, 139, 110, 0.15);
   color: var(--admin-success);
 }
 
-.payload-admin .status-badge--draft {
+.status-badge--draft {
   background-color: rgba(212, 149, 43, 0.15);
   color: var(--admin-warning);
 }
 
-.payload-admin .status-badge--admin {
+.status-badge--admin {
   background-color: var(--admin-accent-light);
   color: var(--admin-accent);
 }
 
 /* Empty State Styling */
-.payload-admin .empty-state {
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -755,21 +797,21 @@ html.admin-dark .payload-admin {
   text-align: center;
 }
 
-.payload-admin .empty-state-icon {
+.empty-state-icon {
   width: 64px;
   height: 64px;
   margin-bottom: 1rem;
   color: var(--admin-text-muted);
 }
 
-.payload-admin .empty-state-title {
+.empty-state-title {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--admin-text-primary);
   margin-bottom: 0.5rem;
 }
 
-.payload-admin .empty-state-description {
+.empty-state-description {
   font-size: 0.875rem;
   color: var(--admin-text-secondary);
   margin-bottom: 1.5rem;
@@ -777,7 +819,7 @@ html.admin-dark .payload-admin {
 }
 
 /* Role Badges */
-.payload-admin .role-badge {
+.role-badge {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.625rem;
@@ -789,18 +831,18 @@ html.admin-dark .payload-admin {
 }
 
 /* Breadcrumb Improvements */
-.payload-admin .breadcrumb {
+.breadcrumb {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
 }
 
-.payload-admin .breadcrumb-separator {
+.breadcrumb-separator {
   color: var(--admin-text-muted);
 }
 
-.payload-admin .breadcrumb-current {
+.breadcrumb-current {
   font-weight: 600;
   color: var(--admin-text-primary);
 }
@@ -810,9 +852,9 @@ html.admin-dark .payload-admin {
    ============================================ */
 
 /* Login Container */
-.payload-admin .login,
-.payload-admin .login__wrapper,
-.payload-admin .template-login {
+.login,
+.login__wrapper,
+.template-login {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -822,8 +864,8 @@ html.admin-dark .payload-admin {
 }
 
 /* Login Card */
-.payload-admin .login__form,
-.payload-admin .template-login form {
+.login__form,
+.template-login form {
   width: 100%;
   max-width: 420px;
   background-color: var(--admin-bg-secondary);
@@ -834,8 +876,8 @@ html.admin-dark .payload-admin {
 }
 
 /* Login Logo */
-.payload-admin .login__logo,
-.payload-admin .template-login .logo {
+.login__logo,
+.template-login .logo {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -843,8 +885,8 @@ html.admin-dark .payload-admin {
 }
 
 /* Custom GTKBlog Logo for Login */
-.payload-admin .login__logo::before,
-.payload-admin .template-login .logo::before {
+.login__logo::before,
+.template-login .logo::before {
   content: 'GTK';
   font-family: var(--admin-font-heading);
   font-size: 2rem;
@@ -853,8 +895,8 @@ html.admin-dark .payload-admin {
   letter-spacing: -0.02em;
 }
 
-.payload-admin .login__logo::after,
-.payload-admin .template-login .logo::after {
+.login__logo::after,
+.template-login .logo::after {
   content: 'Blog';
   font-family: var(--admin-font-heading);
   font-size: 2rem;
@@ -864,14 +906,14 @@ html.admin-dark .payload-admin {
 }
 
 /* Hide default Payload logo image */
-.payload-admin .login__logo img,
-.payload-admin .template-login .logo img {
+.login__logo img,
+.template-login .logo img {
   display: none;
 }
 
 /* Login Title */
-.payload-admin .login__title,
-.payload-admin .template-login h1 {
+.login__title,
+.template-login h1 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--admin-text-primary);
@@ -880,8 +922,8 @@ html.admin-dark .payload-admin {
 }
 
 /* Login Subtitle */
-.payload-admin .login__subtitle,
-.payload-admin .template-login p {
+.login__subtitle,
+.template-login p {
   font-size: 0.875rem;
   color: var(--admin-text-secondary);
   text-align: center;
@@ -889,10 +931,10 @@ html.admin-dark .payload-admin {
 }
 
 /* Login Form Fields */
-.payload-admin .login__form input[type="email"],
-.payload-admin .login__form input[type="password"],
-.payload-admin .template-login input[type="email"],
-.payload-admin .template-login input[type="password"] {
+.login__form input[type="email"],
+.login__form input[type="password"],
+.template-login input[type="email"],
+.template-login input[type="password"] {
   width: 100%;
   background-color: var(--admin-bg-tertiary);
   border: 1.5px solid var(--admin-border-strong);
@@ -904,21 +946,21 @@ html.admin-dark .payload-admin {
   margin-bottom: 1rem;
 }
 
-.payload-admin .login__form input:focus,
-.payload-admin .template-login input:focus {
+.login__form input:focus,
+.template-login input:focus {
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 3px var(--admin-accent-light);
   outline: none;
 }
 
-.payload-admin .login__form input::placeholder,
-.payload-admin .template-login input::placeholder {
+.login__form input::placeholder,
+.template-login input::placeholder {
   color: var(--admin-text-muted);
 }
 
 /* Login Labels */
-.payload-admin .login__form label,
-.payload-admin .template-login label {
+.login__form label,
+.template-login label {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
@@ -927,8 +969,8 @@ html.admin-dark .payload-admin {
 }
 
 /* Login Submit Button */
-.payload-admin .login__form button[type="submit"],
-.payload-admin .template-login button[type="submit"] {
+.login__form button[type="submit"],
+.template-login button[type="submit"] {
   width: 100%;
   background-color: var(--admin-accent);
   color: white;
@@ -942,26 +984,26 @@ html.admin-dark .payload-admin {
   margin-top: 1rem;
 }
 
-.payload-admin .login__form button[type="submit"]:hover,
-.payload-admin .template-login button[type="submit"]:hover {
+.login__form button[type="submit"]:hover,
+.template-login button[type="submit"]:hover {
   background-color: var(--admin-accent-hover);
 }
 
-.payload-admin .login__form button[type="submit"]:active,
-.payload-admin .template-login button[type="submit"]:active {
+.login__form button[type="submit"]:active,
+.template-login button[type="submit"]:active {
   transform: scale(0.98);
 }
 
-.payload-admin .login__form button[type="submit"]:focus-visible,
-.payload-admin .template-login button[type="submit"]:focus-visible {
+.login__form button[type="submit"]:focus-visible,
+.template-login button[type="submit"]:focus-visible {
   outline: 2px solid var(--admin-accent);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--admin-accent-light);
 }
 
 /* Forgot Password Link */
-.payload-admin .login__forgot-password,
-.payload-admin .template-login a[href*="forgot"] {
+.login__forgot-password,
+.template-login a[href*="forgot"] {
   display: inline-block;
   font-size: 0.875rem;
   color: var(--admin-text-secondary);
@@ -971,14 +1013,14 @@ html.admin-dark .payload-admin {
   margin-top: 1.5rem;
 }
 
-.payload-admin .login__forgot-password:hover,
-.payload-admin .template-login a[href*="forgot"]:hover {
+.login__forgot-password:hover,
+.template-login a[href*="forgot"]:hover {
   color: var(--admin-accent);
 }
 
 /* Login Error Messages */
-.payload-admin .login__error,
-.payload-admin .template-login .error {
+.login__error,
+.template-login .error {
   background-color: rgba(217, 79, 79, 0.1);
   border: 1px solid rgba(217, 79, 79, 0.3);
   border-radius: var(--admin-radius-md);
@@ -989,16 +1031,16 @@ html.admin-dark .payload-admin {
 }
 
 /* Login Loading State */
-.payload-admin .login__form button[type="submit"][disabled],
-.payload-admin .template-login button[type="submit"][disabled] {
+.login__form button[type="submit"][disabled],
+.template-login button[type="submit"][disabled] {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
 /* Responsive Login */
 @media (max-width: 480px) {
-  .payload-admin .login__form,
-  .payload-admin .template-login form {
+  .login__form,
+  .template-login form {
     padding: 1.5rem;
   }
 }
@@ -1008,7 +1050,7 @@ html.admin-dark .payload-admin {
    ============================================ */
 
 /* Collection Header */
-.payload-admin .collection-header {
+.collection-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1016,14 +1058,14 @@ html.admin-dark .payload-admin {
   padding: 1rem 0;
 }
 
-.payload-admin .collection-header h1 {
+.collection-header h1 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--admin-text-primary);
 }
 
 /* Search Input Enhancement */
-.payload-admin .collection-search input {
+.collection-search input {
   min-width: 280px;
   background-color: var(--admin-bg-tertiary);
   border: 1.5px solid var(--admin-border-strong);
@@ -1033,18 +1075,18 @@ html.admin-dark .payload-admin {
   transition: border-color var(--admin-transition-fast), box-shadow var(--admin-transition-fast);
 }
 
-.payload-admin .collection-search input:focus {
+.collection-search input:focus {
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 3px var(--admin-accent-light);
   outline: none;
 }
 
-.payload-admin .collection-search input::placeholder {
+.collection-search input::placeholder {
   color: var(--admin-text-muted);
 }
 
 /* Create Button - Always top-right */
-.payload-admin .collection-create-btn {
+.collection-create-btn {
   position: fixed;
   top: 1.5rem;
   right: 1.5rem;
@@ -1052,15 +1094,15 @@ html.admin-dark .payload-admin {
 }
 
 /* Vietnamese Text Support */
-.payload-admin .collection-content,
-.payload-admin table td {
+.collection-content,
+table td {
   font-family: var(--admin-font-sans);
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
 /* Status Column */
-.payload-admin .cell-status {
+.cell-status {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1072,25 +1114,25 @@ html.admin-dark .payload-admin {
   letter-spacing: 0.025em;
 }
 
-.payload-admin .cell-status--published {
+.cell-status--published {
   background-color: rgba(61, 139, 110, 0.15);
   color: var(--admin-success);
 }
 
-.payload-admin .cell-status--draft {
+.cell-status--draft {
   background-color: rgba(212, 149, 43, 0.15);
   color: var(--admin-warning);
 }
 
 /* Price Column Formatting */
-.payload-admin .cell-price {
+.cell-price {
   font-family: var(--admin-font-mono);
   font-weight: 600;
   color: var(--admin-text-primary);
   white-space: nowrap;
 }
 
-.payload-admin .cell-price::after {
+.cell-price::after {
   content: ' VND';
   font-size: 0.875em;
   color: var(--admin-text-muted);
@@ -1098,7 +1140,7 @@ html.admin-dark .payload-admin {
 }
 
 /* Type Column with Icons */
-.payload-admin .cell-type {
+.cell-type {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1113,7 +1155,7 @@ html.admin-dark .payload-admin {
 }
 
 /* Thumbnail Column */
-.payload-admin .cell-thumbnail {
+.cell-thumbnail {
   width: 48px;
   height: 48px;
   border-radius: var(--admin-radius-md);
@@ -1121,7 +1163,7 @@ html.admin-dark .payload-admin {
   background-color: var(--admin-bg-tertiary);
 }
 
-.payload-admin .cell-thumbnail-placeholder {
+.cell-thumbnail-placeholder {
   width: 48px;
   height: 48px;
   border-radius: var(--admin-radius-md);
@@ -1133,20 +1175,20 @@ html.admin-dark .payload-admin {
 }
 
 /* Title Column with Ellipsis */
-.payload-admin .cell-title {
+.cell-title {
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.payload-admin .cell-title:hover {
+.cell-title:hover {
   white-space: normal;
   overflow: visible;
 }
 
 /* Category Column */
-.payload-admin .cell-category {
+.cell-category {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1154,13 +1196,13 @@ html.admin-dark .payload-admin {
 }
 
 /* Checkbox Column Alignment */
-.payload-admin table th:first-child,
-.payload-admin table td:first-child {
+table th:first-child,
+table td:first-child {
   width: 48px;
   text-align: center;
 }
 
-.payload-admin table td:first-child input[type="checkbox"] {
+table td:first-child input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--admin-accent);
@@ -1168,7 +1210,7 @@ html.admin-dark .payload-admin {
 }
 
 /* Pagination Styling */
-.payload-admin .collection-pagination {
+.collection-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1178,7 +1220,7 @@ html.admin-dark .payload-admin {
   margin-top: 1rem;
 }
 
-.payload-admin .collection-pagination button {
+.collection-pagination button {
   min-height: 36px;
   min-width: 36px;
   padding: 0.5rem;
@@ -1190,32 +1232,32 @@ html.admin-dark .payload-admin {
   transition: all var(--admin-transition-fast);
 }
 
-.payload-admin .collection-pagination button:hover:not(:disabled) {
+.collection-pagination button:hover:not(:disabled) {
   background-color: var(--admin-bg-tertiary);
   border-color: var(--admin-accent);
   color: var(--admin-accent);
 }
 
-.payload-admin .collection-pagination button:disabled {
+.collection-pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.payload-admin .collection-pagination button.active {
+.collection-pagination button.active {
   background-color: var(--admin-accent);
   border-color: var(--admin-accent);
   color: white;
 }
 
 /* Filter Buttons */
-.payload-admin .collection-filters {
+.collection-filters {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.payload-admin .collection-filters button {
+.collection-filters button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1228,14 +1270,14 @@ html.admin-dark .payload-admin {
   transition: all var(--admin-transition-fast);
 }
 
-.payload-admin .collection-filters button:hover {
+.collection-filters button:hover {
   background-color: var(--admin-bg-tertiary);
   border-color: var(--admin-accent);
   color: var(--admin-accent);
 }
 
 /* Empty Collection State */
-.payload-admin .collection-empty {
+.collection-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1247,45 +1289,45 @@ html.admin-dark .payload-admin {
   border: 2px dashed var(--admin-border);
 }
 
-.payload-admin .collection-empty h3 {
+.collection-empty h3 {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--admin-text-primary);
   margin-bottom: 0.5rem;
 }
 
-.payload-admin .collection-empty p {
+.collection-empty p {
   color: var(--admin-text-secondary);
   margin-bottom: 1.5rem;
   max-width: 400px;
 }
 
 /* Column Width Utilities */
-.payload-admin .col-narrow { width: 60px; }
-.payload-admin .col-icon { width: 48px; }
-.payload-admin .col-actions { width: 100px; }
-.payload-admin .col-date { width: 140px; }
-.payload-admin .col-status { width: 120px; }
-.payload-admin .col-price { width: 100px; }
+.col-narrow { width: 60px; }
+.col-icon { width: 48px; }
+.col-actions { width: 100px; }
+.col-date { width: 140px; }
+.col-status { width: 120px; }
+.col-price { width: 100px; }
 
 /* Responsive Table */
 @media (max-width: 768px) {
-  .payload-admin .collection-header {
+  .collection-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .payload-admin .collection-search input {
+  .collection-search input {
     min-width: 100%;
   }
 
-  .payload-admin table {
+  table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
   }
 
-  .payload-admin .cell-title {
+  .cell-title {
     max-width: 200px;
   }
 }

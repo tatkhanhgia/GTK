@@ -181,7 +181,7 @@ export function CustomSidebarClient() {
         suppressHydrationWarning
         className={`custom-sidebar fixed left-0 top-0 z-50 flex h-[100dvh] flex-col border-r border-[var(--admin-border)] bg-[var(--admin-bg-secondary)] shadow-[var(--admin-shadow-lg)] transition-all duration-300 ease-out md:fixed md:top-0 md:z-30 md:h-[100dvh] md:max-h-[100dvh] md:translate-x-0 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        } ${isClient && isSidebarCollapsed ? 'w-[72px]' : 'w-72'}`}
+        } ${isClient && isSidebarCollapsed ? 'w-[72px]' : 'w-[288px]'}`}
         style={{ willChange: 'transform, width' }}
       >
         {/* Header */}
