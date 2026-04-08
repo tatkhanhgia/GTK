@@ -21,11 +21,10 @@ export const Pages: CollectionConfig = {
     },
     {
       name: 'content',
-      type: 'textarea',
+      type: 'richText',
       localized: true,
       admin: {
-        rows: 10,
-        description: 'Page content (textarea for better Vietnamese font support)',
+        description: 'Page content (rich text with formatting support)',
       },
     },
     {

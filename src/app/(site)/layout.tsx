@@ -1,13 +1,14 @@
 'use client'
 
+import '@/app/globals.css'
 import { ThemeProvider } from 'next-themes'
 
 /**
  * Site Layout
  *
- * Wraps all site routes with ThemeProvider and other site-specific providers.
- * This layout is separate from the root layout to allow the Payload admin
- * to have its own layout structure without conflicts.
+ * Provides the full document structure for site routes.
+ * Wraps with ThemeProvider for dark/light mode support.
+ * suppressHydrationWarning on <html>/<body> is required for next-themes.
  */
 export default function SiteLayout({
   children,
@@ -15,13 +16,20 @@ export default function SiteLayout({
   children: React.ReactNode
 }) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      {children}
-    </ThemeProvider>
+    <html lang="vi" suppressHydrationWarning>
+      <body
+        className="min-h-screen bg-background text-foreground font-body antialiased"
+        suppressHydrationWarning
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
   )
 }
