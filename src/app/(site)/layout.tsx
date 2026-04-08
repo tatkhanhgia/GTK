@@ -1,13 +1,12 @@
-'use client'
-
 import '@/app/globals.css'
-import { ThemeProvider } from 'next-themes'
+import { SiteThemeProvider } from '@/components/providers/site-theme-provider'
 
 /**
- * Site Layout
+ * Site Layout (Server Component)
  *
- * Provides the full document structure for site routes.
- * Wraps with ThemeProvider for dark/light mode support.
+ * Provides the <html>/<body> document structure for site routes.
+ * Must be a Server Component so that globals.css is bundled into the
+ * server CSS chunk and emitted in deterministic order on SSR.
  * suppressHydrationWarning on <html>/<body> is required for next-themes.
  */
 export default function SiteLayout({
@@ -21,14 +20,7 @@ export default function SiteLayout({
         className="min-h-screen bg-background text-foreground font-body antialiased"
         suppressHydrationWarning
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <SiteThemeProvider>{children}</SiteThemeProvider>
       </body>
     </html>
   )

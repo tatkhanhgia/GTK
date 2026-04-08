@@ -16,7 +16,13 @@ const nextConfig: NextConfig = {
     ],
   },
   compress: true,
-  // experimental: { reactCompiler: true } — enable when React Compiler is stable
+  experimental: {
+    // Force deterministic CSS chunk ordering across server/client bundles.
+    // Fixes hydration mismatch on /admin where Payload's @layer declaration
+    // and Tailwind v4's @layer directives get split into multiple chunks
+    // that load in different order between SSR and client hydration.
+    cssChunking: 'strict',
+  },
 }
 
 // Plugin chain: withPayload wraps withNextIntl(nextConfig)
