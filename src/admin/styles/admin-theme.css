@@ -238,46 +238,49 @@ html[data-theme='dark'] {
    Vietnamese Text Support - Rich Text Editor Fixes
    ============================================================ */
 
-/* Ensure Vietnamese text in rich text editor renders correctly */
-.payload-admin .rich-text-editor,
-.payload-admin .lexical-editor,
-.payload-admin [data-lexical-editor="true"],
-.payload-admin .editor-shell {
+/* Ensure Vietnamese text in rich text editor renders correctly
+   NOTE: rules below are intentionally NOT scoped to `.payload-admin`
+   because the Payload v3 admin layout does not apply that class anywhere
+   on the DOM (only `.payload-admin-header` exists). Scoping to it would
+   make these rules dead. */
+.rich-text-editor,
+.lexical-editor,
+[data-lexical-editor="true"],
+.editor-shell {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: var(--admin-leading-relaxed);
 }
 
 /* Vietnamese content needs extra line height for diacritics */
-.payload-admin .rich-text-editor p,
-.payload-admin .rich-text-editor li,
-.payload-admin .lexical-editor p,
-.payload-admin .lexical-editor li,
-.payload-admin [data-lexical-editor="true"] p,
-.payload-admin [data-lexical-editor="true"] li,
-.payload-admin [data-lexical-text="true"] {
+.rich-text-editor p,
+.rich-text-editor li,
+.lexical-editor p,
+.lexical-editor li,
+[data-lexical-editor="true"] p,
+[data-lexical-editor="true"] li,
+[data-lexical-text="true"] {
   line-height: var(--admin-leading-relaxed);
   font-family: var(--admin-font-vietnamese-safe);
 }
 
 /* Ensure proper font inheritance for all text elements */
-.payload-admin textarea,
-.payload-admin .field-type.textarea textarea,
-.payload-admin .field-type.rich-text .editor-scroller {
+.field-type.textarea textarea,
+.field-type.rich-text .editor-scroller {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: var(--admin-leading-normal);
 }
 
 /* Fix for lexical editor content editable area */
-.payload-admin .ContentEditable__root,
-.payload-admin .ContentEditable__root *,
-.payload-admin .LexicalEditorTheme__paragraph,
-.payload-admin .LexicalEditorTheme__quote,
-.payload-admin .LexicalEditorTheme__h1,
-.payload-admin .LexicalEditorTheme__h2,
-.payload-admin .LexicalEditorTheme__h3,
-.payload-admin .LexicalEditorTheme__h4,
-.payload-admin .LexicalEditorTheme__h5,
-.payload-admin .LexicalEditorTheme__h6 {
+.ContentEditable__root,
+.ContentEditable__root *,
+.LexicalEditorTheme__paragraph,
+.LexicalEditorTheme__quote,
+.LexicalEditorTheme__h1,
+.LexicalEditorTheme__h2,
+.LexicalEditorTheme__h3,
+.LexicalEditorTheme__h4,
+.LexicalEditorTheme__h5,
+.LexicalEditorTheme__h6 {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: var(--admin-leading-relaxed);
   letter-spacing: normal;

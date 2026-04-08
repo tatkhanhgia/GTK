@@ -62,7 +62,10 @@ export function AdminThemeProviderClient({ children }: { children?: React.ReactN
   });
   const resolvedTheme: ResolvedTheme = resolveTheme(themePreference, prefersDark);
 
-  // Sync sidebar collapsed state to CSS and localStorage
+  // Sync sidebar collapsed state to CSS and localStorage.
+  // The actual layout offset is handled purely in CSS via the
+  // --admin-sidebar-width variable on :root (see component-overrides.css),
+  // toggled here by adding/removing the .admin-sidebar-collapsed class.
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -75,69 +78,6 @@ export function AdminThemeProviderClient({ children }: { children?: React.ReactN
       root.classList.remove('admin-sidebar-collapsed');
     }
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(isSidebarCollapsed));
-
-    // Apply margin-left to main content to prevent sidebar overlap
-    // This ensures main content is properly offset regardless of CSS selector specificity
-    const SIDEBAR_WIDTH_EXPANDED = 288; // w-72 = 18rem = 288px
-    const SIDEBAR_WIDTH_COLLAPSED = 72; // w-[72px] = 72px
-    const marginLeft = isSidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED;
-
-    // Find and update main content elements
-    const mainContentSelectors = [
-      '.template-default > .group',
-      '.payload-admin > .group',
-      '.payload-admin > div[class*="group"]',
-      '.template-default > div[class*="group"]',
-    ];
-
-    // Only apply on desktop (screen width >= 768px)
-    const isMobile = window.innerWidth < 768;
-
-    mainContentSelectors.forEach((selector) => {
-      const elements = document.querySelectorAll(selector);
-      elements.forEach((el) => {
-        if (isMobile) {
-          (el as HTMLElement).style.marginLeft = '0';
-        } else {
-          (el as HTMLElement).style.marginLeft = `${marginLeft}px`;
-        }
-      });
-    });
-  }, [isSidebarCollapsed]);
-
-  // Listen for window resize to update margin on mobile/desktop transition
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
-    const handleResize = () => {
-      const SIDEBAR_WIDTH_EXPANDED = 288;
-      const SIDEBAR_WIDTH_COLLAPSED = 72;
-      const marginLeft = isSidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED;
-      const isMobile = window.innerWidth < 768;
-
-      const mainContentSelectors = [
-        '.template-default > .group',
-        '.payload-admin > .group',
-        '.payload-admin > div[class*="group"]',
-        '.template-default > div[class*="group"]',
-      ];
-
-      mainContentSelectors.forEach((selector) => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach((el) => {
-          if (isMobile) {
-            (el as HTMLElement).style.marginLeft = '0';
-          } else {
-            (el as HTMLElement).style.marginLeft = `${marginLeft}px`;
-          }
-        });
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, [isSidebarCollapsed]);
 
   // Listen for changes from other tabs/windows

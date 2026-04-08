@@ -1292,36 +1292,43 @@ html.admin-dark .payload-admin {
 
 /* ============================================================
    Vietnamese Text Rendering Fixes
+   NOTE: Selectors are intentionally NOT scoped under `.payload-admin`
+   because the Payload v3 admin RootLayout does not apply that class
+   anywhere on the DOM (only `.payload-admin-header` exists on the
+   custom header). Scoping to `.payload-admin` would make every rule
+   below a dead rule — which is exactly what caused Vietnamese
+   diacritics (e.g. `ế` U+1EBF, `ố` U+1ED1) to fall back per-glyph
+   onto a font with mismatched metrics and render misaligned.
    ============================================================ */
 
 /* Force Vietnamese-supporting fonts for all text content */
-.payload-admin .field-type.rich-text .editor-shell,
-.payload-admin .field-type.rich-text .editor-container,
-.payload-admin .field-type.rich-text [contenteditable="true"] {
+.field-type.rich-text .editor-shell,
+.field-type.rich-text .editor-container,
+.field-type.rich-text [contenteditable="true"] {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: 1.8;
 }
 
 /* Ensure text areas have proper font for Vietnamese */
-.payload-admin .field-type textarea,
-.payload-admin .field-type.textarea .input-wrapper textarea {
+.field-type textarea,
+.field-type.textarea .input-wrapper textarea {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: 1.65;
 }
 
 /* Fix for form fields with Vietnamese content */
-.payload-admin .field-type input[type="text"],
-.payload-admin .field-type input[type="email"] {
+.field-type input[type="text"],
+.field-type input[type="email"] {
   font-family: var(--admin-font-vietnamese-safe);
 }
 
 /* Specific fix for Payload Lexical editor content */
-.payload-admin .rich-text-lexical .editor-container,
-.payload-admin .rich-text-lexical .editor-scroller,
-.payload-admin .rich-text-lexical .ContentEditable__root,
-.payload-admin .rich-text-lexical .ContentEditable__root *,
-.payload-admin .rich-text-lexical .LexicalEditorTheme__placeholder,
-.payload-admin .editor-container [contenteditable="true"] {
+.rich-text-lexical .editor-container,
+.rich-text-lexical .editor-scroller,
+.rich-text-lexical .ContentEditable__root,
+.rich-text-lexical .ContentEditable__root *,
+.rich-text-lexical .LexicalEditorTheme__placeholder,
+.editor-container [contenteditable="true"] {
   font-family: var(--admin-font-vietnamese-safe) !important;
   line-height: 1.8 !important;
   letter-spacing: normal !important;
@@ -1332,7 +1339,7 @@ html.admin-dark .payload-admin {
 }
 
 /* Headings inside the editor must stay on the Vietnamese-safe sans stack */
-.payload-admin .rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6, p, li, blockquote) {
+.rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6, p, li, blockquote) {
   font-family: var(--admin-font-vietnamese-safe) !important;
   line-height: 1.8 !important;
   letter-spacing: normal !important;
@@ -1340,17 +1347,17 @@ html.admin-dark .payload-admin {
 
 
 /* Final override: keep Lexical editor on a Windows-safe Vietnamese stack */
-.payload-admin .ContentEditable__root,
-.payload-admin .ContentEditable__root *,
-.payload-admin .ContentEditable__root [data-lexical-text="true"],
-.payload-admin .LexicalEditorTheme__paragraph,
-.payload-admin .LexicalEditorTheme__quote,
-.payload-admin .LexicalEditorTheme__h1,
-.payload-admin .LexicalEditorTheme__h2,
-.payload-admin .LexicalEditorTheme__h3,
-.payload-admin .LexicalEditorTheme__h4,
-.payload-admin .LexicalEditorTheme__h5,
-.payload-admin .LexicalEditorTheme__h6 {
+.ContentEditable__root,
+.ContentEditable__root *,
+.ContentEditable__root [data-lexical-text="true"],
+.LexicalEditorTheme__paragraph,
+.LexicalEditorTheme__quote,
+.LexicalEditorTheme__h1,
+.LexicalEditorTheme__h2,
+.LexicalEditorTheme__h3,
+.LexicalEditorTheme__h4,
+.LexicalEditorTheme__h5,
+.LexicalEditorTheme__h6 {
   font-family: var(--admin-font-vietnamese-safe) !important;
   letter-spacing: normal !important;
   line-height: 1.8 !important;

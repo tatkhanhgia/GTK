@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button-variants'
 import { TechStackBadges } from '@/components/ui/tech-stack-badges'
 import { cn, formatPrice } from '@/lib/utils'
 

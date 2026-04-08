@@ -8,6 +8,8 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { LogoInline } from '@/components/layout/logo'
+import { usePathname } from 'next/navigation'
+import { locales } from '@/i18n/config'
 
 const navLinks = [
   { href: '/blog', label: 'Blog', labelVi: 'Blog' },
@@ -22,6 +24,17 @@ interface NavbarProps {
 
 export function Navbar({ locale = 'vi' }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false)
+  // Use raw Next pathname so locale stripping does not depend on next-intl client state.
+  // Example: on /en/me we get "/en/me" — replace segment[0] with otherLocale → "/vi/me".
+  const rawPathname = usePathname() ?? `/${locale}`
+  const otherLocale: 'vi' | 'en' = locale === 'vi' ? 'en' : 'vi'
+  const segments = rawPathname.split('/').filter(Boolean)
+  if (segments.length > 0 && (locales as readonly string[]).includes(segments[0])) {
+    segments[0] = otherLocale
+  } else {
+    segments.unshift(otherLocale)
+  }
+  const switchHref = '/' + segments.join('/')
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
@@ -47,10 +60,18 @@ export function Navbar({ locale = 'vi' }: NavbarProps) {
 
         {/* Desktop Actions — right */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Language switcher placeholder — Phase 5 will replace with real switcher */}
-          <Button variant="ghost" size="sm" className="text-xs font-medium">
+          {/* Language switcher — navigates to the same page in the other locale */}
+          <Link
+            href={switchHref}
+            prefetch={false}
+            aria-label={`Switch language to ${otherLocale === 'vi' ? 'Vietnamese' : 'English'}`}
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'text-xs font-medium'
+            )}
+          >
             {locale === 'vi' ? 'EN' : 'VI'}
-          </Button>
+          </Link>
           <ThemeToggle />
           {/* Use <a> styled as button since base-nova Button has no asChild prop */}
           <Link
@@ -85,7 +106,19 @@ export function Navbar({ locale = 'vi' }: NavbarProps) {
                     {locale === 'vi' ? link.labelVi : link.label}
                   </Link>
                 ))}
-                <div className="pt-4 border-t border-border">
+                <div className="pt-4 border-t border-border flex flex-col gap-2">
+                  <Link
+                    href={switchHref}
+                    prefetch={false}
+                    onClick={() => setIsOpen(false)}
+                    aria-label={`Switch language to ${otherLocale === 'vi' ? 'Vietnamese' : 'English'}`}
+                    className={cn(
+                      buttonVariants({ variant: 'outline' }),
+                      'w-full justify-center'
+                    )}
+                  >
+                    {locale === 'vi' ? 'English' : 'Tiếng Việt'}
+                  </Link>
                   <Link
                     href="/login"
                     onClick={() => setIsOpen(false)}
