@@ -17,56 +17,95 @@
   background: transparent;
 }
 
+/* The custom header is rendered above .template-default (sibling of body),
+   so the padding-left we apply to .template-default does not reach it.
+   Reserve the same sidebar width here so the header content (breadcrumbs,
+   search, account menu) does not slide under the fixed sidebar. */
+@media (min-width: 768px) {
+  header.payload-admin-header {
+    padding-left: var(--admin-sidebar-width) !important;
+    box-sizing: border-box;
+    transition: padding-left 0.3s ease-out;
+  }
+}
+
 /* ============================================================
-   MAIN CONTENT LAYOUT - Offset for fixed sidebar
-   ============================================================ */
+   MAIN CONTENT LAYOUT - Offset for fixed custom sidebar
+   ============================================================
+   The custom sidebar is portaled to <body> and uses position:fixed,
+   so it lives outside the Payload admin layout flow. To stop it
+   from overlapping the main content, we reserve space on the LEFT
+   of the admin shell via padding-left on the actual root template
+   wrappers. The width is driven by a single CSS variable that the
+   AdminThemeProvider toggles based on collapsed state. */
 
-/* Main content area needs margin-left to avoid being covered by sidebar */
-/* Target Payload's main content wrapper - the .group element that is a direct child of .template-default */
-.template-default > .group,
-.payload-admin > .group {
-  margin-left: 288px !important;
-  transition: margin-left 0.3s ease-out;
+:root {
+  --admin-sidebar-width: 288px; /* w-72 = 18rem */
 }
 
-/* When sidebar is collapsed (w-[72px] = 72px) - use class on html element */
-html.admin-sidebar-collapsed .template-default > .group,
-html.admin-sidebar-collapsed .payload-admin > .group {
-  margin-left: 72px !important;
+html.admin-sidebar-collapsed {
+  --admin-sidebar-width: 72px; /* w-[72px] */
 }
 
-/* Mobile: no margin needed since sidebar is overlay */
-@media (max-width: 767px) {
-  .template-default > .group,
-  .payload-admin > .group {
-    margin-left: 0 !important;
+/* Payload v3's .template-default uses CSS Grid with two columns:
+   `[nav-track] [content-track]`. When we hide the built-in <nav>
+   via display:none the grid item is removed entirely, the lone
+   __wrap element drops into the FIRST track (which is 0px wide)
+   and the whole content area collapses to width:0 — even though
+   the second track still measures ~1152px. The visible result is
+   that every page (Dashboard, Posts, Users, …) renders behind the
+   sidebar with table cells squashed into 5–10px columns.
+
+   Fix: take .template-default out of grid layout entirely. As a
+   plain block element with padding-left, the inner __wrap fills
+   the remaining width naturally and the hidden nav has no effect. */
+@media (min-width: 768px) {
+  .payload-admin,
+  .template-default,
+  .payload-default-app {
+    display: block !important;
+    padding-left: var(--admin-sidebar-width) !important;
+    box-sizing: border-box;
+    transition: padding-left 0.3s ease-out;
+  }
+
+  /* Ensure the inner wrap fills the available width once the parent
+     is no longer a grid container. */
+  .template-default > .template-default__wrap {
+    display: block;
+    width: 100%;
+    min-width: 0;
   }
 }
 
-/* Additional selectors for different Payload layout structures */
-/* Target the main content area that comes after the sidebar container */
-#custom-sidebar-container ~ .group,
-#custom-sidebar-container ~ * .group,
-body:has(#custom-sidebar-container) .payload-admin > div[class*="group"],
-body:has(#custom-sidebar-container) .template-default > div[class*="group"] {
-  margin-left: 288px !important;
-  transition: margin-left 0.3s ease-out;
-}
-
-html.admin-sidebar-collapsed #custom-sidebar-container ~ .group,
-html.admin-sidebar-collapsed #custom-sidebar-container ~ * .group,
-html.admin-sidebar-collapsed body:has(#custom-sidebar-container) .payload-admin > div[class*="group"],
-html.admin-sidebar-collapsed body:has(#custom-sidebar-container) .template-default > div[class*="group"] {
-  margin-left: 72px !important;
-}
-
+/* Mobile: sidebar is an overlay, no offset needed */
 @media (max-width: 767px) {
-  #custom-sidebar-container ~ .group,
-  #custom-sidebar-container ~ * .group,
-  body:has(#custom-sidebar-container) .payload-admin > div[class*="group"],
-  body:has(#custom-sidebar-container) .template-default > div[class*="group"] {
-    margin-left: 0 !important;
+  .payload-admin,
+  .template-default,
+  .payload-default-app {
+    display: block !important;
+    padding-left: 0 !important;
   }
+
+  .template-default > .template-default__wrap {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Collection-list table overflow on mobile.
+   Payload v3 wraps the table in `div.table` with overflow-x:hidden,
+   which clips wide tables (e.g. Posts list ~650px) on a 390px screen
+   so the data is invisible. Allow horizontal scrolling instead. */
+.collection-list .table,
+.collection-list__tables .table {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.collection-list .table > table {
+  min-width: max-content;
 }
 
 /* Hide Payload default nav components - we use custom sidebar instead */
