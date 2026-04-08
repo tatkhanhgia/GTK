@@ -28,22 +28,16 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder /app/package.json /app/package-lock.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy startup check script
+# Entrypoint scripts: startup-check delegates to bootstrap-db for
+# idempotent DB schema fixes before launching the Next.js server.
 COPY --from=builder /app/scripts/startup-check.js ./scripts/startup-check.js
+COPY --from=builder /app/scripts/bootstrap-db.js ./scripts/bootstrap-db.js
 
 # Copy only what Next.js standalone output needs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy necessary files for migration checks
-COPY --from=builder /app/payload.config.ts ./
-COPY --from=builder /app/src/migrations ./src/migrations
-COPY --from=builder /app/src/collections ./src/collections
-COPY --from=builder /app/src/globals ./src/globals
-COPY --from=builder /app/src/lib ./src/lib
-COPY --from=builder /app/src/hooks ./src/hooks
-COPY --from=builder /app/src/i18n ./src/i18n
 COPY --from=builder /app/package.json ./
 
 USER nextjs

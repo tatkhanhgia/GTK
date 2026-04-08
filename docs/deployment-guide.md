@@ -76,49 +76,93 @@ git check-ignore .env.local
 
 ## Docker Deployment
 
-### Option A: Docker Compose (Single Machine)
+### Option A: Docker Compose (Single Machine — recommended)
 
-#### 1. Build Docker Image
+Everything is driven from `docker-compose.yml`. The `app` container's
+entrypoint is `scripts/startup-check.js`, which:
+
+1. Waits until Postgres accepts connections (30 retries × 2 s = 1 min).
+2. Runs `scripts/bootstrap-db.js` — an idempotent, plain-JS script that
+   applies any known schema drift fixes (e.g. casting
+   `pages_locales.content` from `varchar` to `jsonb`). Re-running is
+   safe: already-applied fixes report `up-to-date` and the script
+   continues.
+3. Exec's `node server.js` (Next.js standalone output).
+
+**You never need to `psql` or `exec` into the container to migrate.**
+
+#### Deploy / update (single command)
 
 ```bash
-docker build -t gtkblog:latest .
+cd /path/to/gtkblog
+git pull
+docker compose up -d --build
 ```
 
-**Dockerfile Breakdown:**
+That's the whole deploy flow. Watch the logs if you want:
+
+```bash
+docker compose logs -f app
+```
+
+Expected on first boot or after a schema-drift fix:
+
+```
+GTKBlog Startup Check
+⏳ Checking database connection…
+✓ Database reachable
+
+⏳ Running DB bootstrap…
+[bootstrap-db] connected (1 fix to check)
+[bootstrap-db] applied:    pages_locales.content varchar -> jsonb
+[bootstrap-db] all fixes complete
+✓ DB bootstrap complete
+
+Starting Application…
+```
+
+Subsequent restarts just show `up-to-date` for each fix.
+
+#### Adding a new schema fix
+
+Edit `scripts/bootstrap-db.js` and append an entry to the `FIXES`
+array. Each entry must:
+- Check current DB state via `information_schema` / `pg_catalog`.
+- Return `{ status: 'up-to-date' }` if already applied.
+- Otherwise run its `ALTER` / `CREATE` / `UPDATE` and return
+  `{ status: 'applied' }`.
+
+The next `docker compose up -d --build` will apply the new fix before
+the app starts. No `npx payload migrate` or manual SQL required.
+
+#### Escape hatches
+
+- Skip bootstrap entirely (emergencies only):
+  ```bash
+  docker compose run --rm -e SKIP_BOOTSTRAP=true app node server.js
+  ```
+- Inspect the DB manually if a fix errors out:
+  ```bash
+  docker compose exec postgres psql -U gtkblog -d gtkblog
+  ```
+- Raw SQL for the current single drift:
+  ```bash
+  docker compose exec postgres psql -U gtkblog -d gtkblog \
+    -c 'ALTER TABLE "pages_locales" ALTER COLUMN "content" SET DATA TYPE jsonb USING "content"::jsonb;'
+  ```
+
+**Why not `npx payload migrate`?** The Payload 3.81 CLI loads
+`payload.config.ts` via `tsx/esm/api`, which hits a `require(esm)
+cycle` error under Node 22+ with the extensionless relative imports in
+our config. On top of that, `tsx` is a devDependency that is not
+installed in the production runtime image. Both problems disappear by
+talking to Postgres directly with `pg`, which is what `bootstrap-db.js`
+does.
+
+**Dockerfile breakdown:**
 - **Stage 1 (deps):** Install production dependencies only
 - **Stage 2 (builder):** Full build with all dev dependencies + Turbopack
-- **Stage 3 (runner):** Minimal runtime image (only prod deps + .next/standalone)
-
-#### 2. Docker Compose Stack
-
-```bash
-# Review docker-compose.yml (includes PostgreSQL service)
-cat docker-compose.yml
-
-# Start services
-docker-compose up -d
-
-# Verify running
-docker-compose ps
-
-# View logs
-docker-compose logs -f gtkblog
-```
-
-**docker-compose.yml includes:**
-- PostgreSQL 16 (port 5432)
-- Next.js app (port 3000)
-- Persistent volumes for database data
-
-#### 3. Initialize Database
-
-```bash
-# Run migrations (inside container)
-docker-compose exec gtkblog npm run drizzle:migrate
-
-# Or from host (if PostgreSQL accessible)
-npm run drizzle:migrate
-```
+- **Stage 3 (runner):** Minimal runtime image (prod deps + `.next/standalone` + entrypoint scripts)
 
 ### Option B: Kubernetes (Multi-Machine)
 
