@@ -7,6 +7,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
+import { LogoInline } from '@/components/layout/logo'
 
 const navLinks = [
   { href: '/blog', label: 'Blog', labelVi: 'Blog' },
@@ -26,9 +27,7 @@ export function Navbar({ locale = 'vi' }: NavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-heading font-bold text-xl">
-          <span className="gradient-text-brand">GTKBlog</span>
-        </Link>
+        <LogoInline showText />
 
         {/* Desktop Nav — center */}
         <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">

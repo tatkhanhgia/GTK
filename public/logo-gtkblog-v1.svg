@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#F5F0E8"/>
+
+  <!-- G letter path -->
+  <path d="M100 40C67.967 40 42 65.967 42 98s25.967 58 58 58c14.234 0 27.267-5.132 37.406-13.656l-12.39-14.422C118.89 134.332 109.89 138 100 138c-22.056 0-40-17.944-40-40s17.944-40 40-40c9.234 0 17.734 3.156 24.5 8.422l11.2-15.044C125.378 44.578 113.234 40 100 40z" fill="#D97757"/>
+
+  <!-- T letter integrated -->
+  <path d="M95 70h30v12h-9v46h-12V82H95V70z" fill="#C4713E"/>
+
+  <!-- Small decorative dot -->
+  <circle cx="145" cy="55" r="8" fill="#D97757" opacity="0.6"/>
+</svg>

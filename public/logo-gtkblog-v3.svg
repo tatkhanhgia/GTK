@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Hexagon shape -->
+  <path d="M100 10L180 55v90l-80 45-80-45V55L100 10z" fill="#F5F0E8" stroke="#D97757" stroke-width="6"/>
+
+  <!-- Letter G inside hexagon -->
+  <path d="M100 55c-23.196 0-42 18.804-42 42s18.804 42 42 42c10.253 0 19.642-3.69 26.922-9.816l-8.922-10.404C113.77 124.33 107.11 127 100 127c-16.542 0-30-13.458-30-30s13.458-30 30-30c6.93 0 13.31 2.367 18.375 6.317l8.4-11.283C119.034 58.122 109.918 55 100 55z" fill="#D97757"/>
+
+  <!-- T crossbar -->
+  <path d="M85 85h30v8H85z" fill="#C4713E"/>
+
+  <!-- Small accent lines -->
+  <path d="M100 145v20" stroke="#D97757" stroke-width="4" stroke-linecap="round"/>
+  <path d="M85 160l15 15 15-15" stroke="#D97757" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

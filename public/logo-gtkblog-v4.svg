@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" fill="none">
+  <!-- GTK Wordmark -->
+  <g transform="translate(20, 20)">
+    <!-- G -->
+    <path d="M30 10C13.46 10 0 23.46 0 40s13.46 30 30 30c7.37 0 14.11-2.67 19.34-7.09l-6.42-7.48C38.94 58.14 34.67 60 30 60c-11.05 0-20-8.95-20-20s8.95-20 20-20c4.62 0 8.87 1.58 12.25 4.21l5.6-7.52C42.48 12.49 36.46 10 30 10z" fill="#D97757"/>
+    <path d="M20 35h15v6H20z" fill="#C4713E"/>
+
+    <!-- T -->
+    <path d="M65 12h40v8H85v50h-8V20H65v-8z" fill="#D97757"/>
+
+    <!-- K -->
+    <path d="M115 12h8v28l22-28h10l-24 30 26 30h-12l-22-26v26h-8V12z" fill="#D97757"/>
+
+    <!-- Blog text smaller -->
+    <text x="170" y="52" font-family="Space Grotesk, sans-serif" font-size="36" font-weight="600" fill="#C4713E">Blog</text>
+
+    <!-- Decorative dot -->
+    <circle cx="270" cy="20" r="6" fill="#D97757"/>
+  </g>
+
+  <!-- Underline accent -->
+  <rect x="20" y="95" width="120" height="4" rx="2" fill="#D97757" opacity="0.5"/>
+</svg>

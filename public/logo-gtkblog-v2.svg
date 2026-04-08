@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Background -->
+  <rect width="200" height="200" rx="40" fill="#F5F0E8"/>
+
+  <!-- Pen / Code bracket combination -->
+  <!-- Left bracket -->
+  <path d="M60 60L30 100l30 40" stroke="#D97757" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Right bracket -->
+  <path d="M140 60l30 40-30 40" stroke="#D97757" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Pen nib in center -->
+  <path d="M100 45l-15 50h30l-15-50z" fill="#C4713E"/>
+  <circle cx="100" cy="110" r="8" fill="#D97757"/>
+
+  <!-- Pen stroke line -->
+  <path d="M70 145c20-10 40-10 60 0" stroke="#D97757" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+</svg>

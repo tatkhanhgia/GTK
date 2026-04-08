@@ -17,6 +17,58 @@
   background: transparent;
 }
 
+/* ============================================================
+   MAIN CONTENT LAYOUT - Offset for fixed sidebar
+   ============================================================ */
+
+/* Main content area needs margin-left to avoid being covered by sidebar */
+/* Target Payload's main content wrapper - the .group element that is a direct child of .template-default */
+.template-default > .group,
+.payload-admin > .group {
+  margin-left: 288px !important;
+  transition: margin-left 0.3s ease-out;
+}
+
+/* When sidebar is collapsed (w-[72px] = 72px) - use class on html element */
+html.admin-sidebar-collapsed .template-default > .group,
+html.admin-sidebar-collapsed .payload-admin > .group {
+  margin-left: 72px !important;
+}
+
+/* Mobile: no margin needed since sidebar is overlay */
+@media (max-width: 767px) {
+  .template-default > .group,
+  .payload-admin > .group {
+    margin-left: 0 !important;
+  }
+}
+
+/* Additional selectors for different Payload layout structures */
+/* Target the main content area that comes after the sidebar container */
+#custom-sidebar-container ~ .group,
+#custom-sidebar-container ~ * .group,
+body:has(#custom-sidebar-container) .payload-admin > div[class*="group"],
+body:has(#custom-sidebar-container) .template-default > div[class*="group"] {
+  margin-left: 288px !important;
+  transition: margin-left 0.3s ease-out;
+}
+
+html.admin-sidebar-collapsed #custom-sidebar-container ~ .group,
+html.admin-sidebar-collapsed #custom-sidebar-container ~ * .group,
+html.admin-sidebar-collapsed body:has(#custom-sidebar-container) .payload-admin > div[class*="group"],
+html.admin-sidebar-collapsed body:has(#custom-sidebar-container) .template-default > div[class*="group"] {
+  margin-left: 72px !important;
+}
+
+@media (max-width: 767px) {
+  #custom-sidebar-container ~ .group,
+  #custom-sidebar-container ~ * .group,
+  body:has(#custom-sidebar-container) .payload-admin > div[class*="group"],
+  body:has(#custom-sidebar-container) .template-default > div[class*="group"] {
+    margin-left: 0 !important;
+  }
+}
+
 /* Hide Payload default nav components - we use custom sidebar instead */
 .template-default__nav-toggler-wrapper,
 .app-header {
