@@ -1,7 +1,8 @@
-import { expect } from 'vitest'
-import * as matchers from '@testing-library/jest-dom/matchers'
-
-expect.extend(matchers)
+// Extend Vitest's `expect` with @testing-library/jest-dom matchers
+// (e.g. `toBeInTheDocument`, `toHaveTextContent`). Importing the dedicated
+// `/vitest` entry point both registers the matchers at runtime AND augments
+// Vitest's `Assertion` interface with the proper TypeScript types.
+import '@testing-library/jest-dom/vitest'
 
 // Mock environment variables for tests
 process.env.STRIPE_SECRET_KEY = 'sk_test_mock'

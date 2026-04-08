@@ -1,17 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, act, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-const { navMock } = vi.hoisted(() => ({
-  navMock: {
-    navOpen: false,
-    setNavOpen: vi.fn(),
-  },
-}));
-
-vi.mock('@payloadcms/ui', () => ({
-  useNav: () => navMock,
-}));
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/admin',
@@ -21,31 +10,11 @@ vi.mock('next/link', () => ({
   default: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import {
-  AdminThemeProviderClient,
-  useAdminShell,
-} from '@/admin/components/providers/admin-theme-provider-client';
+import { AdminThemeProviderClient } from '@/admin/components/providers/admin-theme-provider-client';
 import { CustomSidebarClient } from '@/admin/components/layout/custom-sidebar-client';
-
-function AdminShellProbe() {
-  const { isMobileSidebarOpen, toggleMobileSidebar } = useAdminShell();
-
-  return React.createElement(
-    'div',
-    null,
-    React.createElement('span', { 'data-testid': 'mobile-state' }, String(isMobileSidebarOpen)),
-    React.createElement(
-      'button',
-      { type: 'button', onClick: toggleMobileSidebar },
-      'toggle-mobile-sidebar',
-    ),
-  );
-}
 
 describe('admin shell mobile nav integration', () => {
   beforeEach(() => {
-    navMock.navOpen = false;
-    navMock.setNavOpen.mockReset();
     window.localStorage.clear();
     document.documentElement.className = '';
     document.documentElement.removeAttribute('data-theme');
@@ -66,37 +35,46 @@ describe('admin shell mobile nav integration', () => {
     cleanup();
   });
 
-  it('mirrors Payload nav state and delegates the mobile toggle back to useNav', () => {
+  it('reflects the mobile sidebar CSS class on <html> into the sidebar overlay state', async () => {
+    // The mobile sidebar is controlled purely via the `admin-mobile-sidebar-open`
+    // class on `document.documentElement` (toggled by the header menu button).
+    // CustomSidebarClient observes that class via a MutationObserver and
+    // swaps the overlay's `aria-hidden` attribute accordingly. The observer
+    // fires asynchronously, so the assertions below must use `waitFor`.
     render(
       React.createElement(
         AdminThemeProviderClient,
         null,
-        React.createElement(AdminShellProbe),
+        React.createElement(CustomSidebarClient),
       ),
     );
 
-    expect(screen.getByTestId('mobile-state')).toHaveTextContent('false');
+    const overlay = document.querySelector('[aria-hidden]');
+    expect(overlay).not.toBeNull();
+    // Closed by default — overlay is hidden
+    expect(overlay?.getAttribute('aria-hidden')).toBe('true');
 
-    fireEvent.click(screen.getByRole('button', { name: 'toggle-mobile-sidebar' }));
+    act(() => {
+      document.documentElement.classList.add('admin-mobile-sidebar-open');
+    });
 
-    expect(navMock.setNavOpen).toHaveBeenCalledTimes(1);
-    expect(navMock.setNavOpen).toHaveBeenCalledWith(true);
+    await waitFor(() => {
+      expect(overlay?.getAttribute('aria-hidden')).toBe('false');
+    });
 
-    cleanup();
-    navMock.navOpen = true;
+    act(() => {
+      document.documentElement.classList.remove('admin-mobile-sidebar-open');
+    });
 
-    render(
-      React.createElement(
-        AdminThemeProviderClient,
-        null,
-        React.createElement(AdminShellProbe),
-      ),
-    );
-
-    expect(screen.getByTestId('mobile-state')).toHaveTextContent('true');
+    await waitFor(() => {
+      expect(overlay?.getAttribute('aria-hidden')).toBe('true');
+    });
   });
 
   it('does not render a second desktop collapse control inside the custom sidebar', () => {
+    // The desktop collapse toggle lives in the custom header, not the
+    // sidebar itself. Guarding against a duplicate button here keeps the
+    // sidebar free of the PanelLeft chevron that previously shipped twice.
     render(
       React.createElement(
         AdminThemeProviderClient,
