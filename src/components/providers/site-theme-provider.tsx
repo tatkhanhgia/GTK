@@ -1,6 +1,7 @@
 'use client'
 
 import { ThemeProvider } from 'next-themes'
+import NextTopLoader from 'nextjs-toploader'
 import type { ReactNode } from 'react'
 
 /**
@@ -18,6 +19,15 @@ export function SiteThemeProvider({ children }: { children: ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
+      {/* Global top progress bar for site route navigations (Layer 1) */}
+      <NextTopLoader
+        color="var(--primary)"
+        height={3}
+        showSpinner={false}
+        easing="ease"
+        speed={400}
+        shadow="0 0 10px var(--primary), 0 0 5px var(--primary)"
+      />
       {children}
     </ThemeProvider>
   )

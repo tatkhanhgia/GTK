@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { useSession } from '@/lib/auth/auth-client'
 import { createComment, deleteComment } from '@/lib/blog/comments-actions'
@@ -129,9 +130,9 @@ export function CommentSection({ postId, locale = 'vi' }: Props) {
       ) : (
         <p className="mb-8 text-sm text-muted-foreground p-4 rounded-lg bg-secondary">
           {isVi ? 'Đăng nhập để bình luận.' : 'Login to comment.'}{' '}
-          <a href="/login" className="text-primary hover:underline">
+          <Link href="/login" className="text-primary hover:underline">
             {isVi ? 'Đăng nhập' : 'Login'}
-          </a>
+          </Link>
         </p>
       )}
 
