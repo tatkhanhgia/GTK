@@ -35,6 +35,11 @@
     },
     "featuredPosts": "Bài viết nổi bật",
     "featuredProducts": "Sản phẩm số",
+    "achievements": {
+      "eyebrow": "Blog qua những con số",
+      "title": "Nơi kiến thức được viết xuống",
+      "subtitle": "Mỗi bài viết, mỗi sản phẩm, mỗi người đăng ký — là một mắt xích trong hành trình chia sẻ của GTKBlog."
+    },
     "newsletter": {
       "title": "Đăng ký nhận bài viết mới",
       "subtitle": "Nhận thông báo khi có bài viết mới nhất về AI và công nghệ.",

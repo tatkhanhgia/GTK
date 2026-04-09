@@ -35,6 +35,11 @@
     },
     "featuredPosts": "Featured Posts",
     "featuredProducts": "Digital Products",
+    "achievements": {
+      "eyebrow": "The blog in numbers",
+      "title": "Where knowledge gets written down",
+      "subtitle": "Every article, every product, every subscriber — a link in GTKBlog's ongoing trail of sharing."
+    },
     "newsletter": {
       "title": "Subscribe for new posts",
       "subtitle": "Get notified when new AI and tech articles are published.",

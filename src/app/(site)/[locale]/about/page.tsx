@@ -10,6 +10,9 @@ import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
 import { AuthorMiniCard } from '@/components/ui/author-mini-card'
 import { AboutHeroSection } from '@/components/about/about-hero-section'
 import { TopicsGrid } from '@/components/about/topics-grid'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { AchievementsSection } from '@/components/sections/achievements-section'
+import { getBlogStats } from '@/lib/author/get-blog-stats'
 
 interface Props {
   params: Promise<{ locale: string }>
@@ -61,11 +64,13 @@ export default async function AboutPage({ params }: Props) {
   const loc = locale as Locale
   const isVi = loc === 'vi'
 
-  const [aboutContent, authorProfile, recentPostsResult] = await Promise.all([
-    fetchAboutContent(loc),
-    getAuthorProfile(loc),
-    getPosts({ locale: loc, page: 1, limit: 3 }).catch(() => ({ docs: [] })),
-  ])
+  const [aboutContent, authorProfile, recentPostsResult, blogStats] =
+    await Promise.all([
+      fetchAboutContent(loc),
+      getAuthorProfile(loc),
+      getPosts({ locale: loc, page: 1, limit: 3 }).catch(() => ({ docs: [] })),
+      getBlogStats(loc),
+    ])
 
   const recentPosts = 'docs' in recentPostsResult ? recentPostsResult : { docs: [] }
 
@@ -94,9 +99,29 @@ export default async function AboutPage({ params }: Props) {
       />
 
       <div className="space-y-16">
-        <AboutHeroSection locale={loc} />
+        <ScrollReveal>
+          <AboutHeroSection locale={loc} />
+        </ScrollReveal>
 
-        <section className="grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.9fr)] lg:items-start">
+        <ScrollReveal>
+          <AchievementsSection
+            achievements={blogStats}
+            eyebrow={isVi ? 'Blog qua những con số' : 'The blog in numbers'}
+            title={
+              isVi
+                ? 'Một vài cột mốc dọc hành trình'
+                : 'A few milestones along the way'
+            }
+            subtitle={
+              isVi
+                ? 'Mỗi bài viết, mỗi sản phẩm, mỗi người đăng ký — đều là dấu vết của một quá trình ghi lại kiến thức có kỷ luật.'
+                : 'Every article, product, and subscriber is a trace of a disciplined habit of writing things down.'
+            }
+            variant="contained"
+          />
+        </ScrollReveal>
+
+        <ScrollReveal as="section" className="grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.9fr)] lg:items-start">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">
               {isVi ? 'Về blog' : 'About the blog'}
@@ -126,19 +151,23 @@ export default async function AboutPage({ params }: Props) {
               </div>
             )}
           </div>
-        </section>
+        </ScrollReveal>
 
-        <TopicsGrid locale={loc} />
+        <ScrollReveal>
+          <TopicsGrid locale={loc} />
+        </ScrollReveal>
 
-        <AuthorMiniCard
-          name={authorName}
-          title={authorTitle}
-          avatarUrl={authorAvatar}
-          locale={loc}
-          variant="full"
-        />
+        <ScrollReveal>
+          <AuthorMiniCard
+            name={authorName}
+            title={authorTitle}
+            avatarUrl={authorAvatar}
+            locale={loc}
+            variant="full"
+          />
+        </ScrollReveal>
 
-        <section>
+        <ScrollReveal as="section">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">
@@ -194,7 +223,7 @@ export default async function AboutPage({ params }: Props) {
               {isVi ? 'Chưa có bài viết nào để hiển thị.' : 'No posts available yet.'}
             </div>
           )}
-        </section>
+        </ScrollReveal>
       </div>
     </div>
   )

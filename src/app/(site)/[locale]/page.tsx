@@ -1,8 +1,15 @@
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { getAuthorProfile } from '@/lib/author/get-author-profile'
+import { getPosts } from '@/lib/blog/get-posts'
+import { getProducts } from '@/lib/products/get-products'
+import { BlogCard } from '@/components/ui/blog-card'
+import { ProductCard } from '@/components/ui/product-card'
+import { NewsletterSection } from '@/components/ui/newsletter-section'
 import { PhilosophySection } from '@/components/ui/philosophy-section'
-import { LazySection } from '@/components/ui/lazy-section'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { AchievementsSection } from '@/components/sections/achievements-section'
+import { getBlogStats } from '@/lib/author/get-blog-stats'
 import type { Locale } from '@/i18n/config'
 
 interface Props {
@@ -21,12 +28,21 @@ function getLocalizedText(value: unknown, locale: Locale): string | undefined {
   return undefined
 }
 
+export const revalidate = 60
+
 export default async function HomePage({ params }: Props) {
   const { locale } = await params
   const loc = locale as Locale
-  const t = await getTranslations('home')
+  // Pin locale explicitly to avoid next-intl context drift on RSC re-renders
+  const t = await getTranslations({ locale: loc, namespace: 'home' })
 
-  const authorProfile = await getAuthorProfile(loc)
+  const [authorProfile, postsResult, productsResult, blogStats] =
+    await Promise.all([
+      getAuthorProfile(loc),
+      getPosts({ locale: loc, limit: 3 }),
+      getProducts({ locale: loc, limit: 3 }),
+      getBlogStats(loc),
+    ])
   const heroTagline = getLocalizedText(authorProfile?.philosophy?.heroTagline, loc)
   const story = authorProfile?.philosophy?.story as { root: { children: unknown[] } } | undefined
 
@@ -51,7 +67,7 @@ export default async function HomePage({ params }: Props) {
   return (
     <main className="flex flex-col">
       {/* Hero Section */}
-      <section className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center">
+      <ScrollReveal as="section" className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center">
         <h1 className="mb-6 font-heading text-4xl font-bold md:text-5xl">
           {t('hero.title')}{' '}
           <span className="gradient-text-brand">{t('hero.titleHighlight')}</span>
@@ -73,23 +89,121 @@ export default async function HomePage({ params }: Props) {
             {t('hero.ctaProducts')}
           </Link>
         </div>
-      </section>
+      </ScrollReveal>
 
-      {/* Personal Story & Philosophy — Lazy loaded */}
+      {/* Achievements Section — real blog/store counts, not career stats */}
+      <div className="border-t border-border bg-secondary/10">
+        <AchievementsSection
+          achievements={blogStats}
+          eyebrow={t('achievements.eyebrow')}
+          title={t('achievements.title')}
+          subtitle={t('achievements.subtitle')}
+        />
+      </div>
+
+      {/* Featured Posts */}
+      {postsResult.docs.length > 0 && (
+        <ScrollReveal>
+          <section className="border-t border-border px-6 py-16">
+            <div className="mx-auto max-w-5xl">
+              <div className="mb-8 flex items-center justify-between">
+                <h2 className="font-heading text-2xl font-bold">{t('featuredPosts')}</h2>
+                <Link href={`/${loc}/blog`} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  {loc === 'vi' ? 'Xem tất cả →' : 'View all →'}
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {postsResult.docs.map((post) => {
+                  const featuredImage =
+                    post.featuredImage && typeof post.featuredImage === 'object'
+                      ? { url: (post.featuredImage as { url?: string }).url ?? '', alt: (post.featuredImage as { alt?: string }).alt ?? post.slug }
+                      : null
+                  const cat =
+                    post.category && typeof post.category === 'object'
+                      ? { name: getLocalizedText((post.category as { name?: unknown }).name, loc) || '', slug: (post.category as { slug: string }).slug }
+                      : null
+                  return (
+                    <BlogCard
+                      key={post.id}
+                      title={getLocalizedText(post.title, loc) || post.slug}
+                      slug={post.slug}
+                      excerpt={getLocalizedText(post.excerpt, loc)}
+                      featuredImage={featuredImage}
+                      category={cat}
+                      publishedAt={post.publishedAt ?? undefined}
+                      readingTime={post.readingTime ?? undefined}
+                      locale={loc}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+      )}
+
+      {/* Featured Products */}
+      {productsResult.docs.length > 0 && (
+        <ScrollReveal>
+          <section className="border-t border-border bg-secondary/20 px-6 py-16">
+            <div className="mx-auto max-w-5xl">
+              <div className="mb-8 flex items-center justify-between">
+                <h2 className="font-heading text-2xl font-bold">{t('featuredProducts')}</h2>
+                <Link href={`/${loc}/products`} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  {loc === 'vi' ? 'Xem tất cả →' : 'View all →'}
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {productsResult.docs.map((product) => {
+                  const firstImgBlock = Array.isArray(product.images) && product.images[0]
+                    ? (product.images[0] as { image: unknown }).image
+                    : null
+                  const image = firstImgBlock && typeof firstImgBlock === 'object'
+                    ? { url: (firstImgBlock as { url?: string }).url ?? '', alt: product.slug }
+                    : null
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      name={typeof product.name === 'string' ? product.name : String(product.name)}
+                      slug={product.slug}
+                      excerpt={typeof product.excerpt === 'string' ? product.excerpt : undefined}
+                      image={image}
+                      priceUSD={product.priceUSD}
+                      priceVND={product.priceVND}
+                      type={product.type}
+                      locale={loc}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+      )}
+
+      {/* Newsletter */}
+      <ScrollReveal>
+        <section className="border-t border-border px-6 py-16">
+          <div className="mx-auto max-w-2xl">
+            <NewsletterSection locale={loc} />
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* Personal Story & Philosophy */}
       {(story || principles.length > 0) && (
-        <LazySection>
+        <ScrollReveal>
           <section className="border-t border-border bg-secondary/30 px-6 py-16">
             <div className="mx-auto max-w-4xl">
               <div className="mb-8 text-center">
-                <h2 className="font-heading text-3xl font-bold tracking-tight"
-                >
+                <h2 className="font-heading text-3xl font-bold tracking-tight">
                   {loc === 'vi' ? 'Triết lý làm việc' : 'How I Work'}
                 </h2>
               </div>
               <PhilosophySection story={story} principles={principles} locale={loc} />
             </div>
           </section>
-        </LazySection>
+        </ScrollReveal>
       )}
     </main>
   )

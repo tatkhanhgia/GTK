@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import type { Locale } from '@/i18n/config'
 
 interface Props {
   params: Promise<{ locale: string }>
