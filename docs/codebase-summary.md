@@ -103,6 +103,8 @@ src/
 │   ├── products/                 # Product components
 │   │   ├── payment-buttons.tsx   # Stripe + SePay toggles
 │   │   └── sepay-qr-modal.tsx    # QR code display
+│   ├── sections/                 # Page-level composable sections
+│   │   └── achievements-section.tsx # Portfolio-style stats grid w/ stagger + counter (homepage + about)
 │   ├── layout/                   # Layout components
 │   │   ├── navbar.tsx            # Sticky header (includes /me link)
 │   │   ├── sidebar.tsx           # Content sidebar (categories, TOC)
@@ -120,6 +122,9 @@ src/
 │       ├── newsletter-section.tsx # Subscription CTA wired to newsletter API
 │       ├── product-card.tsx      # Product grid card
 │       ├── search-input.tsx      # Client-side blog search field shell
+│       ├── skeleton-page-layouts.tsx # Page-level skeleton screens (9 layouts for route loading states)
+│       ├── scroll-reveal.tsx     # Fade+slide-up on viewport intersect (motion v12, respects reduced-motion)
+│       ├── animated-counter.tsx  # Count-up on view w/ ease-out-expo easing
 │       └── ...
 │
 ├── admin/                        # Payload admin custom surface
@@ -175,7 +180,8 @@ src/
 │   │   ├── get-user-downloads.ts # Available downloads
 │   │   └── update-profile-action.ts
 │   ├── author/
-│   │   └── get-author-profile.ts # Fetch author-profile global from Payload
+│   │   ├── get-author-profile.ts # Fetch author-profile global from Payload
+│   │   └── get-blog-stats.ts     # Live counts (posts/topics/products/subscribers) for Achievements section
 │   ├── email/
 │   │   ├── resend-client.ts      # Resend email service
 │   │   ├── send-email.ts         # Generic email function (supports replyTo param)
