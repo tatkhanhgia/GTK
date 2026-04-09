@@ -24,6 +24,9 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { CustomHeader as CustomHeader_admin } from '@/admin/components/layout/custom-header'
 import { AdminThemeProvider as AdminThemeProvider_admin } from '@/admin/components/providers/admin-theme-provider'
 import { CustomDashboard as CustomDashboard_admin } from '@/admin/components/views/custom-dashboard'
+import { StatusCell as StatusCell_admin } from '@/admin/components/cells/status-cell'
+import { TypeCell as TypeCell_admin } from '@/admin/components/cells/type-cell'
+import { PriceVNDCell as PriceVNDCell_admin } from '@/admin/components/cells/price-vnd-cell'
 import { CollectionCards as CollectionCards_admin } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -53,5 +56,8 @@ export const importMap = {
   "@/admin/components/layout/custom-header#CustomHeader": CustomHeader_admin,
   "@/admin/components/providers/admin-theme-provider#AdminThemeProvider": AdminThemeProvider_admin,
   "@/admin/components/views/custom-dashboard#CustomDashboard": CustomDashboard_admin,
+  "@/admin/components/cells/status-cell#StatusCell": StatusCell_admin,
+  "@/admin/components/cells/type-cell#TypeCell": TypeCell_admin,
+  "@/admin/components/cells/price-vnd-cell#PriceVNDCell": PriceVNDCell_admin,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_admin,
 }

@@ -1,4 +1,4 @@
-import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres';
+import { MigrateUpArgs, sql } from '@payloadcms/db-postgres';
 
 /**
  * Safely cast `pages_locales.content` from `varchar` to `jsonb` for environments
@@ -35,6 +35,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
  * JSON representation for no benefit, and Payload can always read `jsonb` as
  * text if needed.
  */
-export async function down(_args: MigrateDownArgs): Promise<void> {
+export async function down(): Promise<void> {
   /* no-op */
 }

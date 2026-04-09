@@ -4,7 +4,7 @@ export const Products: CollectionConfig = {
   slug: 'products',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'type', 'priceUSD', 'status'],
+    defaultColumns: ['name', 'type', 'priceVND', 'status'],
   },
   versions: {
     drafts: {
@@ -52,6 +52,11 @@ export const Products: CollectionConfig = {
         { label: 'Code', value: 'code' },
       ],
       required: true,
+      admin: {
+        components: {
+          Cell: '@/admin/components/cells/type-cell#TypeCell',
+        },
+      },
     },
     {
       name: 'priceUSD',
@@ -69,6 +74,9 @@ export const Products: CollectionConfig = {
       min: 0,
       admin: {
         description: 'Price in VND (e.g., 250000 = 250,000₫)',
+        components: {
+          Cell: '@/admin/components/cells/price-vnd-cell#PriceVNDCell',
+        },
       },
     },
     {
@@ -133,6 +141,9 @@ export const Products: CollectionConfig = {
       required: true,
       admin: {
         position: 'sidebar',
+        components: {
+          Cell: '@/admin/components/cells/status-cell#StatusCell',
+        },
       },
     },
     {
