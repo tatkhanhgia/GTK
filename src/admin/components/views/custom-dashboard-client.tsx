@@ -522,7 +522,7 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
                   </div>
                 ) : (
                   <div className="space-y-5">
-                    {dashboardState.activities.map((item, index) => (
+                    {dashboardState.activities.map((item) => (
                       <Link key={item.id} href={item.href} className="group block relative">
                         <div className="flex items-start gap-4">
                           <div className="relative flex flex-col items-center z-10">

@@ -79,6 +79,33 @@
   /* Motion */
   --admin-transition-fast: 150ms ease;
   --admin-transition-normal: 200ms ease;
+
+  /* Status color tokens — Anthropic earthy palette */
+  /* Draft: warm stone (in-progress, calm) */
+  --status-draft-bg:     #ece7dd;
+  --status-draft-fg:     #6b6457;
+  --status-draft-border: #d8d2c4;
+
+  /* Published: sage forest (calm success, not bright green) */
+  --status-published-bg:     #e3ebe0;
+  --status-published-fg:     #4a6b4f;
+  --status-published-border: #cfdbcb;
+
+  /* Type tokens — Products (Ebook / Template / Code) */
+  /* Ebook: dusty slate-blue (knowledge, calm reading) */
+  --type-ebook-bg:     #e0e7ee;
+  --type-ebook-fg:     #3f5266;
+  --type-ebook-border: #c9d4e0;
+
+  /* Template: muted lavender (creative, design) */
+  --type-template-bg:     #ebe5ef;
+  --type-template-fg:     #5e4d72;
+  --type-template-border: #d8cee0;
+
+  /* Code: warm clay (technical, energy) */
+  --type-code-bg:     #f0e6d8;
+  --type-code-fg:     #7a5e34;
+  --type-code-border: #e2d4bd;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -204,6 +231,28 @@ html[data-theme='dark'] {
   --admin-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
   --admin-shadow-md: 0 14px 30px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.22);
   --admin-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.42), 0 10px 22px rgba(0, 0, 0, 0.28);
+
+  /* Status color tokens — dark mode */
+  --status-draft-bg:     #2a2722;
+  --status-draft-fg:     #b8b0a1;
+  --status-draft-border: #38332b;
+
+  --status-published-bg:     #232a24;
+  --status-published-fg:     #9fbfa3;
+  --status-published-border: #2f3a31;
+
+  /* Type tokens — Products (dark mode) */
+  --type-ebook-bg:     #1f2630;
+  --type-ebook-fg:     #a4bbd2;
+  --type-ebook-border: #2b3340;
+
+  --type-template-bg:     #281f2e;
+  --type-template-fg:     #b8a3c8;
+  --type-template-border: #352a3e;
+
+  --type-code-bg:     #2a2419;
+  --type-code-fg:     #d4b87c;
+  --type-code-border: #3a3122;
 }
 
 body,

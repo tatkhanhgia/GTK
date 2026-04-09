@@ -50,6 +50,9 @@ export function CustomHeaderClient() {
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pageTitle = getPageTitle(pathname);
+  // TODO: wire to real notification state — until the notification system exists,
+  // keep the bell dot hidden so users aren't trained to ignore a permanent badge.
+  const HAS_NOTIFICATIONS = false;
 
   useEffect(() => {
     setMounted(true);
@@ -161,6 +164,7 @@ export function CustomHeaderClient() {
                 type="text"
                 placeholder="Tìm kiếm..."
                 className="
+                  admin-header-search-input
                   w-full h-10 pl-10 pr-4 rounded-xl
                   bg-[var(--admin-bg-secondary)]/50
                   border border-[var(--admin-border)]
@@ -193,8 +197,10 @@ export function CustomHeaderClient() {
             >
               <span className="absolute inset-0 bg-gradient-to-br from-[var(--admin-accent)]/0 to-[var(--admin-accent)]/0 group-hover:from-[var(--admin-accent)]/5 group-hover:to-[var(--admin-accent)]/10 transition-all duration-300" />
               <Bell className="relative h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
-              {/* Notification dot */}
-              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[var(--admin-accent)] ring-2 ring-[var(--admin-bg-secondary)]" />
+              {/* Notification dot — gated until a real notification system is wired up */}
+              {HAS_NOTIFICATIONS && (
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[var(--admin-accent)] ring-2 ring-[var(--admin-bg-secondary)]" />
+              )}
             </button>
 
             {/* Divider */}

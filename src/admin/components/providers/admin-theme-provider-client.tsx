@@ -8,6 +8,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { usePathname } from 'next/navigation';
 import { SidebarInjector } from '../layout/sidebar-injector';
 
 type ThemePreference = 'dark' | 'light' | 'system';
@@ -149,10 +150,27 @@ export function AdminThemeProviderClient({ children }: { children?: React.ReactN
     ],
   );
 
+  const pathname = usePathname();
+  // Detect auth pages via DOM class rather than URL — `/admin` is used for both
+  // the login form (unauthenticated) and the dashboard (authenticated), so URL alone
+  // cannot distinguish them. Payload adds `.template-login` to a direct child of
+  // <body> on auth pages; CSS also uses `body:has(.template-login)` to reset padding.
+  const [isAuthTemplate, setIsAuthTemplate] = useState(true);
+
+  useEffect(() => {
+    // Payload v3 uses .template-minimal for auth pages (login, forgot-password, reset, etc.)
+    const check = () => setIsAuthTemplate(!!document.body.querySelector('.template-minimal'));
+    check();
+    // Re-check whenever Payload swaps the top-level template wrapper
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true });
+    return () => observer.disconnect();
+  }, [pathname]); // re-run on navigation
+
   return (
     <AdminShellContext.Provider value={value}>
       {children}
-      <SidebarInjector />
+      {!isAuthTemplate && <SidebarInjector />}
     </AdminShellContext.Provider>
   );
 }
