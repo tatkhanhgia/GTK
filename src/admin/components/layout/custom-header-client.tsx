@@ -2,9 +2,46 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Menu, MoonStar, SunMedium, UserRound, ChevronRight, PanelLeft, Bell, Search } from 'lucide-react';
 import { useAdminShell } from '../providers/admin-theme-provider-client';
+
+// Collections that support header-search routing. Anything not listed falls
+// back to searching posts, since that is the primary editorial surface.
+const SEARCHABLE_COLLECTIONS = new Set(['posts', 'products', 'pages', 'users', 'categories', 'media']);
+
+// Field name used for the `where[<field>][like]` query parameter per collection.
+// Users don't have a title; everything else does.
+const SEARCH_FIELD_BY_COLLECTION: Record<string, string> = {
+  users: 'email',
+};
+
+// Vietnamese labels shown to the user for each collection. Keeping the UI
+// language consistent matters on pages like /admin/globals/author-profile,
+// where users do not expect the header to suddenly read "posts" in English.
+const COLLECTION_LABELS_VI: Record<string, string> = {
+  posts: 'bài viết',
+  products: 'sản phẩm',
+  pages: 'trang',
+  users: 'người dùng',
+  categories: 'danh mục',
+  media: 'media',
+};
+
+type SearchTarget = { collection: string; field: string; label: string; isDefault: boolean };
+
+function resolveSearchTarget(pathname: string): SearchTarget {
+  const match = pathname.match(/^\/admin\/collections\/([^/]+)/);
+  const matched = match && SEARCHABLE_COLLECTIONS.has(match[1]) ? match[1] : null;
+  const collection = matched ?? 'posts';
+  const field = SEARCH_FIELD_BY_COLLECTION[collection] ?? 'title';
+  const label = COLLECTION_LABELS_VI[collection] ?? collection;
+  // When the user is not on a collection list route (e.g. /admin/globals/*),
+  // the header search falls back to posts. Surface that clearly in the UI so
+  // the aria-label / placeholder do not claim the user is searching the
+  // current page.
+  return { collection, field, label, isDefault: matched === null };
+}
 
 const routeTitles: Record<string, string> = {
   '/admin': 'Dashboard',
@@ -46,10 +83,45 @@ function getPageTitle(pathname: string) {
 
 export function CustomHeaderClient() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isDark, isSidebarCollapsed, toggleTheme, toggleSidebarCollapse } = useAdminShell();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const pageTitle = getPageTitle(pathname);
+  const searchTarget = resolveSearchTarget(pathname);
+  const searchPlaceholder = mounted
+    ? `Tìm ${searchTarget.label}...`
+    : 'Tìm kiếm...';
+  const searchAriaLabel = mounted
+    ? `Tìm ${searchTarget.label}`
+    : 'Tìm kiếm';
+
+  const runSearch = (rawQuery: string) => {
+    const query = rawQuery.trim();
+    const { collection, field } = searchTarget;
+    const base = `/admin/collections/${collection}`;
+    if (!query) {
+      router.push(base);
+      return;
+    }
+    // Payload v3 admin list accepts where[<field>][like] in the URL and renders
+    // the filter chip automatically. Using `like` keeps it case-insensitive and
+    // substring-based, which matches end-user expectations for a header search.
+    const params = new URLSearchParams();
+    params.set(`where[${field}][like]`, query);
+    params.set('limit', '10');
+    router.push(`${base}?${params.toString()}`);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runSearch(searchQuery);
+    } else if (e.key === 'Escape') {
+      setSearchQuery('');
+    }
+  };
   // TODO: wire to real notification state — until the notification system exists,
   // keep the bell dot hidden so users aren't trained to ignore a permanent badge.
   const HAS_NOTIFICATIONS = false;
@@ -162,7 +234,12 @@ export function CustomHeaderClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--admin-text-muted)] group-focus-within:text-[var(--admin-accent)] transition-colors" />
               <input
                 type="text"
-                placeholder="Tìm kiếm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder={searchPlaceholder}
+                aria-label={searchAriaLabel}
+                suppressHydrationWarning
                 className="
                   admin-header-search-input
                   w-full h-10 pl-10 pr-4 rounded-xl
@@ -184,7 +261,7 @@ export function CustomHeaderClient() {
             <button
               type="button"
               className="lg:hidden group relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--admin-border)] bg-gradient-to-br from-[var(--admin-bg-secondary)] to-[var(--admin-bg-tertiary)] text-[var(--admin-text-secondary)] transition-all duration-200 hover:border-[var(--admin-accent)]/40 hover:text-[var(--admin-accent)] hover:shadow-[var(--admin-shadow-sm)] active:scale-95 overflow-hidden"
-              aria-label="Search"
+              aria-label="Tìm kiếm"
             >
               <Search className="relative h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
             </button>
