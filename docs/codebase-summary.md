@@ -287,6 +287,37 @@ Configuration Files
 - **Client-side:** `next-intl` translation hooks in locale-aware React components
 - **Messages:** Separate JSON files in `messages/`
 
+#### Admin i18n Pattern
+
+Payload admin supports bilingual vi/en independently of the next-intl public
+site. Three layers combine to produce a fully localized admin experience:
+
+1. **Core UI** — `@payloadcms/translations` ships vi + en for Payload's
+   framework chrome (save/delete buttons, validation messages, API labels).
+   Wired via `i18n.supportedLanguages` in `payload.config.ts`, with
+   `fallbackLanguage: 'vi'`.
+2. **Schema labels** — Collections, fields, and globals use inline
+   `{ vi, en }` StaticLabel objects everywhere user-facing text appears.
+   `src/globals/author-profile.ts` is the golden reference; every collection
+   under `src/collections/` follows the same pattern.
+3. **Custom components** — The custom sidebar, header, and dashboard read
+   all strings through the `useAdminTranslation()` hook in
+   `src/admin/i18n/use-admin-translation.ts`, a typed wrapper around
+   Payload's `useTranslation()`. Keys live in
+   `src/admin/i18n/custom-translations.ts` under three flat namespaces
+   (`customSidebar:*`, `customHeader:*`, `customDashboard:*`) and are merged
+   into Payload's i18n registry via `i18n.translations` in
+   `payload.config.ts`.
+
+**Default:** `fallbackLanguage: 'vi'`. End users change their admin locale
+via the Payload account language picker; the choice persists in the
+`payload-language` cookie and every custom component re-renders on change
+because `useTranslation()` is reactive.
+
+**Independent of:** the next-intl public site under `/vi/*` and `/en/*` —
+do not conflate the two. Public-site strings live in `messages/*.json`;
+admin strings live in the locations above.
+
 ### 8. **Payment Strategy**
 - **Stripe:** Primary USD/foreign currency checkout
   - Server-side session creation

@@ -2,6 +2,16 @@ import type { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  labels: {
+    singular: { vi: 'Media', en: 'Media' },
+    plural: { vi: 'Media', en: 'Media' },
+  },
+  admin: {
+    description: {
+      vi: 'Thư viện hình ảnh và tệp tải lên',
+      en: 'Image library and uploaded assets',
+    },
+  },
   upload: {
     staticDir: 'public/media',
     imageSizes: [
@@ -32,10 +42,12 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       required: true,
+      label: { vi: 'Văn bản thay thế (alt)', en: 'Alt text' },
     },
     {
       name: 'caption',
       type: 'text',
+      label: { vi: 'Chú thích', en: 'Caption' },
     },
   ],
 }

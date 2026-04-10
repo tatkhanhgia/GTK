@@ -2,9 +2,14 @@ import type { CollectionConfig } from 'payload'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
+  labels: {
+    singular: { vi: 'Bài viết', en: 'Post' },
+    plural: { vi: 'Bài viết', en: 'Posts' },
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'publishedAt', 'category'],
+    description: { vi: 'Quản lý bài viết blog', en: 'Manage blog posts' },
   },
   versions: {
     drafts: {
@@ -25,6 +30,7 @@ export const Posts: CollectionConfig = {
       type: 'text',
       required: true,
       localized: true,
+      label: { vi: 'Tiêu đề', en: 'Title' },
     },
     {
       name: 'slug',
@@ -32,6 +38,7 @@ export const Posts: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
+      label: { vi: 'Đường dẫn', en: 'Slug' },
       admin: {
         position: 'sidebar',
       },
@@ -40,23 +47,27 @@ export const Posts: CollectionConfig = {
       name: 'excerpt',
       type: 'textarea',
       localized: true,
+      label: { vi: 'Mô tả ngắn', en: 'Excerpt' },
     },
     {
       name: 'content',
       type: 'richText',
       localized: true,
       required: true,
+      label: { vi: 'Nội dung', en: 'Content' },
     },
     {
       name: 'featuredImage',
       type: 'upload',
       relationTo: 'media',
+      label: { vi: 'Ảnh đại diện', en: 'Featured image' },
     },
     {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
       hasMany: false,
+      label: { vi: 'Danh mục', en: 'Category' },
       filterOptions: {
         type: { equals: 'blog' },
       },
@@ -64,10 +75,16 @@ export const Posts: CollectionConfig = {
     {
       name: 'tags',
       type: 'array',
+      label: { vi: 'Thẻ', en: 'Tags' },
+      labels: {
+        singular: { vi: 'Thẻ', en: 'Tag' },
+        plural: { vi: 'Thẻ', en: 'Tags' },
+      },
       fields: [
         {
           name: 'tag',
           type: 'text',
+          label: { vi: 'Thẻ', en: 'Tag' },
         },
       ],
     },
@@ -76,6 +93,7 @@ export const Posts: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       hasMany: false,
+      label: { vi: 'Tác giả', en: 'Author' },
       admin: {
         position: 'sidebar',
       },
@@ -83,9 +101,10 @@ export const Posts: CollectionConfig = {
     {
       name: 'status',
       type: 'select',
+      label: { vi: 'Trạng thái', en: 'Status' },
       options: [
-        { label: 'Draft', value: 'draft' },
-        { label: 'Published', value: 'published' },
+        { label: { vi: 'Nháp', en: 'Draft' }, value: 'draft' },
+        { label: { vi: 'Đã xuất bản', en: 'Published' }, value: 'published' },
       ],
       defaultValue: 'draft',
       required: true,
@@ -99,6 +118,7 @@ export const Posts: CollectionConfig = {
     {
       name: 'publishedAt',
       type: 'date',
+      label: { vi: 'Thời gian xuất bản', en: 'Published at' },
       admin: {
         position: 'sidebar',
         date: {
@@ -109,10 +129,14 @@ export const Posts: CollectionConfig = {
     {
       name: 'readingTime',
       type: 'number',
+      label: { vi: 'Thời gian đọc', en: 'Reading time' },
       admin: {
         position: 'sidebar',
         readOnly: true,
-        description: 'Estimated reading time in minutes',
+        description: {
+          vi: 'Thời gian đọc ước tính (phút)',
+          en: 'Estimated reading time in minutes',
+        },
       },
     },
   ],
