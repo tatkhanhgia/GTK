@@ -16,21 +16,25 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useAdminShell } from '../providers/admin-theme-provider-client';
+import { useAdminTranslation } from '../../i18n/use-admin-translation';
 
 interface NavItem {
   href: string;
   icon: LucideIcon;
-  label: string;
+  labelKey: 'dashboard' | 'posts' | 'products' | 'media' | 'pages' | 'users' | 'author';
 }
 
+// Labels are resolved at render time via `t()` so the sidebar reacts to the
+// language picker without a remount. Static `labelKey` strings keep the array
+// cheap to diff and make the translation coverage obvious at a glance.
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/admin', icon: LayoutGrid },
-  { label: 'Posts', href: '/admin/collections/posts', icon: Newspaper },
-  { label: 'Products', href: '/admin/collections/products', icon: Package },
-  { label: 'Media', href: '/admin/collections/media', icon: FileImage },
-  { label: 'Pages', href: '/admin/collections/pages', icon: FileText },
-  { label: 'Users', href: '/admin/collections/users', icon: Users },
-  { label: 'Author', href: '/admin/globals/author-profile', icon: UserCircle2 },
+  { labelKey: 'dashboard', href: '/admin', icon: LayoutGrid },
+  { labelKey: 'posts', href: '/admin/collections/posts', icon: Newspaper },
+  { labelKey: 'products', href: '/admin/collections/products', icon: Package },
+  { labelKey: 'media', href: '/admin/collections/media', icon: FileImage },
+  { labelKey: 'pages', href: '/admin/collections/pages', icon: FileText },
+  { labelKey: 'users', href: '/admin/collections/users', icon: Users },
+  { labelKey: 'author', href: '/admin/globals/author-profile', icon: UserCircle2 },
 ];
 
 function isItemActive(pathname: string, href: string) {
@@ -119,6 +123,7 @@ export function CustomSidebarClient() {
   const pathname = usePathname();
   const isSidebarCollapsed = useSidebarCollapsed();
   const { isOpen: isMobileOpen, close: closeMobileSidebar } = useMobileSidebar();
+  const { t } = useAdminTranslation();
 
   // Prevent hydration mismatch by not rendering width-dependent classes until mounted
   const [isClient, setIsClient] = useState(false);
@@ -221,7 +226,7 @@ export function CustomSidebarClient() {
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--admin-text-secondary)] transition-colors hover:bg-[var(--admin-bg-tertiary)] md:hidden"
             onClick={closeMobileSidebar}
-            aria-label="Close sidebar"
+            aria-label={t('customSidebar:closeSidebar')}
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -232,11 +237,12 @@ export function CustomSidebarClient() {
           className={`flex-1 space-y-1.5 overflow-y-auto py-5 ${
             isClient && isSidebarCollapsed ? 'px-2.5' : 'px-4'
           }`}
-          aria-label="Main navigation"
+          aria-label={t('customSidebar:navigationLabel')}
         >
           {navItems.map((item) => {
             const isActive = isItemActive(pathname, item.href);
             const Icon = item.icon;
+            const label = t(`customSidebar:${item.labelKey}`);
 
             return (
               <Link
@@ -252,7 +258,7 @@ export function CustomSidebarClient() {
                   : 'justify-start px-3 gap-3'
                 }`}
                 onClick={closeMobileSidebar}
-                title={isClient && isSidebarCollapsed ? item.label : undefined}
+                title={isClient && isSidebarCollapsed ? label : undefined}
               >
                 {/* Icon container */}
                 <span
@@ -268,7 +274,7 @@ export function CustomSidebarClient() {
                 {/* Label - hidden when collapsed */}
                 {!(isClient && isSidebarCollapsed) && (
                   <span className="overflow-hidden whitespace-nowrap text-sm font-medium">
-                    {item.label}
+                    {label}
                   </span>
                 )}
               </Link>
@@ -286,12 +292,12 @@ export function CustomSidebarClient() {
                 : 'justify-center gap-2 px-4'
             } text-sm text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-tertiary)] hover:text-[var(--admin-text-primary)]`}
             onClick={closeMobileSidebar}
-            title={isClient && isSidebarCollapsed ? 'Back to site' : undefined}
+            title={isClient && isSidebarCollapsed ? t('customSidebar:backToSite') : undefined}
           >
             <span className={`flex items-center justify-center transition-transform duration-200 ${isClient && isSidebarCollapsed ? 'group-hover:-translate-x-0.5 group-hover:-translate-y-0.5' : 'group-hover:-translate-x-0.5'}`}>
               <ArrowUpLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
             </span>
-            {!(isClient && isSidebarCollapsed) && <span>Back to site</span>}
+            {!(isClient && isSidebarCollapsed) && <span>{t('customSidebar:backToSite')}</span>}
           </Link>
         </div>
       </aside>

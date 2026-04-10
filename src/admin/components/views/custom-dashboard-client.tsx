@@ -21,8 +21,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Card } from '../ui/card';
+import { useAdminTranslation } from '../../i18n/use-admin-translation';
+import type { TFunction } from '@payloadcms/translations';
+import type { CustomTranslationKeys } from '../../i18n/custom-translations';
 
 type CollectionSlug = 'media' | 'pages' | 'posts' | 'products' | 'users';
+
+type DashboardTFunction = TFunction<CustomTranslationKeys>;
 
 interface PayloadListResponse<TDocument> {
   docs: TDocument[];
@@ -61,105 +66,120 @@ interface DashboardState {
   status: 'error' | 'loading' | 'ready';
 }
 
-const COUNT_ENDPOINTS: Array<Pick<StatCardData, 'description' | 'href' | 'icon' | 'title'> & { url: string }> = [
+// Static definitions keep translation keys alongside the data so the payload
+// is locale-free. `loadDashboardData` resolves the actual strings via `t()`
+// at render time — that keeps everything reactive to the language picker.
+type StatEndpoint = {
+  titleKey: CustomTranslationKeys;
+  descriptionKey: CustomTranslationKeys;
+  href: string;
+  icon: LucideIcon;
+  url: string;
+};
+
+const COUNT_ENDPOINTS: StatEndpoint[] = [
   {
-    title: 'Published Posts',
-    description: 'Live article count',
+    titleKey: 'customDashboard:statPublishedPostsTitle',
+    descriptionKey: 'customDashboard:statPublishedPostsDescription',
     href: '/admin/collections/posts',
     icon: Newspaper,
     url: '/api/posts?where[status][equals]=published&limit=0&depth=0',
   },
   {
-    title: 'Products',
-    description: 'Published product listings',
+    titleKey: 'customDashboard:statProductsTitle',
+    descriptionKey: 'customDashboard:statProductsDescription',
     href: '/admin/collections/products',
     icon: Package,
     url: '/api/products?where[status][equals]=published&limit=0&depth=0',
   },
   {
-    title: 'Media Library',
-    description: 'Uploaded assets',
+    titleKey: 'customDashboard:statMediaTitle',
+    descriptionKey: 'customDashboard:statMediaDescription',
     href: '/admin/collections/media',
     icon: FileImage,
     url: '/api/media?limit=0&depth=0',
   },
   {
-    title: 'Admin Users',
-    description: 'Payload accounts',
+    titleKey: 'customDashboard:statUsersTitle',
+    descriptionKey: 'customDashboard:statUsersDescription',
     href: '/admin/collections/users',
     icon: Users,
     url: '/api/users?limit=0&depth=0',
   },
 ];
 
-const QUICK_ACTIONS: Array<{
-  description: string;
+type QuickActionDef = {
+  titleKey: CustomTranslationKeys;
+  descriptionKey: CustomTranslationKeys;
   href: string;
   icon: LucideIcon;
-  title: string;
   gradient: string;
-}> = [
+};
+
+const QUICK_ACTIONS: QuickActionDef[] = [
   {
-    title: 'Viết bài mới',
-    description: 'Tạo và xuất bản bài viết mới',
+    titleKey: 'customDashboard:quickPostTitle',
+    descriptionKey: 'customDashboard:quickPostDescription',
     href: '/admin/collections/posts/create',
     icon: FileText,
     gradient: 'from-[var(--admin-accent)]/20 to-[var(--admin-accent)]/5',
   },
   {
-    title: 'Thêm sản phẩm',
-    description: 'Tạo sản phẩm số mới',
+    titleKey: 'customDashboard:quickProductTitle',
+    descriptionKey: 'customDashboard:quickProductDescription',
     href: '/admin/collections/products/create',
     icon: Package,
     gradient: 'from-[var(--admin-success)]/20 to-[var(--admin-success)]/5',
   },
   {
-    title: 'Tải media lên',
-    description: 'Thêm hình ảnh hoặc file tải xuống',
+    titleKey: 'customDashboard:quickMediaTitle',
+    descriptionKey: 'customDashboard:quickMediaDescription',
     href: '/admin/collections/media/create',
     icon: Upload,
     gradient: 'from-[var(--admin-info)]/20 to-[var(--admin-info)]/5',
   },
   {
-    title: 'Quản lý users',
-    description: 'Xem quyền editor và admin',
+    titleKey: 'customDashboard:quickUsersTitle',
+    descriptionKey: 'customDashboard:quickUsersDescription',
     href: '/admin/collections/users',
     icon: UserCog,
     gradient: 'from-[var(--admin-warning)]/20 to-[var(--admin-warning)]/5',
   },
 ];
 
-const ACTIVITY_ENDPOINTS: Array<{
+type ActivityEndpoint = {
   accentClass: string;
   href: (id: number | string) => string;
-  label: string;
+  labelKey: CustomTranslationKeys;
   slug: CollectionSlug;
   url: string;
-}> = [
+};
+
+const ACTIVITY_ENDPOINTS: ActivityEndpoint[] = [
   {
     slug: 'posts',
-    label: 'Bài viết cập nhật',
+    labelKey: 'customDashboard:activityPostsLabel',
     accentClass: 'bg-[var(--admin-accent)]',
     href: (id) => `/admin/collections/posts/${id}`,
     url: '/api/posts?sort=-updatedAt&limit=2&depth=0',
   },
   {
     slug: 'products',
-    label: 'Sản phẩm cập nhật',
+    labelKey: 'customDashboard:activityProductsLabel',
     accentClass: 'bg-[var(--admin-success)]',
     href: (id) => `/admin/collections/products/${id}`,
     url: '/api/products?sort=-updatedAt&limit=2&depth=0',
   },
   {
     slug: 'media',
-    label: 'Media tải lên',
+    labelKey: 'customDashboard:activityMediaLabel',
     accentClass: 'bg-[var(--admin-info)]',
     href: (id) => `/admin/collections/media/${id}`,
     url: '/api/media?sort=-updatedAt&limit=2&depth=0',
   },
   {
     slug: 'pages',
-    label: 'Trang chỉnh sửa',
+    labelKey: 'customDashboard:activityPagesLabel',
     accentClass: 'bg-[var(--admin-warning)]',
     href: (id) => `/admin/collections/pages/${id}`,
     url: '/api/pages?sort=-updatedAt&limit=2&depth=0',
@@ -176,7 +196,7 @@ async function fetchJSON<TData>(url: string) {
   return (await response.json()) as TData;
 }
 
-function readTitle(value: DashboardDocument['alt' | 'name' | 'title']) {
+function readTitle(value: DashboardDocument['alt' | 'name' | 'title'], t: DashboardTFunction) {
   if (typeof value === 'string' && value.trim()) {
     return value;
   }
@@ -191,7 +211,7 @@ function readTitle(value: DashboardDocument['alt' | 'name' | 'title']) {
     }
   }
 
-  return 'Untitled item';
+  return t('customDashboard:untitledItem');
 }
 
 function formatRelativeTime(value?: string, locale: string = 'vi') {
@@ -249,7 +269,10 @@ function formatRelativeTime(value?: string, locale: string = 'vi') {
   return formatter.format(diffInSeconds, 'second');
 }
 
-async function loadDashboardData(): Promise<DashboardState> {
+async function loadDashboardData(
+  t: DashboardTFunction,
+  locale: string,
+): Promise<DashboardState> {
   const [statResponses, activityResponses] = await Promise.all([
     Promise.all(
       COUNT_ENDPOINTS.map((item) => fetchJSON<PayloadListResponse<DashboardDocument>>(item.url)),
@@ -260,11 +283,11 @@ async function loadDashboardData(): Promise<DashboardState> {
   ]);
 
   const stats = COUNT_ENDPOINTS.map((item, index) => ({
-    description: item.description,
+    description: t(item.descriptionKey),
     href: item.href,
     icon: item.icon,
     isPrimary: index === 0,
-    title: item.title,
+    title: t(item.titleKey),
     value: statResponses[index]?.totalDocs ?? 0,
   }));
 
@@ -274,9 +297,9 @@ async function loadDashboardData(): Promise<DashboardState> {
         accentClass: ACTIVITY_ENDPOINTS[index].accentClass,
         href: ACTIVITY_ENDPOINTS[index].href(doc.id),
         id: `${ACTIVITY_ENDPOINTS[index].slug}-${doc.id}`,
-        label: ACTIVITY_ENDPOINTS[index].label,
-        timeLabel: formatRelativeTime(doc.updatedAt),
-        title: readTitle(doc.title ?? doc.name ?? doc.alt),
+        label: t(ACTIVITY_ENDPOINTS[index].labelKey),
+        timeLabel: formatRelativeTime(doc.updatedAt, locale),
+        title: readTitle(doc.title ?? doc.name ?? doc.alt, t),
         updatedAt: doc.updatedAt ? new Date(doc.updatedAt).getTime() : 0,
       })),
     )
@@ -298,11 +321,15 @@ async function loadDashboardData(): Promise<DashboardState> {
   };
 }
 
-function formatNumber(num: number): string {
-  return num.toLocaleString('vi-VN');
+function formatNumber(num: number, locale: string): string {
+  // `vi` → thousand separator '.', `en` → ','. Fall back to BCP-47 region
+  // variants so Intl gets something it recognises without hardcoding one
+  // locale per language.
+  const intlTag = locale === 'vi' ? 'vi-VN' : 'en-US';
+  return num.toLocaleString(intlTag);
 }
 
-function StatCard({ description, href, icon: Icon, isPrimary, title, value }: StatCardData) {
+function StatCard({ description, href, icon: Icon, isPrimary, title, value, locale }: StatCardData & { locale: string }) {
   return (
     <Link href={href} className={`block ${isPrimary ? 'lg:col-span-2' : ''}`}>
       <Card
@@ -320,7 +347,7 @@ function StatCard({ description, href, icon: Icon, isPrimary, title, value }: St
                 isPrimary ? 'text-3xl font-bold tracking-tight md:text-4xl' : 'text-2xl font-bold md:text-3xl'
               }`}
             >
-              {formatNumber(value)}
+              {formatNumber(value, locale)}
             </p>
             <p className="mt-auto pt-2 text-sm text-[var(--admin-text-muted)]">{description}</p>
           </div>
@@ -333,7 +360,15 @@ function StatCard({ description, href, icon: Icon, isPrimary, title, value }: St
   );
 }
 
-function QuickActionCard({ description, href, icon: Icon, title, gradient }: typeof QUICK_ACTIONS[0]) {
+type QuickActionCardProps = {
+  description: string;
+  href: string;
+  icon: LucideIcon;
+  title: string;
+  gradient: string;
+};
+
+function QuickActionCard({ description, href, icon: Icon, title, gradient }: QuickActionCardProps) {
   return (
     <Link
       href={href}
@@ -356,7 +391,7 @@ function QuickActionCard({ description, href, icon: Icon, title, gradient }: typ
   );
 }
 
-function DashboardSkeleton() {
+function DashboardSkeleton({ t }: { t: DashboardTFunction }) {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -380,7 +415,10 @@ function DashboardSkeleton() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <Card title="Recent Activity" description="Loading the latest updates">
+        <Card
+          title={t('customDashboard:sectionRecentActivity')}
+          description={t('customDashboard:sectionRecentActivityDescription')}
+        >
           <div className="space-y-5">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="flex items-start gap-4">
@@ -400,6 +438,8 @@ function DashboardSkeleton() {
 }
 
 export const CustomDashboardClient = React.memo(function CustomDashboardClient() {
+  const { t, i18n } = useAdminTranslation();
+  const locale = i18n.language;
   const [dashboardState, setDashboardState] = useState<DashboardState>({
     activities: [],
     stats: [],
@@ -409,7 +449,7 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
   useEffect(() => {
     let isMounted = true;
 
-    loadDashboardData()
+    loadDashboardData(t, locale)
       .then((result) => {
         if (isMounted) {
           setDashboardState(result);
@@ -424,7 +464,12 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
     return () => {
       isMounted = false;
     };
-  }, []);
+    // Re-fetch (and re-translate) whenever the admin language changes so the
+    // stat/activity labels stay in sync with the picker. `t` identity moves
+    // in lock-step with `locale` inside Payload's Translation provider, so
+    // depending on `locale` alone is sufficient and avoids an extra render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   return (
     <main
@@ -442,43 +487,42 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-4 w-4 text-[var(--admin-accent)]" />
               <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--admin-accent)]">
-                Tổng quan
+                {t('customDashboard:heroKicker')}
               </p>
             </div>
             <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-[var(--admin-text-primary)] md:text-3xl lg:text-4xl">
-              Quản lý nội dung, sản phẩm và media từ một giao diện duy nhất.
+              {t('customDashboard:heroTitle')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-[var(--admin-text-secondary)]">
-              Số liệu được tải trực tiếp từ Payload CMS để dashboard luôn phản ánh trạng thái
-              hiện tại của hệ thống.
+              {t('customDashboard:heroSubtitle')}
             </p>
           </div>
         </div>
 
         {dashboardState.status === 'loading' ? (
-          <DashboardSkeleton />
+          <DashboardSkeleton t={t} />
         ) : (
           <div className="space-y-8">
             {/* Stats Section */}
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="h-4 w-4 text-[var(--admin-accent)]" />
-                <h2 className="text-lg font-semibold text-[var(--admin-text-primary)]">Thống kê</h2>
+                <h2 className="text-lg font-semibold text-[var(--admin-text-primary)]">{t('customDashboard:sectionStats')}</h2>
               </div>
 
               {dashboardState.stats.length > 0 ? (
                 <div className="stats-grid grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-4">
                   {dashboardState.stats.map((item) => (
-                    <StatCard key={item.title} {...item} />
+                    <StatCard key={item.title} {...item} locale={locale} />
                   ))}
                 </div>
               ) : (
                 <Card className="border-[rgba(217,79,79,0.25)]">
                   <div className="empty-state">
                     <Database className="empty-state-icon" />
-                    <p className="empty-state-title">Không thể tải dữ liệu</p>
+                    <p className="empty-state-title">{t('customDashboard:statsLoadErrorTitle')}</p>
                     <p className="empty-state-description">
-                      Không thể kết nối đến Payload API. Các thao tác nhanh vẫn có sẵn bên dưới.
+                      {t('customDashboard:statsLoadErrorDescription')}
                     </p>
                   </div>
                 </Card>
@@ -489,11 +533,18 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <Activity className="h-4 w-4 text-[var(--admin-accent)]" />
-                <h2 className="text-lg font-semibold text-[var(--admin-text-primary)]">Thao tác nhanh</h2>
+                <h2 className="text-lg font-semibold text-[var(--admin-text-primary)]">{t('customDashboard:sectionQuickActions')}</h2>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {QUICK_ACTIONS.map((item) => (
-                  <QuickActionCard key={item.title} {...item} />
+                  <QuickActionCard
+                    key={item.titleKey}
+                    title={t(item.titleKey)}
+                    description={t(item.descriptionKey)}
+                    href={item.href}
+                    icon={item.icon}
+                    gradient={item.gradient}
+                  />
                 ))}
               </div>
             </section>
@@ -501,8 +552,8 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
             {/* Activity & Status */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
               <Card
-                title="Hoạt động gần đây"
-                description="Cập nhật mới nhất từ các collections"
+                title={t('customDashboard:sectionRecentActivity')}
+                description={t('customDashboard:sectionRecentActivityDescription')}
                 className="relative overflow-hidden"
               >
                 {/* Decorative line */}
@@ -510,14 +561,14 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
 
                 {dashboardState.status === 'error' ? (
                   <p className="text-sm text-[var(--admin-error)]">
-                    Không thể tải hoạt động. Kiểm tra kết nối API hoặc thử làm mới trang.
+                    {t('customDashboard:activityLoadError')}
                   </p>
                 ) : dashboardState.activities.length === 0 ? (
                   <div className="py-8 text-center">
                     <Newspaper className="mx-auto mb-3 h-12 w-12 text-[var(--admin-text-muted)]" />
-                    <p className="text-sm font-medium text-[var(--admin-text-primary)]">Chưa có hoạt động</p>
+                    <p className="text-sm font-medium text-[var(--admin-text-primary)]">{t('customDashboard:noActivityTitle')}</p>
                     <p className="mt-1 text-sm text-[var(--admin-text-secondary)]">
-                      Hoạt động sẽ xuất hiện khi bạn tạo hoặc chỉnh sửa nội dung.
+                      {t('customDashboard:noActivityDescription')}
                     </p>
                   </div>
                 ) : (
@@ -551,14 +602,14 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
               </Card>
 
               <Card
-                title="Trạng thái hệ thống"
-                description="Kiểm tra nhanh hệ thống admin"
+                title={t('customDashboard:sectionSystemStatus')}
+                description={t('customDashboard:sectionSystemStatusDescription')}
                 actions={
                   <Link
                     href="/admin/collections/media"
                     className="inline-flex items-center gap-1 text-sm font-medium text-[var(--admin-accent)] hover:gap-2 transition-all"
                   >
-                    Mở thư viện
+                    {t('customDashboard:openLibrary')}
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </Link>
                 }
@@ -566,10 +617,10 @@ export const CustomDashboardClient = React.memo(function CustomDashboardClient()
               >
                 <div className="space-y-3">
                   {[
-                    { label: 'Database', status: 'Đã kết nối', icon: Database, color: 'bg-[var(--admin-success)]' },
-                    { label: 'Media Storage', status: 'Hoạt động', icon: HardDrive, color: 'bg-[var(--admin-info)]' },
-                    { label: 'Search Index', status: 'Sẵn sàng', icon: Search, color: 'bg-[var(--admin-warning)]' },
-                    { label: 'Permissions', status: 'Được bảo vệ', icon: ShieldCheck, color: 'bg-[var(--admin-accent)]' },
+                    { label: t('customDashboard:systemDatabase'), status: t('customDashboard:systemStatusConnected'), icon: Database, color: 'bg-[var(--admin-success)]' },
+                    { label: t('customDashboard:systemMediaStorage'), status: t('customDashboard:systemStatusActive'), icon: HardDrive, color: 'bg-[var(--admin-info)]' },
+                    { label: t('customDashboard:systemSearchIndex'), status: t('customDashboard:systemStatusReady'), icon: Search, color: 'bg-[var(--admin-warning)]' },
+                    { label: t('customDashboard:systemPermissions'), status: t('customDashboard:systemStatusProtected'), icon: ShieldCheck, color: 'bg-[var(--admin-accent)]' },
                   ].map(({ icon: Icon, label, status, color }) => (
                     <div
                       key={label}

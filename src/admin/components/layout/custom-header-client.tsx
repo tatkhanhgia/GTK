@@ -5,37 +5,44 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, MoonStar, SunMedium, UserRound, ChevronRight, PanelLeft, Bell, Search } from 'lucide-react';
 import { useAdminShell } from '../providers/admin-theme-provider-client';
+import { useAdminTranslation } from '../../i18n/use-admin-translation';
+import type { TFunction } from '@payloadcms/translations';
+import type { CustomTranslationKeys } from '../../i18n/custom-translations';
 
-// Collections that support header-search routing. Anything not listed falls
-// back to searching posts, since that is the primary editorial surface.
-const SEARCHABLE_COLLECTIONS = new Set(['posts', 'products', 'pages', 'users', 'categories', 'media']);
+// Collections whose list route the header search can jump to. Anything not
+// listed falls back to `posts`, the primary editorial surface.
+const SEARCHABLE_COLLECTIONS = ['posts', 'products', 'pages', 'users', 'categories', 'media'] as const;
+type SearchableCollection = (typeof SEARCHABLE_COLLECTIONS)[number];
+const SEARCHABLE_COLLECTION_SET = new Set<string>(SEARCHABLE_COLLECTIONS);
 
-// Field name used for the `where[<field>][like]` query parameter per collection.
+// Field used for the `where[<field>][like]` query parameter per collection.
 // Users don't have a title; everything else does.
-const SEARCH_FIELD_BY_COLLECTION: Record<string, string> = {
+const SEARCH_FIELD_BY_COLLECTION: Partial<Record<SearchableCollection, string>> = {
   users: 'email',
 };
 
-// Vietnamese labels shown to the user for each collection. Keeping the UI
-// language consistent matters on pages like /admin/globals/author-profile,
-// where users do not expect the header to suddenly read "posts" in English.
-const COLLECTION_LABELS_VI: Record<string, string> = {
-  posts: 'bài viết',
-  products: 'sản phẩm',
-  pages: 'trang',
-  users: 'người dùng',
-  categories: 'danh mục',
-  media: 'media',
+// Each collection maps to a `customHeader:target*` translation key so the
+// placeholder / aria-label follow the language picker instead of being
+// hardcoded in Vietnamese.
+const TARGET_KEY_BY_COLLECTION: Record<SearchableCollection, CustomTranslationKeys> = {
+  posts: 'customHeader:targetPosts',
+  products: 'customHeader:targetProducts',
+  pages: 'customHeader:targetPages',
+  users: 'customHeader:targetUsers',
+  categories: 'customHeader:targetCategories',
+  media: 'customHeader:targetMedia',
 };
 
-type SearchTarget = { collection: string; field: string; label: string; isDefault: boolean };
+type SearchTarget = { collection: SearchableCollection; field: string; label: string; isDefault: boolean };
 
-function resolveSearchTarget(pathname: string): SearchTarget {
+function resolveSearchTarget(pathname: string, t: TFunction<CustomTranslationKeys>): SearchTarget {
   const match = pathname.match(/^\/admin\/collections\/([^/]+)/);
-  const matched = match && SEARCHABLE_COLLECTIONS.has(match[1]) ? match[1] : null;
+  const matched = match && SEARCHABLE_COLLECTION_SET.has(match[1])
+    ? (match[1] as SearchableCollection)
+    : null;
   const collection = matched ?? 'posts';
   const field = SEARCH_FIELD_BY_COLLECTION[collection] ?? 'title';
-  const label = COLLECTION_LABELS_VI[collection] ?? collection;
+  const label = t(TARGET_KEY_BY_COLLECTION[collection]);
   // When the user is not on a collection list route (e.g. /admin/globals/*),
   // the header search falls back to posts. Surface that clearly in the UI so
   // the aria-label / placeholder do not claim the user is searching the
@@ -43,10 +50,23 @@ function resolveSearchTarget(pathname: string): SearchTarget {
   return { collection, field, label, isDefault: matched === null };
 }
 
-const routeTitles: Record<string, string> = {
-  '/admin': 'Dashboard',
-  '/admin/account': 'Account',
-  '/admin/globals/author-profile': 'Author Profile',
+// Exact-match paths that map to a dedicated page-title translation key.
+const ROUTE_TITLE_KEYS: Record<string, CustomTranslationKeys> = {
+  '/admin': 'customHeader:pageTitleDashboard',
+  '/admin/account': 'customHeader:pageTitleAccount',
+  '/admin/globals/author-profile': 'customHeader:pageTitleAuthorProfile',
+};
+
+// Collection slugs surfaced in the breadcrumb fall back to their sidebar
+// translation (already localized). Keeping a narrow map avoids a runtime
+// `as any` when widening arbitrary strings to CustomTranslationKeys.
+const COLLECTION_TITLE_KEYS: Record<string, CustomTranslationKeys> = {
+  posts: 'customSidebar:posts',
+  products: 'customSidebar:products',
+  pages: 'customSidebar:pages',
+  users: 'customSidebar:users',
+  categories: 'customSidebar:categories',
+  media: 'customSidebar:media',
 };
 
 function toTitleCase(value: string) {
@@ -57,20 +77,23 @@ function toTitleCase(value: string) {
     .join(' ');
 }
 
-function getPageTitle(pathname: string) {
-  if (routeTitles[pathname]) {
-    return routeTitles[pathname];
+function getPageTitle(pathname: string, t: TFunction<CustomTranslationKeys>) {
+  const routeKey = ROUTE_TITLE_KEYS[pathname];
+  if (routeKey) {
+    return t(routeKey);
   }
 
   if (pathname.startsWith('/admin/collections/')) {
     const segments = pathname.split('/').filter(Boolean);
     const collectionSlug = segments[2];
+    const baseKey = COLLECTION_TITLE_KEYS[collectionSlug];
+    const baseLabel = baseKey ? t(baseKey) : toTitleCase(collectionSlug);
 
     if (segments[3] === 'create') {
-      return `Create ${toTitleCase(collectionSlug).replace(/s$/, '')}`;
+      return t('customHeader:createPrefix', { name: baseLabel });
     }
 
-    return toTitleCase(collectionSlug);
+    return baseLabel;
   }
 
   if (pathname.startsWith('/admin/globals/')) {
@@ -78,24 +101,27 @@ function getPageTitle(pathname: string) {
     return toTitleCase(segments[2]);
   }
 
-  return 'Admin Panel';
+  return t('customHeader:pageTitleFallback');
 }
 
 export function CustomHeaderClient() {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useAdminTranslation();
   const { isDark, isSidebarCollapsed, toggleTheme, toggleSidebarCollapse } = useAdminShell();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const pageTitle = getPageTitle(pathname);
-  const searchTarget = resolveSearchTarget(pathname);
+  const pageTitle = getPageTitle(pathname, t);
+  const searchTarget = resolveSearchTarget(pathname, t);
+  // Before hydration we use the locale-agnostic default so SSR output matches
+  // the first client render regardless of the eventual user locale.
   const searchPlaceholder = mounted
-    ? `Tìm ${searchTarget.label}...`
-    : 'Tìm kiếm...';
+    ? t('customHeader:searchPlaceholder', { target: searchTarget.label })
+    : t('customHeader:searchPlaceholderDefault');
   const searchAriaLabel = mounted
-    ? `Tìm ${searchTarget.label}`
-    : 'Tìm kiếm';
+    ? t('customHeader:searchAria', { target: searchTarget.label })
+    : t('customHeader:searchAriaDefault');
 
   const runSearch = (rawQuery: string) => {
     const query = rawQuery.trim();
@@ -173,7 +199,7 @@ export function CustomHeaderClient() {
               onClick={() => {
                 document.documentElement.classList.toggle('admin-mobile-sidebar-open');
               }}
-              aria-label="Toggle sidebar"
+              aria-label={t('customHeader:toggleMobileSidebar')}
             >
               <span className="absolute inset-0 bg-gradient-to-br from-[var(--admin-accent)]/0 to-[var(--admin-accent)]/0 group-hover:from-[var(--admin-accent)]/5 group-hover:to-[var(--admin-accent)]/10 transition-all duration-300" />
               <Menu className="relative h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
@@ -193,8 +219,20 @@ export function CustomHeaderClient() {
                 overflow-hidden
               `}
               onClick={toggleSidebarCollapse}
-              aria-label={mounted ? (isSidebarCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar') : 'Toggle sidebar'}
-              title={mounted ? (isSidebarCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar') : 'Toggle sidebar'}
+              aria-label={
+                mounted
+                  ? isSidebarCollapsed
+                    ? t('customHeader:sidebarExpand')
+                    : t('customHeader:sidebarCollapse')
+                  : t('customHeader:sidebarToggleFallback')
+              }
+              title={
+                mounted
+                  ? isSidebarCollapsed
+                    ? t('customHeader:sidebarExpand')
+                    : t('customHeader:sidebarCollapse')
+                  : t('customHeader:sidebarToggleFallback')
+              }
               suppressHydrationWarning
             >
               <span className="absolute inset-0 bg-gradient-to-br from-[var(--admin-accent)]/0 to-[var(--admin-accent)]/0 group-hover:from-[var(--admin-accent)]/5 group-hover:to-[var(--admin-accent)]/10 transition-all duration-300" />
@@ -217,7 +255,7 @@ export function CustomHeaderClient() {
               <div className="hidden items-center gap-1.5 text-[11px] font-medium text-[var(--admin-text-muted)] md:flex">
                 <span className="transition-colors hover:text-[var(--admin-text-secondary)] cursor-default">GTKBlog</span>
                 <ChevronRight className="h-3 w-3 opacity-50" />
-                <span className="text-[var(--admin-accent)]">Admin</span>
+                <span className="text-[var(--admin-accent)]">{t('customHeader:breadcrumbAdmin')}</span>
                 <ChevronRight className="h-3 w-3 opacity-50" />
                 <span className="text-[var(--admin-text-secondary)] truncate max-w-[150px]">{pageTitle}</span>
               </div>
@@ -261,7 +299,7 @@ export function CustomHeaderClient() {
             <button
               type="button"
               className="lg:hidden group relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--admin-border)] bg-gradient-to-br from-[var(--admin-bg-secondary)] to-[var(--admin-bg-tertiary)] text-[var(--admin-text-secondary)] transition-all duration-200 hover:border-[var(--admin-accent)]/40 hover:text-[var(--admin-accent)] hover:shadow-[var(--admin-shadow-sm)] active:scale-95 overflow-hidden"
-              aria-label="Tìm kiếm"
+              aria-label={t('customHeader:searchMobileLabel')}
             >
               <Search className="relative h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
             </button>
@@ -270,7 +308,7 @@ export function CustomHeaderClient() {
             <button
               type="button"
               className="group relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--admin-border)] bg-gradient-to-br from-[var(--admin-bg-secondary)] to-[var(--admin-bg-tertiary)] text-[var(--admin-text-secondary)] transition-all duration-200 hover:border-[var(--admin-accent)]/40 hover:text-[var(--admin-accent)] hover:shadow-[var(--admin-shadow-sm)] active:scale-95 overflow-hidden"
-              aria-label="Notifications"
+              aria-label={t('customHeader:notifications')}
             >
               <span className="absolute inset-0 bg-gradient-to-br from-[var(--admin-accent)]/0 to-[var(--admin-accent)]/0 group-hover:from-[var(--admin-accent)]/5 group-hover:to-[var(--admin-accent)]/10 transition-all duration-300" />
               <Bell className="relative h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
@@ -300,7 +338,7 @@ export function CustomHeaderClient() {
             >
               <span className="absolute inset-0 bg-gradient-to-br from-[var(--admin-accent)]/0 to-[var(--admin-accent)]/0 group-hover:from-[var(--admin-accent)]/5 group-hover:to-[var(--admin-accent)]/10 transition-all duration-300" />
               <UserRound className="relative h-4 w-4 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
-              <span className="relative hidden sm:inline">Account</span>
+              <span className="relative hidden sm:inline">{t('customHeader:account')}</span>
             </Link>
 
             {/* Theme Toggle */}
@@ -318,7 +356,13 @@ export function CustomHeaderClient() {
                 active:scale-95
                 overflow-hidden
               "
-              aria-label={mounted ? (isDark ? 'Switch to light mode' : 'Switch to dark mode') : 'Toggle theme'}
+              aria-label={
+                mounted
+                  ? isDark
+                    ? t('customHeader:themeDark')
+                    : t('customHeader:themeLight')
+                  : t('customHeader:themeToggle')
+              }
               suppressHydrationWarning
             >
               <span className="absolute inset-0 bg-gradient-to-br from-[var(--admin-accent)]/0 to-[var(--admin-accent)]/0 group-hover:from-[var(--admin-accent)]/5 group-hover:to-[var(--admin-accent)]/10 transition-all duration-300" />
