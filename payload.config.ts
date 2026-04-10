@@ -13,6 +13,7 @@ import { Posts } from './src/collections/posts'
 import { Products } from './src/collections/products'
 import { Pages } from './src/collections/pages'
 import { AuthorProfile } from './src/globals/author-profile'
+import { customTranslations } from './src/admin/i18n/custom-translations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,6 +26,11 @@ export default buildConfig({
   i18n: {
     supportedLanguages: { vi, en },
     fallbackLanguage: 'vi',
+    // Custom admin UI strings (sidebar, header, dashboard) live in a dedicated
+    // module so this config file stays small. Payload merges these with the
+    // core translations imported above, giving us a single `t('customHeader:...')`
+    // call site for everything we own.
+    translations: customTranslations,
   },
   admin: {
     user: 'users',
