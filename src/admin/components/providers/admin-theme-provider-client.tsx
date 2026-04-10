@@ -153,9 +153,16 @@ export function AdminThemeProviderClient({ children }: { children?: React.ReactN
   const pathname = usePathname();
   // Detect auth pages via DOM class rather than URL — `/admin` is used for both
   // the login form (unauthenticated) and the dashboard (authenticated), so URL alone
-  // cannot distinguish them. Payload adds `.template-login` to a direct child of
-  // <body> on auth pages; CSS also uses `body:has(.template-login)` to reset padding.
-  const [isAuthTemplate, setIsAuthTemplate] = useState(true);
+  // cannot distinguish them. Payload adds `.template-minimal` to a direct child of
+  // <body> on auth pages; CSS `body:has(.template-minimal) #custom-sidebar-container`
+  // hides the sidebar synchronously once that class lands.
+  //
+  // Default `false` (sidebar rendered). Dashboard + collections are the dominant
+  // case for signed-in editors, and starting with the sidebar avoids a visible
+  // pop-in after hydration on every protected page. For the login page, the CSS
+  // :has() guard hides the sidebar in the same paint frame that Payload adds
+  // `.template-minimal`, so no flash is observed in practice.
+  const [isAuthTemplate, setIsAuthTemplate] = useState(false);
 
   useEffect(() => {
     // Payload v3 uses .template-minimal for auth pages (login, forgot-password, reset, etc.)

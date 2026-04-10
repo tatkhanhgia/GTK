@@ -254,11 +254,6 @@ export function CustomSidebarClient() {
                 onClick={closeMobileSidebar}
                 title={isClient && isSidebarCollapsed ? item.label : undefined}
               >
-                {/* Active indicator bar for collapsed state */}
-                {isClient && isSidebarCollapsed && isActive && (
-                  <span className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-1 h-6 bg-[var(--admin-accent)] rounded-r-full" />
-                )}
-
                 {/* Icon container */}
                 <span
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200 ${

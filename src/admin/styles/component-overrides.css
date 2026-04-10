@@ -451,7 +451,7 @@ table tbody tr:hover {
 /* Semi-collapsed sidebar width - optimal for icon-only display */
 .admin-sidebar-collapsed .nav,
 html.admin-sidebar-collapsed .nav,
-.custom-sidebar.w-[72px] {
+.custom-sidebar.w-\[72px\] {
   width: 72px !important;
   min-width: 72px !important;
   max-width: 72px !important;
@@ -564,9 +564,14 @@ html.admin-sidebar-collapsed .nav-group__toggle-content:hover::before {
   }
 }
 
-/* Custom sidebar collapsed improvements */
-.custom-sidebar.w-[72px] .sidebar-brand-text,
-.custom-sidebar.w-[72px] nav a span:last-child {
+/* Custom sidebar collapsed improvements.
+   IMPORTANT: the React component unmounts the label <span> when
+   collapsed, so the icon container becomes the ONLY child — which
+   means a bare `span:last-child` selector would also match (and
+   hide) the icon. Guard with :not(:only-child) so we only target
+   the label span in the expanded state when both children exist. */
+.custom-sidebar.w-\[72px\] .sidebar-brand-text,
+.custom-sidebar.w-\[72px\] nav a > span:last-child:not(:only-child) {
   opacity: 0;
   width: 0;
   overflow: hidden;
@@ -1498,18 +1503,17 @@ table td:first-child input[type="checkbox"] {
   box-shadow: 0 4px 14px rgba(217, 119, 87, 0.35);
 }
 
-/* Active indicator - left border */
-.custom-sidebar.w-\[72px\] nav a[aria-current="page"]::before {
-  content: '';
-  position: absolute;
-  left: -14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 24px;
-  background: var(--admin-accent);
-  border-radius: 0 3px 3px 0;
-  box-shadow: 0 0 8px rgba(217, 119, 87, 0.5);
+/* Collapsed mode: suppress the inherited left accent bar on active items.
+   The icon container's accent gradient already communicates active state;
+   a second bar caused clipping/overflow artifacts at the sidebar edge.
+   On hover the :hover::before tooltip arrow rule below takes over naturally
+   (different left/width/background), so we only neutralize the non-hover state. */
+.custom-sidebar.w-\[72px\] nav a[aria-current="page"]:not(:hover)::before {
+  height: 0 !important;
+  width: 0 !important;
+  left: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Inactive icon styling */
@@ -1740,14 +1744,78 @@ html.admin-light .template-default .collection-list .table > table td {
   margin-top: 0.25rem;
 }
 
-/* 5. Doc tabs (Edit / API) — gap between tabs + tap padding */
-.template-default .doc-tabs__tabs-container {
-  display: flex;
-  gap: 1.25rem;
+/* 5. Doc tabs (Edit / API) — real buttons, not invisible text.
+   Payload v3 DOM (verified live 2026-04-10):
+     .doc-tabs > .doc-tabs__tabs-container > ul.doc-tabs__tabs > li.doc-tab[.doc-tab--active]
+   Previous selector `.doc-tabs__tab` was a typo (no such class) so zero rules applied,
+   leaving Edit/API as invisible text. Target `.doc-tab` directly. */
+.template-default .doc-tabs {
+  margin-bottom: 0.25rem;
 }
 
-.template-default .doc-tabs__tab {
-  padding: 0.5rem 0.25rem;
+.template-default .doc-tabs__tabs-container {
+  margin-right: 0 !important;
+}
+
+.template-default .doc-tabs__tabs {
+  gap: 8px !important;
+  padding: 2px !important;
+  background: var(--admin-bg-tertiary);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-md);
+  display: inline-flex !important;
+  width: auto !important;
+}
+
+.template-default .doc-tab {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 16px !important;
+  min-height: 34px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  color: var(--admin-text-secondary) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: calc(var(--admin-radius-md) - 2px) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  text-decoration: none !important;
+  transition: color var(--admin-transition-fast),
+              background-color var(--admin-transition-fast),
+              border-color var(--admin-transition-fast),
+              box-shadow var(--admin-transition-fast);
+  white-space: nowrap;
+}
+
+.template-default .doc-tab:hover {
+  color: var(--admin-text-primary) !important;
+  background: var(--admin-bg-secondary) !important;
+}
+
+.template-default .doc-tab--active,
+.template-default .doc-tab.btn--disabled {
+  color: var(--admin-accent) !important;
+  background: var(--admin-bg-secondary) !important;
+  border-color: var(--admin-border) !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.06), 0 0 0 1px var(--admin-accent-light);
+  font-weight: 600 !important;
+  cursor: default !important;
+}
+
+.template-default .doc-tab__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+
+/* Kill the default right-edge fade gradient that only makes sense when
+   tabs overflow horizontally. It's hiding the last tab visually. */
+.template-default .doc-tabs:after {
+  display: none !important;
 }
 
 /* 6. Form field rhythm — stack fields with breathing room */
@@ -2590,58 +2658,152 @@ html.admin-light .collection-list .no-results::before {
    - .array-field__row-header collides with .array-actions popup
    ============================================================ */
 
-/* ---------- Tabs field (visual separator + breathing room) ---------- */
+/* ---------- Tabs field (Anthropic-style magazine tabs) ----------
+   The tab bar behaves like the navigation of a considered editorial site:
+   - Tabs sit on a warm tinted strip separated from the content by a
+     1px hairline (not a button pill group — too gamified).
+   - Each tab is an uppercase, tracked label with a left counter dot.
+   - Active tab draws a thick 2.5px accent underline flush with the
+     hairline + color shift + subtle weight change.
+   - Hover state previews the underline at reduced opacity. */
 .template-default .tabs-field__tabs-wrap {
-  border-bottom: 1px solid var(--admin-border);
-  margin-bottom: 1.5rem !important;
-  padding-bottom: 0;
+  margin-bottom: 2rem !important;
+  padding: 0 0 0 0;
+  border: 0;
+  border-bottom: 1px solid var(--admin-border) !important;
   position: relative;
+}
+
+/* Warm tint behind the tabs so they feel like an editorial sub-header */
+.template-default .tabs-field__tabs-wrap:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+              var(--admin-bg-secondary) 0%,
+              var(--admin-bg-primary) 100%);
+  border-radius: var(--admin-radius-md) var(--admin-radius-md) 0 0;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .template-default .tabs-field__tabs {
   display: inline-flex !important;
-  gap: 0.25rem !important;
+  gap: 6px !important;
   flex-wrap: wrap;
-  padding: 0;
+  padding: 0 4px !important;
   margin: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+  z-index: 1;
 }
 
 .template-default .tabs-field__tab-button {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center;
-  gap: 6px !important;
-  padding: 10px 16px !important;
+  gap: 8px !important;
+  padding: 14px 18px 12px !important;
   height: auto !important;
-  min-height: 40px !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
+  min-height: 46px !important;
+  font-family: var(--admin-font-vietnamese-safe) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase;
   line-height: 1.2 !important;
-  color: var(--admin-text-secondary) !important;
+  color: var(--admin-text-tertiary) !important;
   background: transparent !important;
-  border: 1px solid transparent !important;
-  border-bottom: 2px solid transparent !important;
-  border-radius: var(--admin-radius-md) var(--admin-radius-md) 0 0 !important;
-  margin-bottom: -1px !important; /* overlap container border-bottom */
+  border: 0 !important;
+  border-radius: 0 !important;
   cursor: pointer;
-  transition: color var(--admin-transition-fast),
-              background-color var(--admin-transition-fast),
-              border-color var(--admin-transition-fast);
+  transition: color var(--admin-transition-fast);
   white-space: nowrap;
+  position: relative;
+}
+
+/* Hairline indicator (hover/active) — sits exactly on the container border */
+.template-default .tabs-field__tab-button:after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -1px;
+  height: 2.5px;
+  background: var(--admin-accent);
+  border-radius: 2px 2px 0 0;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity var(--admin-transition-fast);
+  opacity: 0;
+}
+
+/* Numeric counter dot in front of the label ("01 Danh tính") */
+.template-default .tabs-field__tab-button:before {
+  content: counter(tab-counter, decimal-leading-zero);
+  counter-increment: tab-counter;
+  display: inline-block;
+  font-family: var(--admin-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--admin-text-muted);
+  opacity: 0.75;
+  transition: color var(--admin-transition-fast),
+              opacity var(--admin-transition-fast);
+}
+
+.template-default .tabs-field__tabs {
+  counter-reset: tab-counter;
 }
 
 .template-default .tabs-field__tab-button:hover {
   color: var(--admin-text-primary) !important;
-  background: var(--admin-bg-tertiary) !important;
+}
+
+.template-default .tabs-field__tab-button:hover:after {
+  transform: scaleX(0.55);
+  opacity: 0.35;
+}
+
+.template-default .tabs-field__tab-button:hover:before {
+  color: var(--admin-accent);
+  opacity: 1;
+}
+
+.template-default .tabs-field__tab-button:focus-visible {
+  outline: 2px solid var(--admin-accent) !important;
+  outline-offset: 4px;
+  border-radius: 4px !important;
 }
 
 .template-default .tabs-field__tab-button--active,
 .template-default .tabs-field__tab-button[aria-selected='true'] {
+  color: var(--admin-text-primary) !important;
+  background: transparent !important;
+  border: 0 !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  padding-left: 18px !important;
+}
+
+.template-default .tabs-field__tab-button--active:after,
+.template-default .tabs-field__tab-button[aria-selected='true']:after {
+  transform: scaleX(1);
+  opacity: 1;
+  height: 2.5px;
+  background: var(--admin-accent);
+}
+
+.template-default .tabs-field__tab-button--active:before,
+.template-default .tabs-field__tab-button[aria-selected='true']:before {
   color: var(--admin-accent) !important;
-  background: var(--admin-bg-secondary) !important;
-  border-color: var(--admin-border) !important;
-  border-bottom-color: var(--admin-accent) !important;
-  font-weight: 600 !important;
+  opacity: 1 !important;
 }
 
 /* Tab description shown above the active tab content */
@@ -3094,6 +3256,393 @@ html.admin-light .collection-list .no-results::before {
   padding-bottom: 2.5rem;
 }
 
+/* ============================================================
+   UPLOAD FIELD (Avatar picker) — visible buttons + inline drag text
+   Payload v3 DOM (verified from @payloadcms/ui/Upload/Input.js):
+     .field-type.upload
+       .upload__dropzoneAndUpload
+         div.dropzone
+           .upload__dropzoneContent
+             .upload__dropzoneContent__buttons
+               button.btn.btn--style-pill.upload__createNewToggler → "Create New"
+               span.upload__dropzoneContent__orText → "or"
+               button.btn.btn--style-pill.upload__listToggler → "Choose from existing"
+             p.upload__dragAndDropText → "or drag and drop a file"
+
+   Defaults: buttons have .btn--style-pill (barely visible bg), and
+   .upload__dropzoneContent uses justify-content:space-between which
+   pushes the drag-drop text to the far right. We fix both.
+   ============================================================ */
+
+.template-default .field-type.upload .upload__dropzoneContent {
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap;
+  padding: 6px 2px;
+}
+
+.template-default .field-type.upload .upload__dropzoneContent__buttons {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  left: 0 !important;
+  flex-wrap: wrap;
+}
+
+.template-default .field-type.upload .upload__dropzoneContent__orText {
+  color: var(--admin-text-tertiary) !important;
+  font-size: 12px !important;
+  text-transform: lowercase;
+  padding: 0 2px;
+}
+
+/* Turn the pill buttons into real, visible buttons */
+.template-default .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill,
+.template-default .field-type.upload button.upload__createNewToggler,
+.template-default .field-type.upload button.upload__listToggler {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  color: var(--admin-text-primary) !important;
+  background: var(--admin-bg-secondary) !important;
+  border: 1px solid var(--admin-border-strong) !important;
+  border-radius: var(--admin-radius-md) !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.04);
+  cursor: pointer !important;
+  transition: background-color var(--admin-transition-fast),
+              border-color var(--admin-transition-fast),
+              color var(--admin-transition-fast),
+              box-shadow var(--admin-transition-fast),
+              transform var(--admin-transition-fast);
+  white-space: nowrap;
+}
+
+.template-default .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill .btn__content,
+.template-default .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill .btn__label {
+  color: inherit !important;
+  font: inherit !important;
+  line-height: 1.2 !important;
+}
+
+/* Primary look for "Create New" */
+.template-default .field-type.upload button.upload__createNewToggler {
+  background: var(--admin-accent) !important;
+  border-color: var(--admin-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.12);
+}
+
+.template-default .field-type.upload button.upload__createNewToggler:hover {
+  background: var(--admin-accent-hover) !important;
+  border-color: var(--admin-accent-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--admin-shadow-sm);
+}
+
+/* Secondary look for "Choose from existing" */
+.template-default .field-type.upload button.upload__listToggler:hover {
+  background: var(--admin-bg-tertiary) !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+  transform: translateY(-1px);
+}
+
+.template-default .field-type.upload button.upload__createNewToggler:focus-visible,
+.template-default .field-type.upload button.upload__listToggler:focus-visible {
+  outline: 2px solid var(--admin-accent) !important;
+  outline-offset: 2px;
+}
+
+/* Move "or drag and drop a file" text right after the buttons instead of
+   being pushed to the far right by justify-content:space-between. */
+.template-default .field-type.upload .upload__dragAndDropText {
+  display: inline-flex !important;
+  align-items: center;
+  margin: 0 0 0 4px !important;
+  padding: 0;
+  font-size: 12px !important;
+  color: var(--admin-text-tertiary) !important;
+  text-transform: lowercase;
+  flex-shrink: 0;
+  align-self: center !important;
+  order: 2;
+}
+
+/* Dropzone wrapper: give it a subtle dashed frame so users can tell where
+   to drop. Uses the same pattern as array "Add row" button. */
+.template-default .field-type.upload .dropzone {
+  border: 1px dashed var(--admin-border-strong);
+  border-radius: var(--admin-radius-md);
+  padding: 14px 16px;
+  background: var(--admin-bg-primary);
+  transition: background-color var(--admin-transition-fast),
+              border-color var(--admin-transition-fast);
+}
+
+.template-default .field-type.upload .dropzone:hover,
+.template-default .field-type.upload .dropzone--drag-over {
+  border-color: var(--admin-accent);
+  background: var(--admin-accent-light);
+}
+
+/* On narrow screens, let the drag text wrap under the buttons instead
+   of being hidden (Payload default hides it under 800px). */
+@media (max-width: 800px) {
+  .template-default .field-type.upload .upload__dragAndDropText {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   RICH TEXT (Lexical) FIELDS — Professional editor card
+   ============================================================
+   Payload v3 Lexical DOM (verified against @payloadcms/richtext-lexical):
+     .field-type.rich-text
+       .rich-text-lexical
+         .editor-shell (has inline toolbar + fixed toolbar containers)
+           .editor-container
+             .editor-scroller
+               .editor
+                 .ContentEditable__root   ← the actual contenteditable
+                 .add-block-menu          ← floating "+" button
+                 .draggable-block-menu    ← floating drag handle (six dots)
+                 .draggable-block-target-line
+
+   CRITICAL: Payload default sets
+     .editor-container > .editor-scroller > .editor > .ContentEditable__root
+     { padding-left: 3rem }
+   That 3rem gutter is where the + and drag-handle icons live. If you set
+   padding:14px 16px on ContentEditable__root, the + icon slams into the
+   first line of text. Preserve the left gutter explicitly.
+   ============================================================ */
+
+.template-default .field-type.rich-text .rich-text-lexical,
+.template-default .field-type.rich-text .rich-text-lexical__wrap,
+.template-default .field-type.rich-text .rich-text--read-only {
+  background: #ffffff !important;
+  border: 1.5px solid #d8cabd !important; /* warm tan = theme-elevation-250 */
+  border-radius: 10px !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px rgba(24, 21, 18, 0.05),
+    0 12px 24px -14px rgba(24, 21, 18, 0.12) !important;
+  transition: border-color var(--admin-transition-fast),
+              box-shadow var(--admin-transition-fast),
+              transform var(--admin-transition-fast);
+  overflow: visible;
+  position: relative;
+}
+
+/* Corner flag so users instantly read "text input": a small monospaced
+   label in the top-right of the editor card. */
+.template-default .field-type.rich-text .rich-text-lexical:before {
+  content: 'RICH TEXT';
+  position: absolute;
+  top: -9px;
+  right: 14px;
+  padding: 2px 8px;
+  font-family: var(--admin-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--admin-text-tertiary);
+  background: #ffffff;
+  border: 1px solid #d8cabd;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.template-default .field-type.rich-text .rich-text-lexical:hover {
+  border-color: #b9a799 !important; /* elevation-350 */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 3px 6px rgba(24, 21, 18, 0.08),
+    0 16px 30px -16px rgba(24, 21, 18, 0.16) !important;
+}
+
+.template-default .field-type.rich-text .rich-text-lexical:focus-within {
+  border-color: var(--admin-accent) !important;
+  box-shadow:
+    0 0 0 4px var(--admin-accent-light),
+    0 2px 4px rgba(24, 21, 18, 0.06),
+    0 18px 32px -16px rgba(217, 119, 87, 0.22) !important;
+}
+
+.template-default .field-type.rich-text .rich-text-lexical:focus-within:before {
+  color: var(--admin-accent);
+  border-color: var(--admin-accent);
+}
+
+/* Editor shell: the inner frame that wraps toolbar + content */
+.template-default .field-type.rich-text .editor-shell {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: calc(var(--admin-radius-md) - 1px) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+/* Fixed toolbar / inline toolbar — give the editor a real "chrome" strip */
+.template-default .field-type.rich-text .toolbar-popup,
+.template-default .field-type.rich-text .fixed-toolbar,
+.template-default .field-type.rich-text .inline-toolbar-popup {
+  background: var(--admin-bg-secondary) !important;
+  border-bottom: 1px solid var(--admin-border) !important;
+  padding: 6px 8px !important;
+  border-radius: calc(var(--admin-radius-md) - 1px) calc(var(--admin-radius-md) - 1px) 0 0 !important;
+}
+
+.template-default .field-type.rich-text .toolbar-popup button,
+.template-default .field-type.rich-text .fixed-toolbar button {
+  border-radius: 6px !important;
+  transition: background-color var(--admin-transition-fast);
+}
+
+.template-default .field-type.rich-text .toolbar-popup button:hover,
+.template-default .field-type.rich-text .fixed-toolbar button:hover {
+  background: var(--admin-bg-tertiary) !important;
+}
+
+/* Container: keep position:relative for floating buttons */
+.template-default .field-type.rich-text .editor-container {
+  position: relative;
+  background: transparent !important;
+  font-size: 14px !important;
+  letter-spacing: normal !important;
+  padding: 8px 0 !important;
+}
+
+/* The editable area. Use the SAME direct-child selector Payload uses so
+   we override cleanly. Preserve the 48px left gutter for the + / drag icons. */
+.template-default .field-type.rich-text .editor-container > .editor-scroller > .editor > .ContentEditable__root,
+.template-default .field-type.rich-text .ContentEditable__root {
+  padding: 14px 18px 14px 48px !important;
+  min-height: 140px;
+  font-size: 14px !important;
+  line-height: 1.75 !important;
+  color: var(--admin-text-primary) !important;
+  caret-color: var(--admin-accent);
+}
+
+/* Placeholder ("Start typing, or press '/' ...") — anchor to matching gutter */
+.template-default .field-type.rich-text .editor-container > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder,
+.template-default .field-type.rich-text .LexicalEditorTheme__placeholder {
+  top: 14px !important;
+  left: 48px !important;
+  font-size: 14px !important;
+  color: var(--admin-text-muted) !important;
+  font-style: normal !important;
+}
+
+/* The left guide line that Payload renders via :before — recolor it */
+.template-default .field-type.rich-text .editor-container > .editor-scroller > .editor > .ContentEditable__root:before {
+  border-left-color: var(--admin-border) !important;
+  left: 32px !important;
+}
+
+/* The floating "+" (add-block-menu) and drag handle — make them visible by
+   default at a subtle opacity instead of 0 so users understand what they do.
+   Also theme them with our accent on hover. */
+.template-default .field-type.rich-text .add-block-menu,
+.template-default .field-type.rich-text .draggable-block-menu {
+  opacity: 0.45 !important;
+  border-radius: 6px !important;
+  transition: opacity var(--admin-transition-fast),
+              background-color var(--admin-transition-fast);
+}
+
+.template-default .field-type.rich-text .rich-text-lexical:hover .add-block-menu,
+.template-default .field-type.rich-text .rich-text-lexical:hover .draggable-block-menu {
+  opacity: 0.7 !important;
+}
+
+.template-default .field-type.rich-text .add-block-menu:hover,
+.template-default .field-type.rich-text .draggable-block-menu:hover {
+  opacity: 1 !important;
+  background-color: var(--admin-accent-light) !important;
+}
+
+.template-default .field-type.rich-text .add-block-menu:hover .icon,
+.template-default .field-type.rich-text .draggable-block-menu:hover .icon {
+  opacity: 1 !important;
+}
+
+/* Dark mode: flip to dark elevated surface with warm border */
+html.dark .template-default .field-type.rich-text .rich-text-lexical,
+html.admin-dark .template-default .field-type.rich-text .rich-text-lexical,
+html.dark .template-default .field-type.rich-text .rich-text-lexical__wrap,
+html.admin-dark .template-default .field-type.rich-text .rich-text-lexical__wrap {
+  background: #1f1f1d !important;
+  border: 1.5px solid #3a342c !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 16px 30px -14px rgba(0, 0, 0, 0.55) !important;
+}
+
+html.dark .template-default .field-type.rich-text .rich-text-lexical:before,
+html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:before {
+  background: #1f1f1d;
+  border-color: #3a342c;
+  color: var(--admin-text-muted);
+}
+
+html.dark .template-default .field-type.rich-text .rich-text-lexical:hover,
+html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:hover {
+  border-color: #524836 !important;
+}
+
+html.dark .template-default .field-type.rich-text .rich-text-lexical:focus-within,
+html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:focus-within {
+  border-color: var(--admin-accent) !important;
+  box-shadow:
+    0 0 0 4px var(--admin-accent-light),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 20px 40px -18px rgba(224, 144, 112, 0.3) !important;
+}
+
+html.dark .template-default .field-type.rich-text .rich-text-lexical:focus-within:before,
+html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:focus-within:before {
+  color: var(--admin-accent);
+  border-color: var(--admin-accent);
+}
+
+html.dark .template-default .field-type.rich-text .toolbar-popup,
+html.admin-dark .template-default .field-type.rich-text .toolbar-popup,
+html.dark .template-default .field-type.rich-text .fixed-toolbar,
+html.admin-dark .template-default .field-type.rich-text .fixed-toolbar {
+  background: #262522 !important;
+  border-bottom-color: #3a342c !important;
+}
+
+/* Textarea fields — same visible container treatment for consistency */
+.template-default .field-type.textarea textarea {
+  background: var(--admin-bg-secondary) !important;
+  border: 1px solid var(--admin-border-strong) !important;
+  border-radius: var(--admin-radius-md) !important;
+  padding: 12px 14px !important;
+  font-size: 14px !important;
+  color: var(--admin-text-primary) !important;
+  transition: border-color var(--admin-transition-fast),
+              box-shadow var(--admin-transition-fast);
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.03);
+}
+
+.template-default .field-type.textarea textarea:focus {
+  outline: none !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+}
+
 /* Mobile: tabs scroll horizontally instead of wrapping awkwardly */
 @media (max-width: 640px) {
   .template-default .tabs-field__tabs-wrap {
@@ -3112,4 +3661,394 @@ html.admin-light .collection-list .no-results::before {
   .template-default .group-field__wrap {
     padding: 1rem;
   }
+}
+
+/* ============================================================
+   EDIT VIEW — ELEVATED CONTENT CARD (Linear / Vercel pattern)
+   ============================================================
+   Problem: the warm cream page background (#f6f1ea) was sitting
+   directly under labels, titles and inputs with nothing between
+   them, so the entire form "swam" on the page. The original
+   `.group-field__wrap` card used #fff8f1 which was almost
+   indistinguishable from the page.
+
+   Fix: lift the main form area into a white elevated card
+   (border + shadow + generous padding). Anchored on the Payload
+   v3 class `.document-fields__main` which wraps the primary form
+   content for both collections and globals. The sidebar
+   (`.document-fields__sidebar`) becomes its own lighter card.
+
+   Inside the white card, inputs adopt a soft warm tint so they
+   still read as an input surface — not another white rectangle.
+   Groups and tabs strip their own frames so we never nest cards.
+   ============================================================ */
+
+/* ---------- 1. Page background + title treatment ----------
+   Pull the document header out of the card. Give it an editorial
+   look: large bold title, thin divider, subtle meta row. */
+.template-default .doc-header {
+  margin-bottom: 1.25rem !important;
+  padding: 0 2px;
+}
+
+.template-default .doc-header__title.render-title {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.015em;
+  color: var(--admin-text-primary) !important;
+  margin: 0 0 0.25rem !important;
+}
+
+/* ---------- 2. Main form card ----------
+   `.document-fields__main` is the primary form column.
+   Turn it into a raised white card. */
+.template-default .document-fields__main {
+  background: #ffffff;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-xl);
+  padding: 2rem 2.25rem 2.25rem;
+  box-shadow:
+    0 1px 2px rgba(24, 21, 18, 0.04),
+    0 14px 34px -20px rgba(24, 21, 18, 0.10);
+}
+
+@media (max-width: 768px) {
+  .template-default .document-fields__main {
+    padding: 1.25rem 1.125rem 1.5rem;
+    border-radius: var(--admin-radius-lg);
+  }
+}
+
+/* Sidebar card (right rail: status, last modified, created, etc.) */
+.template-default .document-fields__sidebar-wrap,
+.template-default .document-fields__sidebar {
+  background: var(--admin-bg-secondary);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  padding: 1.25rem 1.25rem 1.5rem;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.03);
+}
+
+/* ---------- 3. Inputs inside the white card ----------
+   Warm tint so fields are clearly distinct from the card surface.
+   Border is also reinforced. Focus ring unchanged (accent). */
+.template-default .document-fields__main input[type="text"],
+.template-default .document-fields__main input[type="email"],
+.template-default .document-fields__main input[type="password"],
+.template-default .document-fields__main input[type="number"],
+.template-default .document-fields__main input[type="search"],
+.template-default .document-fields__main input[type="url"],
+.template-default .document-fields__main input[type="tel"],
+.template-default .document-fields__main input[type="date"],
+.template-default .document-fields__main select,
+.template-default .document-fields__main .field-type.textarea textarea {
+  background: #faf5ec !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: var(--admin-radius-md) !important;
+  padding: 11px 14px !important;
+  font-size: 14px !important;
+  color: var(--admin-text-primary) !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.03) inset;
+  transition:
+    background-color var(--admin-transition-fast),
+    border-color var(--admin-transition-fast),
+    box-shadow var(--admin-transition-fast);
+}
+
+.template-default .document-fields__main input[type="text"]:hover,
+.template-default .document-fields__main input[type="email"]:hover,
+.template-default .document-fields__main input[type="number"]:hover,
+.template-default .document-fields__main select:hover,
+.template-default .document-fields__main .field-type.textarea textarea:hover {
+  background: #fff9ee !important;
+  border-color: #d8cabd !important;
+}
+
+.template-default .document-fields__main input[type="text"]:focus,
+.template-default .document-fields__main input[type="email"]:focus,
+.template-default .document-fields__main input[type="password"]:focus,
+.template-default .document-fields__main input[type="number"]:focus,
+.template-default .document-fields__main input[type="search"]:focus,
+.template-default .document-fields__main input[type="url"]:focus,
+.template-default .document-fields__main input[type="tel"]:focus,
+.template-default .document-fields__main input[type="date"]:focus,
+.template-default .document-fields__main select:focus,
+.template-default .document-fields__main .field-type.textarea textarea:focus {
+  background: #ffffff !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+  outline: none !important;
+}
+
+/* Reinforce label legibility on the white card */
+.template-default .document-fields__main .field-type > label,
+.template-default .document-fields__main .field-type__label,
+.template-default .document-fields__main .field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  letter-spacing: -0.005em;
+}
+
+/* ---------- 4. Tabs inside the card ----------
+   Strip the prior warm gradient behind tabs — card is white now,
+   a gradient on white would look muddy. Keep the editorial
+   hairline + counter + active underline from the existing rules. */
+.template-default .document-fields__main .tabs-field__tabs-wrap {
+  margin-top: -0.25rem;
+  margin-left: -2.25rem;
+  margin-right: -2.25rem;
+  padding: 0 2.25rem;
+  border-bottom: 1px solid var(--admin-border) !important;
+}
+
+.template-default .document-fields__main .tabs-field__tabs-wrap:before {
+  display: none !important;
+}
+
+.template-default .document-fields__main .tabs-field__content {
+  padding-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .template-default .document-fields__main .tabs-field__tabs-wrap {
+    margin-left: -1.125rem;
+    margin-right: -1.125rem;
+    padding: 0 1.125rem;
+  }
+}
+
+/* ---------- 5. Group fields inside the card ----------
+   The card + a group panel + more background = too many
+   surfaces. Strip the group frame when it sits directly on the
+   white card: use a subtle left accent rule + heading only. */
+.template-default .document-fields__main .group-field__wrap {
+  background: transparent;
+  border: 0;
+  border-left: 2px solid var(--admin-border);
+  border-radius: 0;
+  padding: 0.25rem 0 0.5rem 1.25rem;
+}
+
+.template-default .document-fields__main .group-field__header {
+  border-bottom: 0;
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.875rem;
+}
+
+/* ---------- 6. Rich-text editor inside the card ----------
+   Match the warm tinted surface used by text/email/number inputs
+   (#faf5ec + #e5dccb border) so users immediately read the field
+   as "an input I can type into" — not another card section. The
+   inset shadow reinforces a classic "input well" affordance. */
+.template-default .document-fields__main .field-type.rich-text .rich-text-lexical {
+  background: #faf5ec !important;
+  border-color: #e5dccb !important;
+  box-shadow:
+    0 1px 2px rgba(24, 21, 18, 0.03) inset,
+    0 0 0 1px rgba(229, 220, 203, 0.6),
+    0 2px 6px -2px rgba(24, 21, 18, 0.06) !important;
+}
+
+.template-default .document-fields__main .field-type.rich-text .rich-text-lexical:hover {
+  background: #fff9ee !important;
+  border-color: #d8cabd !important;
+}
+
+.template-default .document-fields__main .field-type.rich-text .rich-text-lexical:focus-within {
+  background: #ffffff !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow:
+    0 0 0 3px var(--admin-accent-light),
+    0 1px 2px rgba(24, 21, 18, 0.04) inset,
+    0 4px 10px -4px rgba(217, 119, 87, 0.18) !important;
+}
+
+/* Make the toolbar strip visually obvious so the field reads as a
+   rich editor at a glance instead of a bare surface. */
+.template-default .document-fields__main .field-type.rich-text .fixed-toolbar,
+.template-default .document-fields__main .field-type.rich-text .toolbar-popup {
+  background: #f1e9d8 !important;
+  border-bottom: 1px solid #e0d3bf !important;
+}
+
+/* Stronger placeholder so the empty state clearly says "type here". */
+.template-default .document-fields__main .field-type.rich-text .LexicalEditorTheme__placeholder,
+.template-default .document-fields__main .field-type.rich-text .editor-container > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
+  color: #9a8974 !important;
+  font-style: italic !important;
+  opacity: 1 !important;
+}
+
+/* ---------- 7. Upload dropzone inside the card ---------- */
+.template-default .document-fields__main .field-type.upload .dropzone {
+  background: #faf5ec;
+  border-color: #e0d3bf;
+}
+
+/* ---------- 8. Dark mode card ---------- */
+html.dark .template-default .document-fields__main,
+html.admin-dark .template-default .document-fields__main {
+  background: #1c1b19;
+  border-color: rgba(245, 240, 232, 0.08);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 18px 40px -20px rgba(0, 0, 0, 0.55);
+}
+
+html.dark .template-default .document-fields__sidebar-wrap,
+html.dark .template-default .document-fields__sidebar,
+html.admin-dark .template-default .document-fields__sidebar-wrap,
+html.admin-dark .template-default .document-fields__sidebar {
+  background: #1a1a18;
+  border-color: rgba(245, 240, 232, 0.08);
+}
+
+html.dark .template-default .document-fields__main input[type="text"],
+html.dark .template-default .document-fields__main input[type="email"],
+html.dark .template-default .document-fields__main input[type="password"],
+html.dark .template-default .document-fields__main input[type="number"],
+html.dark .template-default .document-fields__main input[type="search"],
+html.dark .template-default .document-fields__main input[type="url"],
+html.dark .template-default .document-fields__main input[type="tel"],
+html.dark .template-default .document-fields__main input[type="date"],
+html.dark .template-default .document-fields__main select,
+html.dark .template-default .document-fields__main .field-type.textarea textarea,
+html.admin-dark .template-default .document-fields__main input[type="text"],
+html.admin-dark .template-default .document-fields__main input[type="email"],
+html.admin-dark .template-default .document-fields__main input[type="password"],
+html.admin-dark .template-default .document-fields__main input[type="number"],
+html.admin-dark .template-default .document-fields__main input[type="search"],
+html.admin-dark .template-default .document-fields__main input[type="url"],
+html.admin-dark .template-default .document-fields__main input[type="tel"],
+html.admin-dark .template-default .document-fields__main input[type="date"],
+html.admin-dark .template-default .document-fields__main select,
+html.admin-dark .template-default .document-fields__main .field-type.textarea textarea {
+  background: #14120f !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) inset;
+}
+
+html.dark .template-default .document-fields__main input[type="text"]:focus,
+html.dark .template-default .document-fields__main input[type="email"]:focus,
+html.dark .template-default .document-fields__main input[type="number"]:focus,
+html.dark .template-default .document-fields__main select:focus,
+html.dark .template-default .document-fields__main .field-type.textarea textarea:focus,
+html.admin-dark .template-default .document-fields__main input[type="text"]:focus,
+html.admin-dark .template-default .document-fields__main input[type="email"]:focus,
+html.admin-dark .template-default .document-fields__main input[type="number"]:focus,
+html.admin-dark .template-default .document-fields__main select:focus,
+html.admin-dark .template-default .document-fields__main .field-type.textarea textarea:focus {
+  background: #0f0d0b !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+}
+
+html.dark .template-default .document-fields__main .group-field__wrap,
+html.admin-dark .template-default .document-fields__main .group-field__wrap {
+  border-left-color: rgba(245, 240, 232, 0.14);
+}
+
+html.dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical,
+html.admin-dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical {
+  background: #14120f !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.45) inset,
+    0 0 0 1px rgba(245, 240, 232, 0.04),
+    0 3px 8px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:hover,
+html.admin-dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:hover {
+  background: #191713 !important;
+  border-color: rgba(245, 240, 232, 0.22) !important;
+}
+
+html.dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:focus-within,
+html.admin-dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:focus-within {
+  background: #0f0d0b !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow:
+    0 0 0 3px var(--admin-accent-light),
+    0 1px 2px rgba(0, 0, 0, 0.5) inset,
+    0 4px 12px -4px rgba(224, 144, 112, 0.3) !important;
+}
+
+html.dark .template-default .document-fields__main .field-type.rich-text .fixed-toolbar,
+html.dark .template-default .document-fields__main .field-type.rich-text .toolbar-popup,
+html.admin-dark .template-default .document-fields__main .field-type.rich-text .fixed-toolbar,
+html.admin-dark .template-default .document-fields__main .field-type.rich-text .toolbar-popup {
+  background: #1f1c18 !important;
+  border-bottom-color: rgba(245, 240, 232, 0.1) !important;
+}
+
+html.dark .template-default .document-fields__main .field-type.rich-text .LexicalEditorTheme__placeholder,
+html.admin-dark .template-default .document-fields__main .field-type.rich-text .LexicalEditorTheme__placeholder {
+  color: #8a7c6a !important;
+  font-style: italic !important;
+  opacity: 1 !important;
+}
+
+html.dark .template-default .document-fields__main .field-type.upload .dropzone,
+html.admin-dark .template-default .document-fields__main .field-type.upload .dropzone {
+  background: #14120f;
+  border-color: rgba(245, 240, 232, 0.14);
+}
+
+/* ============================================================
+   REACT-SELECT INTERNAL INPUT RESET
+   Bug: verified via DOM dump 2026-04-10.
+   Our global `input[type="text"]` overrides (lines 327, 1391,
+   3736) also match react-select's internal <input class="rs__input">,
+   painting it as a 30×44px cream-colored box that sits on the LEFT
+   of the selected value inside .rs__value-container (grid layout).
+   Symptom: inside author-profile → selectedWriting rows, the post
+   title "Xây dựng blog với Next.js và Payload CMS" had its first
+   ~4 characters covered by this phantom input box.
+   Fix: nuke all inherited input styling on .rs__input so it returns
+   to its intended invisible state (2px wide typing target, fully
+   transparent, no border/padding/shadow). Specificity
+   (.template-default .document-fields__main .rs__control .rs__input
+   = 0/4/0) beats the offender (0/3/1). Applies to both themes via a
+   single rule so we don't have to mirror it under html.dark / html.admin-dark. */
+.template-default .document-fields__main .rs__control .rs__input,
+.template-default .document-fields__main .rs__control input.rs__input[type="text"],
+.template-default .rs__control .rs__input,
+.template-default .rs__control input.rs__input[type="text"] {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.template-default .document-fields__main .rs__control .rs__input:focus,
+.template-default .document-fields__main .rs__control .rs__input:hover,
+.template-default .rs__control .rs__input:focus,
+.template-default .rs__control .rs__input:hover {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* The input-container (grid cell) that holds .rs__input must also stay
+   zero-padded — otherwise the cream-colored bleed reappears around the
+   typing cursor because the container itself inherits some padding from
+   less-specific input-wrapper rules. */
+.template-default .document-fields__main .rs__control .rs__input-container,
+.template-default .rs__control .rs__input-container {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
 }
