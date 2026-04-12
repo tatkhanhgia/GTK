@@ -1,5 +1,6 @@
 'use client'
-import React from 'react'
+import React, { useMemo } from 'react'
+import { useAdminTranslation } from '../../i18n/use-admin-translation'
 
 /**
  * Custom Cell component for the Products `type` field.
@@ -10,24 +11,29 @@ import React from 'react'
  *   - Code     → warm amber (technical)
  */
 
-const LABELS: Record<string, string> = {
-  ebook: 'Ebook',
-  template: 'Template',
-  code: 'Code',
-}
-
 type TypeCellProps = {
   cellData?: string | null
 }
 
 export const TypeCell: React.FC<TypeCellProps> = ({ cellData }) => {
+  const { t } = useAdminTranslation()
   const value = (cellData ?? '').toLowerCase()
+
+  const LABELS = useMemo<Record<string, string>>(
+    () => ({
+      ebook: t('customCells:typeEbook'),
+      template: t('customCells:typeTemplate'),
+      code: t('customCells:typeCode'),
+    }),
+    [t],
+  )
+
   const label = LABELS[value] ?? (value || '—')
 
   return (
     <span
       className={`type-pill type-pill--${value || 'unknown'}`}
-      aria-label={`Type: ${label}`}
+      aria-label={t('customCells:typeAriaLabel', { label })}
     >
       <span className="type-pill__dot" aria-hidden="true" />
       {label}

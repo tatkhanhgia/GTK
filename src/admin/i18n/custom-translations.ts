@@ -61,6 +61,23 @@ type CustomTranslationsShape = {
     themeDark: string;
     themeLight: string;
     themeToggle: string;
+    langSwitcherLabel: string;
+    langSwitcherVi: string;
+    langSwitcherEn: string;
+  };
+  customCells: {
+    statusDraft: string;
+    statusPublished: string;
+    statusAriaLabel: string;
+    typeEbook: string;
+    typeTemplate: string;
+    typeCode: string;
+    typeAriaLabel: string;
+    priceAriaLabel: string;
+  };
+  customFields: {
+    platformNoOptions: string;
+    platformPlaceholder: string;
   };
   customDashboard: {
     heroKicker: string;
@@ -151,6 +168,23 @@ export const customTranslationsVi: CustomTranslationsShape = {
     themeDark: 'Chuyển sang chế độ sáng',
     themeLight: 'Chuyển sang chế độ tối',
     themeToggle: 'Đổi chủ đề',
+    langSwitcherLabel: 'Chọn ngôn ngữ giao diện',
+    langSwitcherVi: 'Tiếng Việt',
+    langSwitcherEn: 'Tiếng Anh',
+  },
+  customCells: {
+    statusDraft: 'Nháp',
+    statusPublished: 'Đã xuất bản',
+    statusAriaLabel: 'Trạng thái: {{label}}',
+    typeEbook: 'Ebook',
+    typeTemplate: 'Template',
+    typeCode: 'Code',
+    typeAriaLabel: 'Loại: {{label}}',
+    priceAriaLabel: 'Giá: {{value}} VND',
+  },
+  customFields: {
+    platformNoOptions: 'Không có lựa chọn',
+    platformPlaceholder: 'Chọn nền tảng...',
   },
   customDashboard: {
     heroKicker: 'Tổng quan',
@@ -243,6 +277,23 @@ export const customTranslationsEn: CustomTranslationsShape = {
     themeDark: 'Switch to light mode',
     themeLight: 'Switch to dark mode',
     themeToggle: 'Toggle theme',
+    langSwitcherLabel: 'Select interface language',
+    langSwitcherVi: 'Vietnamese',
+    langSwitcherEn: 'English',
+  },
+  customCells: {
+    statusDraft: 'Draft',
+    statusPublished: 'Published',
+    statusAriaLabel: 'Status: {{label}}',
+    typeEbook: 'Ebook',
+    typeTemplate: 'Template',
+    typeCode: 'Code',
+    typeAriaLabel: 'Type: {{label}}',
+    priceAriaLabel: 'Price: {{value}} VND',
+  },
+  customFields: {
+    platformNoOptions: 'No options available',
+    platformPlaceholder: 'Select platform...',
   },
   customDashboard: {
     heroKicker: 'Overview',

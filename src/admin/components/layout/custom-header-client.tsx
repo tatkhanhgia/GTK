@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Menu, MoonStar, SunMedium, UserRound, ChevronRight, PanelLeft, Bell, Search } from 'lucide-react';
 import { useAdminShell } from '../providers/admin-theme-provider-client';
 import { useAdminTranslation } from '../../i18n/use-admin-translation';
+import { LanguageSwitcherClient } from '../ui/language-switcher-client';
 import type { TFunction } from '@payloadcms/translations';
 import type { CustomTranslationKeys } from '../../i18n/custom-translations';
 
@@ -340,6 +341,9 @@ export function CustomHeaderClient() {
               <UserRound className="relative h-4 w-4 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
               <span className="relative hidden sm:inline">{t('customHeader:account')}</span>
             </Link>
+
+            {/* Language Switcher */}
+            <LanguageSwitcherClient />
 
             {/* Theme Toggle */}
             <button

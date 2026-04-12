@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import { useAdminTranslation } from '../../i18n/use-admin-translation'
 
 /**
  * Custom Cell component for the Products `priceVND` field.
@@ -18,6 +19,8 @@ type PriceVNDCellProps = {
 }
 
 export const PriceVNDCell: React.FC<PriceVNDCellProps> = ({ cellData }) => {
+  const { t } = useAdminTranslation()
+
   if (cellData === null || cellData === undefined || cellData === '') {
     return <span className="price-cell price-cell--empty">—</span>
   }
@@ -30,7 +33,7 @@ export const PriceVNDCell: React.FC<PriceVNDCellProps> = ({ cellData }) => {
   }
 
   return (
-    <span className="price-cell" aria-label={`Price: ${numeric} VND`}>
+    <span className="price-cell" aria-label={t('customCells:priceAriaLabel', { value: String(numeric) })}>
       {formatter.format(numeric)}
     </span>
   )
