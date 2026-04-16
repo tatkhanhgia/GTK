@@ -75,6 +75,7 @@ src/
 │   ├── products.ts               # Products
 │   ├── media.ts                  # Image/file uploads
 │   ├── pages.ts                  # Custom pages
+│   ├── translations.ts           # UI translation keys (vi/en) stored in DB
 │   └── index.ts                  # Collection exports
 │
 ├── globals/                      # Payload CMS globals (singletons)
@@ -83,7 +84,8 @@ src/
 │
 ├── scripts/                      # Development & utility scripts
 │   ├── seed.ts                   # Seed database with dev data (Payload CMS)
-│   └── seed-data.ts              # Bilingual seed data definitions
+│   ├── seed-data.ts              # Bilingual seed data definitions
+│   └── seed-translations.ts      # Migrate translation keys from JSON/custom-translations into DB
 │
 ├── components/
 │   ├── about/                    # About page editorial sections
@@ -133,14 +135,28 @@ src/
 │   │   └── component-overrides.css # Payload component overrides for sidebar, tables, forms
 │   ├── hooks/                    # Theme utilities
 │   │   └── use-system-theme.ts    # System theme detection hook (prefers-color-scheme)
+│   ├── i18n/                     # Admin-specific translations
+│   │   ├── custom-translations.ts # Bilingual keys for sidebar, header, dashboard, cells, fields
+│   │   ├── generated-translations.ts # Build-time generated union of DB keys + custom overrides
+│   │   ├── use-admin-translation.ts # Typed hook wrapper around Payload's useTranslation()
+│   │   └── use-db-translations.ts   # Runtime hook: fetches Translations collection for admin custom components
 │   ├── components/               # Theme-aware UI primitives & layouts
 │   │   ├── providers/
 │   │   │   └── theme-provider.tsx # Theme context provider toggling .admin-dark
 │   │   ├── layout/
 │   │   │   ├── custom-sidebar.tsx
-│   │   │   └── custom-header.tsx
+│   │   │   ├── custom-header.tsx
+│   │   │   └── custom-header-client.tsx # Client wrapper with LanguageSwitcherClient
+│   │   ├── fields/
+│   │   │   ├── platform-select-field.tsx # Locale-aware label resolution
+│   │   │   └── platform-brand-icons.tsx
+│   │   ├── cells/
+│   │   │   ├── status-cell.tsx    # Translated status strings
+│   │   │   ├── type-cell.tsx      # Translated type strings
+│   │   │   └── price-vnd-cell.tsx # Translated price label
 │   │   ├── ui/
-│   │   │   └── card.tsx
+│   │   │   ├── card.tsx
+│   │   │   └── language-switcher-client.tsx # VI/EN toggle for admin header
 │   │   └── views/
 │   │       └── custom-dashboard.tsx # Anthropic-style dashboard home view
 │   └── testing-checklist.md      # QA checklist for admin UI (colors, layout, accessibility)
@@ -195,7 +211,7 @@ src/
 ├── i18n/
 │   ├── config.ts                 # Supported locales & routing
 │   ├── routing.ts                # next-intl routing config
-│   ├── request.ts                # Server-side i18n request
+│   ├── request.ts                # Server-side i18n request (queries DB Translations collection via getPayload)
 │   └── navigation.ts             # Locale-aware navigation helpers
 │
 ├── middleware.ts                 # Auth + i18n middleware chain
@@ -280,43 +296,81 @@ Configuration Files
 - Legacy `/[locale]/blog/category/[slug]` requests are redirected server-side to the query-param listing URL
 
 ### 7. **i18n Architecture**
+
+The project uses a unified, DB-driven translation system for the public site
+and a hybrid runtime + build-time system for the admin panel.
+
+#### Public Site i18n
+
 - **Routing:** `/vi/*` for Vietnamese, `/en/*` for English
 - **Default:** Vietnamese (`vi`)
-- **Fallback:** Enable (use vi if en missing)
-- **Server-side:** `getRequestConfig()` from `src/i18n/request.ts`
-- **Client-side:** `next-intl` translation hooks in locale-aware React components
-- **Messages:** Separate JSON files in `messages/`
+- **Fallback:** Enabled (use vi if en missing)
+- **Server-side:** `getRequestConfig()` in `src/i18n/request.ts` loads
+  translations at request time by querying the `translations` collection
+  directly through `getPayload` (no HTTP loopback).
+- **Client-side:** `next-intl` translation hooks in locale-aware React
+  components consume the request-time messages.
+- **Legacy files:** `messages/vi.json` and `messages/en.json` remain as
+  static fallbacks but are no longer the source of truth.
 
 #### Admin i18n Pattern
 
 Payload admin supports bilingual vi/en independently of the next-intl public
-site. Three layers combine to produce a fully localized admin experience:
+site. The admin layer is a **hybrid** of build-time core strings and
+runtime/custom-component translations:
 
-1. **Core UI** — `@payloadcms/translations` ships vi + en for Payload's
-   framework chrome (save/delete buttons, validation messages, API labels).
-   Wired via `i18n.supportedLanguages` in `payload.config.ts`, with
-   `fallbackLanguage: 'vi'`.
+1. **Core UI (build-time)** — `@payloadcms/translations` ships vi + en for
+   Payload's framework chrome. Additionally, `npm run prebuild` generates
+   `src/admin/i18n/generated-translations.ts`, a union of all DB `translations`
+   keys plus `custom-translations.ts` overrides, so the TypeScript compiler
+   knows every possible admin key at build time.
 2. **Schema labels** — Collections, fields, and globals use inline
    `{ vi, en }` StaticLabel objects everywhere user-facing text appears.
    `src/globals/author-profile.ts` is the golden reference; every collection
    under `src/collections/` follows the same pattern.
-3. **Custom components** — The custom sidebar, header, and dashboard read
-   all strings through the `useAdminTranslation()` hook in
-   `src/admin/i18n/use-admin-translation.ts`, a typed wrapper around
-   Payload's `useTranslation()`. Keys live in
-   `src/admin/i18n/custom-translations.ts` under three flat namespaces
-   (`customSidebar:*`, `customHeader:*`, `customDashboard:*`) and are merged
-   into Payload's i18n registry via `i18n.translations` in
-   `payload.config.ts`.
+3. **Custom components (runtime)** — Admin custom components fetch live
+   translations from the DB via `useDbTranslations()` in
+   `src/admin/i18n/use-db-translations.ts`. This allows CMS editors to update
+   admin strings without rebuilding the app.
+4. **Custom components (static fallback)** — The custom sidebar, header, and
+   dashboard can also read static strings through the `useAdminTranslation()`
+   hook in `src/admin/i18n/use-admin-translation.ts`, a typed wrapper around
+   Payload's `useTranslation()`. Static keys live in
+   `src/admin/i18n/custom-translations.ts` under flat namespaces
+   (`customSidebar:*`, `customHeader:*`, `customDashboard:*`, `customCells:*`,
+   `customFields:*`) and are merged into Payload's i18n registry via
+   `i18n.translations` in `payload.config.ts`.
+5. **Language Switcher** — `LanguageSwitcherClient` component in
+   `src/admin/components/ui/language-switcher-client.tsx` wired into the
+   custom header provides a VI/EN toggle using Payload's native
+   `switchLanguage()` API.
+6. **Localized field/cell components** — Platform select field
+   (`platform-select-field.tsx`) resolves translated labels per locale;
+   custom cells (`status-cell.tsx`, `type-cell.tsx`, `price-vnd-cell.tsx`)
+   use `useAdminTranslation()` instead of hardcoded English strings.
 
 **Default:** `fallbackLanguage: 'vi'`. End users change their admin locale
-via the Payload account language picker; the choice persists in the
-`payload-language` cookie and every custom component re-renders on change
-because `useTranslation()` is reactive.
+via the language switcher in the header OR the Payload account language
+picker; the choice persists in the `payload-language` cookie and every
+custom component re-renders on change because `useTranslation()` is
+reactive.
 
-**Independent of:** the next-intl public site under `/vi/*` and `/en/*` —
-do not conflate the two. Public-site strings live in `messages/*.json`;
-admin strings live in the locations above.
+**Source of truth:** The `translations` collection is the single source of
+truth for public site strings. Admin core strings are generated at build time
+from the same collection, while admin custom components can pull fresh
+values at runtime.
+
+#### Translations Collection
+
+- **File:** `src/collections/translations.ts`
+- **Fields:** `key` (string, unique), `vi` (string), `en` (string), `group`
+  (relationship to `translationGroups`), `context` (textarea, optional)
+- **Seeding:** `scripts/seed-translations.ts` migrates existing keys from
+  `messages/*.json` and `custom-translations.ts` into the DB. 228 keys were
+  seeded successfully.
+- **Build hook:** `npm run prebuild` queries the collection and emits the
+  generated TypeScript union file so the admin translation hook stays fully
+  typed.
 
 ### 8. **Payment Strategy**
 - **Stripe:** Primary USD/foreign currency checkout
@@ -394,7 +448,9 @@ pm2 start ecosystem.config.js --env production
 
 | Script | Command | Purpose |
 |--------|---------|---------|
+| **prebuild** | `npm run prebuild` | Query DB translations and regenerate `src/admin/i18n/generated-translations.ts` for typed admin keys |
 | **seed** | `npm run seed` (via `tsx src/scripts/seed.ts`) | Populate development database with bilingual sample data (categories, blog posts, products, pages, author profile) |
+| **seed:translations** | `npm run seed:translations` | Migrate static JSON / custom-translations keys into the `translations` DB collection |
 | **dev** | `npm run dev` | Start Next.js dev server with Turbopack |
 | **build** | `npm run build` | Production build with Turbopack optimization |
 | **test** | `npm run test` | Run unit tests with Vitest |

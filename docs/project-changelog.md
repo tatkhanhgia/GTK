@@ -5,6 +5,21 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **Unified DB-Driven Translations:** Replaced static JSON message files with a live `Translations` collection in Payload CMS
+  - New collection: `translations` (`src/collections/translations.ts`) with fields `key`, `vi`, `en`, `group`, and `context`
+  - New grouping collection: `translationGroups` (`src/collections/translation-groups.ts`) for organizing translation keys
+  - Public site i18n (`src/i18n/request.ts`) now loads messages at request time via direct DB query through `getPayload` (no HTTP loopback)
+  - Admin custom components fetch runtime translations via `useDbTranslations` hook (`src/admin/i18n/use-db-translations.ts`)
+  - Admin core/framework strings are generated at build time via `npm run prebuild` into `src/admin/i18n/generated-translations.ts`
+  - Seed script `scripts/seed-translations.ts` migrates legacy `messages/*.json` and `src/admin/i18n/custom-translations.ts` keys into the DB
+  - 228 translation keys seeded successfully; `messages/*.json` remain as static fallbacks only
+  - `payload.config.ts` updated to register both new collections and inject DB translations into Payload's i18n registry
+- **Admin Multilingual (VI/EN):** Full bilingual support across Payload admin UI
+  - New `LanguageSwitcherClient` component in `src/admin/components/ui/language-switcher-client.tsx` with VI/EN toggle in custom header
+  - Expanded `custom-translations.ts` with new namespaces: `customCells` (statusDraft, statusPublished, typeEbook/Template/Code, priceAriaLabel) and `customFields` (platformNoOptions, platformPlaceholder)
+  - `platform-select-field.tsx`: locale-aware label resolution + translated placeholder/noOptionsMessage
+  - Custom cells (`status-cell.tsx`, `type-cell.tsx`, `price-vnd-cell.tsx`) migrated to `useAdminTranslation()` instead of hardcoded English
+  - All collections updated with bilingual StaticLabels where missing
 - **Portfolio-style Achievements Section (Homepage + About):** Stats block inspired by lehuythai.com — but with real, live numbers instead of hardcoded career stats
   - New `AchievementsSection` component (`src/components/sections/achievements-section.tsx`) with staggered scroll reveal, per-item count-up animation, hover lift + gradient glow; `AchievementItem` / `AchievementIcon` types exported from the same file
   - `ScrollReveal` wrapper (`src/components/ui/scroll-reveal.tsx`) — fade + slide-up on intersection, honors `prefers-reduced-motion`
