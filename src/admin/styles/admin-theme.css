@@ -91,6 +91,14 @@
   --status-published-fg:     #4a6b4f;
   --status-published-border: #cfdbcb;
 
+  /* Payload drawer / modal stacking — override Payload's default
+     `--z-modal: 30` (defined in @payloadcms/ui/dist/scss/app.scss).
+     Our custom sidebar (custom-sidebar-client.tsx:187) uses `md:z-30`,
+     which ties with the default and ends up on top of drawers due to
+     DOM render order. Lift modals above the sidebar so DocumentDrawer
+     (clicking edit icon on relationship fields) renders over everything. */
+  --z-modal: 60;
+
   /* Type tokens — Products (Ebook / Template / Code) */
   /* Ebook: dusty slate-blue (knowledge, calm reading) */
   --type-ebook-bg:     #e0e7ee;
@@ -106,6 +114,68 @@
   --type-code-bg:     #f0e6d8;
   --type-code-fg:     #7a5e34;
   --type-code-border: #e2d4bd;
+
+  /* Payload theme bridge — light defaults at :root so Payload components
+     always have valid values even before JS hydration adds .light class. */
+  --theme-bg: #f6f1ea;
+  --theme-input-bg: #ffffff;
+  --theme-text: #181512;
+  --theme-border-color: rgba(24, 21, 18, 0.1);
+  --theme-elevation-0: #fffdfa;
+  --theme-elevation-50: #fff8f1;
+  --theme-elevation-100: #f7efe6;
+  --theme-elevation-150: #efe5db;
+  --theme-elevation-200: #e5d9cd;
+  --theme-elevation-250: #d8cabd;
+  --theme-elevation-300: #cab9ab;
+  --theme-elevation-350: #b9a799;
+  --theme-elevation-400: #a39184;
+  --theme-elevation-450: #918073;
+  --theme-elevation-500: #7d6d61;
+  --theme-elevation-600: #66594f;
+  --theme-elevation-650: #5b5047;
+  --theme-elevation-700: #4c433b;
+  --theme-elevation-750: #413831;
+  --theme-elevation-800: #342d27;
+  --theme-elevation-900: #241e19;
+  --theme-elevation-950: #1b1612;
+  --theme-elevation-1000: #120f0c;
+  --theme-success-50: #eef8f3;
+  --theme-success-100: #e0f1e8;
+  --theme-success-150: #cae6d8;
+  --theme-success-200: #aed7c1;
+  --theme-success-300: #85bf9f;
+  --theme-success-400: #61a985;
+  --theme-success-500: #4b9975;
+  --theme-success-600: #3d8b6e;
+  --theme-success-650: #327b5f;
+  --theme-success-700: #2a6a51;
+  --theme-success-750: #215944;
+  --theme-success-800: #1a4837;
+  --theme-success-900: #133429;
+  --theme-error-50: #fff1f1;
+  --theme-error-100: #fde2e2;
+  --theme-error-150: #facaca;
+  --theme-error-200: #f5a9a9;
+  --theme-error-300: #ed7f7f;
+  --theme-error-400: #e46464;
+  --theme-error-500: #de5656;
+  --theme-error-600: #d94f4f;
+  --theme-error-650: #c54242;
+  --theme-error-700: #a93737;
+  --theme-error-750: #8e2d2d;
+  --theme-error-800: #722424;
+  --theme-error-900: #561a1a;
+  --theme-error-950: #3d1111;
+  --theme-warning-100: #fff1d6;
+  --theme-warning-200: #f7deb0;
+  --theme-warning-300: #efc679;
+  --theme-warning-400: #e3ad47;
+  --theme-warning-500: #d4952b;
+  --theme-warning-600: #ba7f1d;
+  --theme-warning-700: #976617;
+  --theme-warning-800: #744d13;
+  --theme-warning-900: #54370e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -253,6 +323,67 @@ html[data-theme='dark'] {
   --type-code-bg:     #2a2419;
   --type-code-fg:     #d4b87c;
   --type-code-border: #3a3122;
+
+  /* Payload theme bridge — dark mode */
+  --theme-bg: #141413;
+  --theme-input-bg: #242422;
+  --theme-text: #f5f0e8;
+  --theme-border-color: rgba(245, 240, 232, 0.1);
+  --theme-elevation-0: #120f0c;
+  --theme-elevation-50: #1b1612;
+  --theme-elevation-100: #241e19;
+  --theme-elevation-150: #2a2520;
+  --theme-elevation-200: #342d27;
+  --theme-elevation-250: #413831;
+  --theme-elevation-300: #4c433b;
+  --theme-elevation-350: #5b5047;
+  --theme-elevation-400: #66594f;
+  --theme-elevation-450: #7d6d61;
+  --theme-elevation-500: #918073;
+  --theme-elevation-600: #a39184;
+  --theme-elevation-650: #b9a799;
+  --theme-elevation-700: #cab9ab;
+  --theme-elevation-750: #d8cabd;
+  --theme-elevation-800: #e5d9cd;
+  --theme-elevation-900: #efe5db;
+  --theme-elevation-950: #f7efe6;
+  --theme-elevation-1000: #fffdfa;
+  --theme-success-50: #133429;
+  --theme-success-100: #1a4837;
+  --theme-success-150: #215944;
+  --theme-success-200: #2a6a51;
+  --theme-success-300: #327b5f;
+  --theme-success-400: #3d8b6e;
+  --theme-success-500: #4b9975;
+  --theme-success-600: #61a985;
+  --theme-success-650: #85bf9f;
+  --theme-success-700: #aed7c1;
+  --theme-success-750: #cae6d8;
+  --theme-success-800: #e0f1e8;
+  --theme-success-900: #eef8f3;
+  --theme-error-50: #3d1111;
+  --theme-error-100: #561a1a;
+  --theme-error-150: #722424;
+  --theme-error-200: #8e2d2d;
+  --theme-error-300: #a93737;
+  --theme-error-400: #c54242;
+  --theme-error-500: #d94f4f;
+  --theme-error-600: #de5656;
+  --theme-error-650: #e46464;
+  --theme-error-700: #ed7f7f;
+  --theme-error-750: #f5a9a9;
+  --theme-error-800: #facaca;
+  --theme-error-900: #fde2e2;
+  --theme-error-950: #fff1f1;
+  --theme-warning-100: #54370e;
+  --theme-warning-200: #744d13;
+  --theme-warning-300: #976617;
+  --theme-warning-400: #ba7f1d;
+  --theme-warning-500: #d4952b;
+  --theme-warning-600: #e3ad47;
+  --theme-warning-700: #efc679;
+  --theme-warning-800: #f7deb0;
+  --theme-warning-900: #fff1d6;
 }
 
 body,
@@ -314,7 +445,7 @@ pre {
 
 /* Ensure proper font inheritance for all text elements */
 .field-type.textarea textarea,
-.field-type.rich-text .editor-scroller {
+.rich-text-lexical .editor-scroller {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: var(--admin-leading-normal);
 }

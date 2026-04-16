@@ -880,16 +880,27 @@ table .cell-actions button:hover {
    LOGIN PAGE STYLES
    ============================================ */
 
-/* Login Container */
+/* Login Container — Payload v3 renders section.login.template-minimal */
 .login,
 .login__wrapper,
 .template-login {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: var(--admin-bg-primary);
   padding: 1.5rem;
+}
+
+/* Payload v3 inner wrap — must be centered as a block child and stack brand + form */
+.template-minimal__wrap {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 /* Login Card */
@@ -904,7 +915,8 @@ table .cell-actions button:hover {
   box-shadow: var(--admin-shadow-lg);
 }
 
-/* Login Logo */
+/* Login Brand/Logo — Payload v3 uses .login__brand with an inline SVG */
+.login__brand,
 .login__logo,
 .template-login .logo {
   display: flex;
@@ -913,7 +925,8 @@ table .cell-actions button:hover {
   margin-bottom: 2rem;
 }
 
-/* Custom GTKBlog Logo for Login */
+/* Custom GTKBlog Logo — replace Payload's SVG with text via pseudo-elements */
+.login__brand::before,
 .login__logo::before,
 .template-login .logo::before {
   content: 'GTK';
@@ -924,6 +937,7 @@ table .cell-actions button:hover {
   letter-spacing: -0.02em;
 }
 
+.login__brand::after,
 .login__logo::after,
 .template-login .logo::after {
   content: 'Blog';
@@ -934,7 +948,9 @@ table .cell-actions button:hover {
   margin-left: 0.25rem;
 }
 
-/* Hide default Payload logo image */
+/* Hide Payload's default logo — v3 uses inline SVG, not img */
+.login__brand svg,
+.login__brand .graphic-logo,
 .login__logo img,
 .template-login .logo img {
   display: none;
@@ -1373,9 +1389,9 @@ table td:first-child input[type="checkbox"] {
    ============================================================ */
 
 /* Force Vietnamese-supporting fonts for all text content */
-.field-type.rich-text .editor-shell,
-.field-type.rich-text .editor-container,
-.field-type.rich-text [contenteditable="true"] {
+.rich-text-lexical .editor-shell,
+.rich-text-lexical .editor-container,
+.rich-text-lexical [contenteditable="true"] {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: 1.8;
 }
@@ -2862,11 +2878,11 @@ html.admin-light .collection-list .no-results::before {
 }
 
 /* ---------- Array field (header + draggable rows) ---------- */
-.template-default .array-field {
+:is(.template-default, .drawer__content-children) .array-field {
   margin-top: 0.5rem;
 }
 
-.template-default .array-field__header {
+:is(.template-default, .drawer__content-children) .array-field__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2875,7 +2891,7 @@ html.admin-light .collection-list .no-results::before {
   flex-wrap: wrap;
 }
 
-.template-default .array-field__header-wrap {
+:is(.template-default, .drawer__content-children) .array-field__header-wrap {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -2883,16 +2899,322 @@ html.admin-light .collection-list .no-results::before {
   min-width: 0;
 }
 
-.template-default .array-field__header h3,
-.template-default .array-field__header .array-field__title {
+:is(.template-default, .drawer__content-children) .array-field__header h3,
+:is(.template-default, .drawer__content-children) .array-field__header .array-field__title {
   margin: 0 !important;
   font-size: 13px;
   font-weight: 600;
   color: var(--admin-text-primary);
 }
 
+/* ---------- Array field: Collapse All / Show All toolbar ----------
+   Payload v3 renders this as:
+     .array-field__header
+       └ .array-field__header-content
+           ├ .array-field__header-wrap > h3.array-field__title
+           └ ul.array-field__header-actions
+               └ li > button.array-field__header-action  ("Collapse All", "Show All")
+
+   The default Payload style treats these as borderless underline-on-hover
+   text links. Our upstream `.dashboard-content button { min-height: 44px;
+   min-width: 44px }` rule inflates them into 44x44 tap-targets that dwarf
+   the 13px title — which is the "broken" visual the user reported.
+   We opt out of the size override and restyle them as a refined segmented
+   pill that matches the admin's clay palette. */
+:is(.template-default, .drawer__content-children) .array-field__header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+:is(.template-default, .drawer__content-children) .array-field__header-actions {
+  display: inline-flex;
+  align-items: stretch;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--admin-bg-tertiary);
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(24, 21, 18, 0.02);
+  color: var(--admin-text-tertiary);
+}
+
+:is(.template-default, .drawer__content-children) .array-field__header-actions > li {
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+/* 1px hairline divider between chips — works whether Payload wraps each
+   action in a <li> or renders the <button> directly inside the <ul>. */
+:is(.template-default, .drawer__content-children) .array-field__header-actions > * + * {
+  border-left: 1px solid var(--admin-border);
+}
+
+/* Outspecs `.dashboard-content button` (0,1,1) with (0,3,1) — no !important
+   needed. Also neutralises the global :active transform scale. */
+:is(.template-default, .drawer__content-children) .array-field__header-actions .array-field__header-action {
+  min-height: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0.3125rem 0.75rem;      /* 5px 12px — compact chip */
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: var(--admin-text-tertiary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color var(--admin-transition-fast),
+    background-color var(--admin-transition-fast);
+}
+
+:is(.template-default, .drawer__content-children) .array-field__header-actions .array-field__header-action:hover,
+:is(.template-default, .drawer__content-children) .array-field__header-actions .array-field__header-action:focus-visible {
+  color: var(--admin-accent);
+  background: var(--admin-accent-light);
+  text-decoration: none;
+  outline: none;
+}
+
+:is(.template-default, .drawer__content-children) .array-field__header-actions .array-field__header-action:active {
+  color: var(--admin-accent-hover);
+  background: var(--admin-accent-light);
+  transform: none;
+}
+
+/* ---------- Universal popup menu ("..." dropdowns) ----------
+   Payload v3 Popup render (verified from source bundle 2026-04-12):
+
+     // OUTER WRAPPER (lives inside .template-default)
+     <div class="popup {className}">
+       <div class="popup__trigger-wrap">{Trigger}</div>
+       {mounted && createPortal(
+         // PORTAL CONTENT — mounted directly on document.body,
+         // OUTSIDE .template-default, OUTSIDE .dashboard-content
+         <div class="popup__content popup--size-medium popup--v-bottom {portalClassName}">
+           <div class="popup__scroll-container">
+             <div class="popup-button-list popup-button-list__text-align--left
+                         popup-button-list__button-size--default">
+               <button class="popup-button-list__button">
+                 <svg class="icon"/> "Copy Field"
+               </button>
+               ...
+             </div>
+           </div>
+           <div class="popup__caret" />
+         </div>,
+         document.body
+       )}
+     </div>
+
+   CRITICAL: because the portal content sits on document.body, selectors
+   prefixed with `.template-default` or `.dashboard-content` never match.
+   Every rule here uses bare class selectors.
+
+   Call-sites covered by this one block:
+     • ClipboardAction  (Copy Field / Paste Field)
+     • array-actions    (Array row: Move up/down, Add below, Duplicate,
+                         Copy Row, Paste Row, Remove)
+     • doc-controls popup
+     • any other PopupList-driven menu
+
+   We also add a tasteful 160ms enter animation — Payload v3 ships none. */
+
+/* Popup shell — tinted elevated card matching the admin clay palette.
+   Specificity (0,1,0) matches Payload's own .popup__content rule; since
+   our CSS loads after Payload's, we win cleanly. */
+.popup__content {
+  background: var(--admin-bg-elevated);
+  color: var(--admin-text-primary);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-md);
+  box-shadow: var(--admin-shadow-lg);
+  padding: 4px;
+  min-width: 176px;
+}
+
+/* Caret recolour — Payload's default points at --theme-input-bg which
+   doesn't match our new elevated surface. */
+.popup--v-bottom .popup__caret {
+  border-bottom-color: var(--admin-bg-elevated);
+  filter: drop-shadow(0 -1px 0 var(--admin-border));
+}
+.popup--v-top .popup__caret {
+  border-top-color: var(--admin-bg-elevated);
+  filter: drop-shadow(0 1px 0 var(--admin-border));
+}
+
+/* Payload's ButtonGroup — drop its legacy padding hack */
+.popup-button-list {
+  gap: 2px;
+  padding: 0;
+  --popup-button-highlight: var(--admin-accent-light);
+}
+
+/* Every menu item. Bare (0,1,0) selector — matches inside the portal.
+   Payload's own rules are also (0,1,0); ours load later so we win.
+   Using !important only on layout properties (display/padding/line-height)
+   because they're the ones Payload's two separate .popup-button-list__button
+   rules double-up on and also because the portal is a volatile target. */
+.popup-button-list__button {
+  min-height: 0 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.625rem !important;
+  padding: 0.5rem 0.625rem !important;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--admin-radius-sm);
+  color: var(--admin-text-secondary);
+  font-family: inherit;
+  font-size: 13px !important;
+  font-weight: 500;
+  line-height: 1.25 !important;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--admin-transition-fast),
+    color var(--admin-transition-fast);
+}
+
+/* Constrain Payload's default 20x20 icons so they don't dwarf 13px text */
+.popup-button-list__button > svg,
+.popup-button-list__button .icon,
+.popup-button-list__button > .icon--drag-handle {
+  width: 14px !important;
+  height: 14px !important;
+  flex: 0 0 14px;
+  color: var(--admin-text-tertiary);
+  transition: color var(--admin-transition-fast);
+}
+
+/* Array-row chevron wrapper (Payload nests it in a <div>) */
+.popup-button-list__button .array-actions__action-chevron {
+  display: inline-flex !important;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-text-tertiary);
+}
+.popup-button-list__button .array-actions__action-chevron svg {
+  width: 14px !important;
+  height: 14px !important;
+  flex: initial;
+}
+
+/* Hover & focus — gentle accent tint */
+.popup-button-list__button:hover:not(.popup-button-list__disabled),
+.popup-button-list__button:focus-visible:not(.popup-button-list__disabled),
+.popup-button-list__button:focus-within:not(.popup-button-list__disabled) {
+  background: var(--admin-accent-light);
+  color: var(--admin-accent);
+  outline: none;
+}
+
+.popup-button-list__button:hover:not(.popup-button-list__disabled) > svg,
+.popup-button-list__button:hover:not(.popup-button-list__disabled) .icon,
+.popup-button-list__button:hover:not(.popup-button-list__disabled) .array-actions__action-chevron,
+.popup-button-list__button:focus-visible:not(.popup-button-list__disabled) > svg,
+.popup-button-list__button:focus-visible:not(.popup-button-list__disabled) .icon,
+.popup-button-list__button:focus-visible:not(.popup-button-list__disabled) .array-actions__action-chevron {
+  color: var(--admin-accent);
+}
+
+/* Destructive action — "Remove" row gets a muted danger tint on hover */
+.popup-button-list__button.array-actions__remove:hover:not(.popup-button-list__disabled),
+.popup-button-list__button.array-actions__remove:focus-visible:not(.popup-button-list__disabled) {
+  background: rgba(217, 72, 72, 0.12);
+  color: #c44545;
+}
+.popup-button-list__button.array-actions__remove:hover:not(.popup-button-list__disabled) > svg,
+.popup-button-list__button.array-actions__remove:focus-visible:not(.popup-button-list__disabled) > svg {
+  color: #c44545;
+}
+
+/* Selected state (PopupList renders this for active menu items) */
+.popup-button-list__button--selected {
+  background: var(--admin-accent-light);
+  color: var(--admin-accent);
+}
+
+/* Disabled state */
+.popup-button-list__button.popup-button-list__disabled,
+.popup-button-list__disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--admin-text-muted);
+}
+
+/* Kill the global button :active transform for menu items */
+.popup-button-list__button:active {
+  transform: none !important;
+}
+
+/* Divider between sections */
+.popup-divider {
+  background: var(--admin-border);
+  margin: 4px 0;
+}
+
+/* ---------- Popup enter animation ----------
+   Payload re-creates the portal children on every open/close because the
+   className flip between "popup__content ..." and "popup__hidden-content"
+   effectively rebuilds the subtree's render. A plain CSS @keyframes
+   attached to .popup__content therefore fires on every mount. 160ms
+   ease-out, respects prefers-reduced-motion. */
+@keyframes admin-popup-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popup__content {
+  animation: admin-popup-enter 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top center;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup__content {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-default .popup.popup--active > .popup__content {
+    animation: none;
+  }
+}
+
 /* Draggable rows: each row gets vertical breathing room */
-.template-default .array-field__draggable-rows {
+:is(.template-default, .drawer__content-children) .array-field__draggable-rows {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -2908,32 +3230,58 @@ html.admin-light .collection-list .no-results::before {
        └ .collapsible__indicator      (chevron SVG)
    We turn the collapsible itself into a flex row so these children align
    horizontally: drag | label | actions | chevron. */
-.template-default .array-field__row.collapsible,
-.template-default .field-type.array-field .collapsible--style-default {
-  background: var(--admin-bg-tertiary);
-  border: 1px solid var(--admin-border);
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible,
+:is(.template-default, .drawer__content-children) .field-type.array-field .collapsible--style-default {
+  /* Warm tint distinct from the white `.document-fields__main` card
+     (#ffffff). Using var(--admin-bg-tertiary) gave #ffffff and made
+     the row invisible inside the main/drawer cards. */
+  background: #fff8f1;
+  border: 1px solid var(--admin-border-strong);
   border-radius: var(--admin-radius-md);
   transition: border-color var(--admin-transition-fast),
               box-shadow var(--admin-transition-fast);
   position: relative;
 }
 
-.template-default .array-field__row.collapsible:hover {
+/* Dark mode: row needs a lighter surface vs the dark main card */
+html.dark :is(.template-default, .drawer__content-children) .array-field__row.collapsible,
+html.dark :is(.template-default, .drawer__content-children) .field-type.array-field .collapsible--style-default,
+html.admin-dark :is(.template-default, .drawer__content-children) .array-field__row.collapsible,
+html.admin-dark :is(.template-default, .drawer__content-children) .field-type.array-field .collapsible--style-default {
+  background: #201d1a;
+  border-color: rgba(245, 240, 232, 0.14);
+}
+
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible:hover {
   border-color: var(--admin-border-strong);
 }
 
-/* Header row layout: drag | label | actions | chevron */
-.template-default .array-field__row.collapsible {
+/* Header row layout: drag | label | actions | chevron
+   Row 1 is fixed at 48px because .collapsible__toggle-wrap is position:absolute
+   (no flow contribution). Without an explicit height, the grid row collapses to 0
+   when content is hidden (collapsed state) — making the header invisible. */
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible {
   display: grid;
   grid-template-columns: auto 1fr auto auto;
-  grid-template-rows: auto auto;
+  grid-template-rows: 48px auto;
   align-items: center;
   column-gap: 0.625rem;
 }
 
+/* Collapsed state: round bottom corners since content is hidden,
+   and drop grid-row-2 so the border hugs the 48px header. */
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible.collapsible--collapsed {
+  grid-template-rows: 48px;
+}
+
+/* Collapsed chevron points down to indicate expandable */
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible.collapsible--collapsed .collapsible__indicator svg {
+  transform: rotate(0deg);
+}
+
 /* The hidden toggle button — positioned absolute over the header for click,
    text label hidden visually but kept accessible. */
-.template-default .array-field__row.collapsible > .collapsible__toggle-wrap {
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > .collapsible__toggle-wrap {
   grid-column: 1 / -1;
   grid-row: 1;
   position: absolute;
@@ -2944,7 +3292,7 @@ html.admin-light .collection-list .no-results::before {
   z-index: 1;
 }
 
-.template-default .collapsible__toggle-wrap > .collapsible__toggle {
+:is(.template-default, .drawer__content-children) .collapsible__toggle-wrap > .collapsible__toggle {
   display: block;
   width: 100%;
   height: 100%;
@@ -2955,7 +3303,7 @@ html.admin-light .collection-list .no-results::before {
   margin: 0;
 }
 
-.template-default .collapsible__toggle-wrap > .collapsible__toggle > span {
+:is(.template-default, .drawer__content-children) .collapsible__toggle-wrap > .collapsible__toggle > span {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -2968,7 +3316,7 @@ html.admin-light .collection-list .no-results::before {
 }
 
 /* Drag handle (1st visible cell) */
-.template-default .array-field__row.collapsible > .collapsible__drag {
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > .collapsible__drag {
   grid-column: 1;
   grid-row: 1;
   display: inline-flex;
@@ -2983,17 +3331,17 @@ html.admin-light .collection-list .no-results::before {
   z-index: 2; /* above toggle overlay so drag still works */
 }
 
-.template-default .collapsible__drag:hover {
+:is(.template-default, .drawer__content-children) .collapsible__drag:hover {
   color: var(--admin-accent);
 }
 
-.template-default .collapsible__drag svg {
+:is(.template-default, .drawer__content-children) .collapsible__drag svg {
   width: 18px;
   height: 18px;
 }
 
 /* Header wrap (2nd cell) — holds the row label */
-.template-default .array-field__row.collapsible > .collapsible__header-wrap {
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > .collapsible__header-wrap {
   grid-column: 2;
   grid-row: 1;
   display: flex;
@@ -3004,7 +3352,7 @@ html.admin-light .collection-list .no-results::before {
   pointer-events: none; /* let clicks fall through to the toggle behind */
 }
 
-.template-default .array-field__row-header {
+:is(.template-default, .drawer__content-children) .array-field__row-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -3013,17 +3361,20 @@ html.admin-light .collection-list .no-results::before {
   padding: 0;
 }
 
-.template-default .array-field__row-header .row-label {
+:is(.template-default, .drawer__content-children) .array-field__row-header .row-label {
   font-size: 13px;
   font-weight: 600;
+  line-height: 1;
   color: var(--admin-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Actions wrap (3rd cell) — the "..." popup menu */
-.template-default .array-field__row.collapsible > .collapsible__actions-wrap {
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > .collapsible__actions-wrap {
   grid-column: 3;
   grid-row: 1;
   display: flex;
@@ -3032,12 +3383,12 @@ html.admin-light .collection-list .no-results::before {
   z-index: 2;
 }
 
-.template-default .collapsible__actions {
+:is(.template-default, .drawer__content-children) .collapsible__actions {
   display: flex;
   align-items: center;
 }
 
-.template-default .popup.array-actions .popup-button.array-actions__button {
+:is(.template-default, .drawer__content-children) .popup.array-actions .popup-button.array-actions__button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3052,14 +3403,14 @@ html.admin-light .collection-list .no-results::before {
               color var(--admin-transition-fast);
 }
 
-.template-default .popup.array-actions .popup-button.array-actions__button:hover {
+:is(.template-default, .drawer__content-children) .popup.array-actions .popup-button.array-actions__button:hover {
   background: var(--admin-bg-secondary);
   border-color: var(--admin-border);
   color: var(--admin-accent);
 }
 
 /* Chevron indicator (4th cell) */
-.template-default .array-field__row.collapsible > .collapsible__indicator {
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > .collapsible__indicator {
   grid-column: 4;
   grid-row: 1;
   display: inline-flex;
@@ -3075,41 +3426,63 @@ html.admin-light .collection-list .no-results::before {
               color var(--admin-transition-fast);
 }
 
-.template-default .collapsible__indicator svg {
+:is(.template-default, .drawer__content-children) .collapsible__indicator svg {
   width: 14px;
   height: 14px;
 }
 
-/* The collapsible body sits in row 2 spanning all columns */
-.template-default .array-field__row.collapsible > .rah-static,
-.template-default .array-field__row.collapsible > div:has(.collapsible__content) {
+/* The collapsible body sits in row 2 spanning all columns.
+   Payload v3 renders the expanded content in one of three DOM shapes
+   depending on whether react-animate-height wraps the animation:
+     1. .collapsible > .rah-static > ... > .collapsible__content
+     2. .collapsible > div:has(.collapsible__content) > .collapsible__content
+     3. .collapsible > .collapsible__content               (no wrapper)
+   Case 3 is what the `tags` array field hits (verified via DOM dump
+   2026-04-12). Without matching it, `.collapsible__content` falls into
+   grid-row 1 and visually OVERLAPS the 48px header row — the inner
+   label ("Tag") hides behind the row header "Tag 01" and the input
+   box appears shifted up. Target all three direct-child shapes so the
+   body always lands in row 2 below the header. */
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > .rah-static,
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > div:has(.collapsible__content),
+:is(.template-default, .drawer__content-children) .array-field__row.collapsible > .collapsible__content {
   grid-column: 1 / -1;
   grid-row: 2;
 }
 
 /* When the row is OPEN, the body holding inner fields needs padding so
-   inputs don't bleed all the way to the row border. */
-.template-default .array-field__row .collapsible__content {
-  padding: 1rem 1.25rem 1.25rem 1.25rem !important;
+   inputs don't bleed all the way to the row border. Extra top padding
+   creates breathing room between the 48px row header and the first
+   field label (e.g. "Post" dropdown under "Writing 1"). */
+:is(.template-default, .drawer__content-children) .array-field__row .collapsible__content {
+  padding: 1.5rem 1.5rem 1.5rem 1.5rem !important;
   background: var(--admin-bg-secondary);
   border-top: 1px solid var(--admin-border);
   border-radius: 0 0 var(--admin-radius-md) var(--admin-radius-md);
 }
 
 /* Inner field stack inside an array row */
-.template-default .array-field__row .render-fields {
-  gap: 0.875rem !important;
+:is(.template-default, .drawer__content-children) .array-field__row .render-fields {
+  gap: 1.125rem !important;
+}
+
+/* Payload default .field-type__wrap has padding-inline: var(--file-gutter-h)
+   which adds uneven horizontal insets inside array rows where
+   .collapsible__content already supplies 1.5rem padding. Zero it out
+   so controls align flush with the content boundary. */
+:is(.template-default, .drawer__content-children) .array-field__row .field-type__wrap {
+  padding-inline: 0 !important;
 }
 
 /* "Add Row" button at the bottom of an array */
-.template-default .array-field__add-button-wrap,
-.template-default .array-field__add-row {
+:is(.template-default, .drawer__content-children) .array-field__add-button-wrap,
+:is(.template-default, .drawer__content-children) .array-field__add-row {
   margin-top: 0.75rem;
 }
 
-.template-default .array-field__add-button,
-.template-default .array-field__add-row button,
-.template-default .array-field__add-button-wrap button {
+:is(.template-default, .drawer__content-children) .array-field__add-button,
+:is(.template-default, .drawer__content-children) .array-field__add-row button,
+:is(.template-default, .drawer__content-children) .array-field__add-button-wrap button {
   display: inline-flex !important;
   align-items: center !important;
   gap: 0.4rem !important;
@@ -3128,9 +3501,9 @@ html.admin-light .collection-list .no-results::before {
               color var(--admin-transition-fast);
 }
 
-.template-default .array-field__add-button:hover,
-.template-default .array-field__add-row button:hover,
-.template-default .array-field__add-button-wrap button:hover {
+:is(.template-default, .drawer__content-children) .array-field__add-button:hover,
+:is(.template-default, .drawer__content-children) .array-field__add-row button:hover,
+:is(.template-default, .drawer__content-children) .array-field__add-button-wrap button:hover {
   background: var(--admin-accent-light) !important;
   border-color: var(--admin-accent) !important;
   border-style: solid !important;
@@ -3171,30 +3544,225 @@ html.admin-light .collection-list .no-results::before {
   flex-wrap: wrap;
 }
 
-/* Save / Publish button inside doc controls — primary look */
-.template-default .doc-controls__controls-wrapper .form-submit button,
-.template-default .doc-controls__controls-wrapper button[type='submit'] {
+/* ============================================================
+   UNIFIED BUTTON SYSTEM — Primary / Secondary / Icon
+   Applies to both `.template-default` (main edit view) and
+   `.drawer__content-children` (DocumentDrawer).
+
+   CRITICAL Payload anatomy note:
+   When a "Publish changes" button has a submenu (schedule publish,
+   publish-specific-locale), Payload wraps the real <button> in a
+   DIV with class `btn--style-primary btn--withPopup`. That div
+   contains:
+     1. The main <button> (submits the form) — NO style classes on it
+     2. A <Popup> that renders a chevron <button.popup-button ...>
+
+   So `.btn--style-primary` in this context is a CONTAINER, not a
+   button. Previous version shrunk `.popup-button.btn` to 38×38 which
+   clipped the chevron AND pushed the main label out of view.
+
+   Fix: style the `.btn--withPopup` DIV as the visible capsule, keep
+   both inner buttons transparent, and separate them with a 1px rule.
+   ============================================================ */
+
+/* ---------- Primary CTA (standalone button, no popup) ---------- */
+.template-default .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup),
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup) {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
-  height: 36px !important;
-  min-height: 36px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   padding: 0 18px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  border-radius: var(--admin-radius-md) !important;
+  letter-spacing: 0.01em !important;
+  border-radius: 10px !important;
   background: var(--admin-accent) !important;
   color: #fff !important;
   border: 1px solid var(--admin-accent) !important;
-  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: background-color 140ms ease, transform 80ms ease !important;
 }
 
-.template-default .doc-controls__controls-wrapper .form-submit button:hover,
-.template-default .doc-controls__controls-wrapper button[type='submit']:hover {
+/* ---------- Primary CTA (split button with chevron popup) ----------
+   `.btn--withPopup` is a DIV wrapper. Treat it as an inline-flex
+   capsule; its two children (main button + chevron) are transparent
+   and inherit the capsule color. */
+.template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup {
+  display: inline-flex !important;
+  align-items: stretch !important;
+  height: 38px !important;
+  border-radius: 10px !important;
+  background: var(--admin-accent) !important;
+  color: #fff !important;
+  border: 1px solid var(--admin-accent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  transition: background-color 140ms ease !important;
+}
+
+/* Inner buttons inside the withPopup capsule */
+.template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup > button,
+.template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup .popup,
+.template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup .popup-button,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup > button,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup .popup,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup .popup-button {
+  background: transparent !important;
+  border: 0 !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+/* Main label button (left side) */
+.template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup > button:first-child,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup > button:first-child {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 18px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+
+/* Chevron popup button (right side) — separated by a hairline */
+.template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup .popup-button,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup .popup-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 32px !important;
+  padding: 0 10px !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.22) !important;
+  cursor: pointer !important;
+}
+
+/* Normalize inner btn__content / btn__label spans so text is never
+   clipped by Payload's default margin/line-height weirdness. */
+.template-default .doc-controls__controls-wrapper div.btn--style-primary .btn__content,
+.template-default .doc-controls__controls-wrapper div.btn--style-primary .btn__label,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary .btn__content,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary .btn__label,
+.template-default .doc-controls__controls-wrapper button.btn--style-primary .btn__content,
+.template-default .doc-controls__controls-wrapper button.btn--style-primary .btn__label,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary .btn__content,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary .btn__label {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: inherit !important;
+  font: inherit !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-indent: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* Hover / active for primary capsule */
+.template-default .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):hover,
+.template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup:hover,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):hover,
+.drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup:hover {
   background: var(--admin-accent-hover) !important;
   border-color: var(--admin-accent-hover) !important;
-  transform: translateY(-1px);
+}
+
+.template-default .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):active,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):active {
+  transform: scale(0.97) !important;
+  background: #b55f3e !important;
+}
+
+/* ---------- Secondary — API / Preview / revert / neutral action ---------- */
+.template-default .doc-controls__controls-wrapper button.btn--style-secondary,
+.template-default .doc-controls__controls-wrapper button.btn--style-pill,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-secondary,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: var(--admin-text-primary) !important;
+  border: 1px solid #e5dccb !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  cursor: pointer !important;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 80ms ease !important;
+}
+
+.template-default .doc-controls__controls-wrapper button.btn--style-secondary:hover,
+.template-default .doc-controls__controls-wrapper button.btn--style-pill:hover,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-secondary:hover,
+.drawer__content-children .doc-controls__controls-wrapper button.btn--style-pill:hover {
+  background: #faf5ec !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+/* ---------- Standalone icon-only kebab "..." menu ----------
+   Only match popup-buttons that are DIRECT children of the controls
+   wrapper (not nested inside a btn--withPopup split button — those
+   are styled above as chevron attachments). */
+.template-default .doc-controls__controls-wrapper > .popup > .popup-button,
+.template-default .doc-controls__controls-wrapper > .popup-button,
+.drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button,
+.drawer__content-children .doc-controls__controls-wrapper > .popup-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  border: 1px solid #e5dccb !important;
+  color: var(--admin-text-secondary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  cursor: pointer !important;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 80ms ease !important;
+}
+
+.template-default .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+.template-default .doc-controls__controls-wrapper > .popup-button:hover,
+.drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+.drawer__content-children .doc-controls__controls-wrapper > .popup-button:hover {
+  background: #faf5ec !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+/* Disabled + focus ring for all toolbar buttons */
+.template-default .doc-controls__controls-wrapper button:disabled,
+.drawer__content-children .doc-controls__controls-wrapper button:disabled {
+  opacity: 0.48 !important;
+  cursor: not-allowed !important;
+}
+
+.template-default .doc-controls__controls-wrapper button:focus-visible,
+.drawer__content-children .doc-controls__controls-wrapper button:focus-visible {
+  outline: 2px solid var(--admin-accent) !important;
+  outline-offset: 2px !important;
 }
 
 /* Header title spacing tightened (was 16px / 400 default) */
@@ -3402,11 +3970,145 @@ html.admin-light .collection-list .no-results::before {
 }
 
 /* ============================================================
+   DRAWER: Upload field buttons (Create New / Choose from existing)
+   Mirrors the Avatar-style upload buttons from the Identity tab
+   into the drawer scope so "Featured image" upload on the post
+   drawer looks identical to the main edit view. Reference: same
+   styling block above for `.template-default .field-type.upload`.
+   ============================================================ */
+.drawer__content-children .field-type.upload .upload__dropzoneContent {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  flex-wrap: wrap;
+}
+
+.drawer__content-children .field-type.upload .upload__dropzoneContent__buttons {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  left: 0 !important;
+  flex-wrap: wrap;
+}
+
+.drawer__content-children .field-type.upload .upload__dropzoneContent__orText {
+  color: var(--admin-text-tertiary) !important;
+  font-size: 12px !important;
+  text-transform: lowercase;
+  padding: 0 2px;
+}
+
+.drawer__content-children .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill,
+.drawer__content-children .field-type.upload button.upload__createNewToggler,
+.drawer__content-children .field-type.upload button.upload__listToggler {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  color: var(--admin-text-primary) !important;
+  background: #fff !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: 10px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9),
+              0 1px 2px rgba(24, 21, 18, 0.03) !important;
+  cursor: pointer !important;
+  transition: background-color 140ms ease, border-color 140ms ease,
+              color 140ms ease, transform 80ms ease !important;
+  white-space: nowrap !important;
+}
+
+/* Normalize inner spans to prevent label clipping */
+.drawer__content-children .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill .btn__content,
+.drawer__content-children .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill .btn__label,
+.drawer__content-children .field-type.upload button.upload__createNewToggler .btn__content,
+.drawer__content-children .field-type.upload button.upload__createNewToggler .btn__label,
+.drawer__content-children .field-type.upload button.upload__listToggler .btn__content,
+.drawer__content-children .field-type.upload button.upload__listToggler .btn__label {
+  color: inherit !important;
+  font: inherit !important;
+  line-height: 1.2 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Primary look for "Create New" — solid accent */
+.drawer__content-children .field-type.upload button.upload__createNewToggler {
+  background: var(--admin-accent) !important;
+  border-color: var(--admin-accent) !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.drawer__content-children .field-type.upload button.upload__createNewToggler:hover {
+  background: var(--admin-accent-hover) !important;
+  border-color: var(--admin-accent-hover) !important;
+}
+
+.drawer__content-children .field-type.upload button.upload__createNewToggler:active {
+  transform: scale(0.97) !important;
+  background: #b55f3e !important;
+}
+
+/* Secondary look for "Choose from existing" */
+.drawer__content-children .field-type.upload button.upload__listToggler:hover {
+  background: #faf5ec !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+.drawer__content-children .field-type.upload button.upload__listToggler:active {
+  transform: scale(0.97) !important;
+  background: #f5ecd9 !important;
+}
+
+.drawer__content-children .field-type.upload button.upload__createNewToggler:focus-visible,
+.drawer__content-children .field-type.upload button.upload__listToggler:focus-visible {
+  outline: 2px solid var(--admin-accent) !important;
+  outline-offset: 2px;
+}
+
+/* "or drag and drop a file" helper text */
+.drawer__content-children .field-type.upload .upload__dragAndDropText {
+  display: inline-flex !important;
+  align-items: center;
+  margin: 0 0 0 4px !important;
+  padding: 0;
+  font-size: 12px !important;
+  color: var(--admin-text-tertiary) !important;
+  text-transform: lowercase;
+  flex-shrink: 0;
+  align-self: center !important;
+}
+
+/* Dropzone wrapper: dashed frame */
+.drawer__content-children .field-type.upload .dropzone {
+  border: 1px dashed var(--admin-border-strong) !important;
+  border-radius: var(--admin-radius-md) !important;
+  padding: 14px 16px !important;
+  background: var(--admin-bg-primary) !important;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.drawer__content-children .field-type.upload .dropzone:hover,
+.drawer__content-children .field-type.upload .dropzone--drag-over {
+  border-color: var(--admin-accent) !important;
+  background: var(--admin-accent-light) !important;
+}
+
+/* ============================================================
    RICH TEXT (Lexical) FIELDS — Professional editor card
    ============================================================
-   Payload v3 Lexical DOM (verified against @payloadcms/richtext-lexical):
-     .field-type.rich-text
-       .rich-text-lexical
+   Payload v3 Lexical actual DOM (verified from richtext-lexical source):
+
+     SINGLE div with BOTH classes: .rich-text-lexical AND .field-type
+       .rich-text-lexical__wrap
          .editor-shell (has inline toolbar + fixed toolbar containers)
            .editor-container
              .editor-scroller
@@ -3415,6 +4117,13 @@ html.admin-light .collection-list .no-results::before {
                  .add-block-menu          ← floating "+" button
                  .draggable-block-menu    ← floating drag handle (six dots)
                  .draggable-block-target-line
+             .insert-paragraph-at-end    ← strip at editor bottom
+               .insert-paragraph-at-end-inside
+                 span ("+")
+
+   IMPORTANT: the element is div.rich-text-lexical.field-type (one div).
+   Do NOT use .field-type.rich-text (no 'rich-text' class exists).
+   Use .rich-text-lexical as the outer selector for all rules below.
 
    CRITICAL: Payload default sets
      .editor-container > .editor-scroller > .editor > .ContentEditable__root
@@ -3424,9 +4133,9 @@ html.admin-light .collection-list .no-results::before {
    first line of text. Preserve the left gutter explicitly.
    ============================================================ */
 
-.template-default .field-type.rich-text .rich-text-lexical,
-.template-default .field-type.rich-text .rich-text-lexical__wrap,
-.template-default .field-type.rich-text .rich-text--read-only {
+.template-default .rich-text-lexical,
+.template-default .rich-text-lexical .rich-text-lexical__wrap,
+.template-default .rich-text--read-only {
   background: #ffffff !important;
   border: 1.5px solid #d8cabd !important; /* warm tan = theme-elevation-250 */
   border-radius: 10px !important;
@@ -3443,7 +4152,7 @@ html.admin-light .collection-list .no-results::before {
 
 /* Corner flag so users instantly read "text input": a small monospaced
    label in the top-right of the editor card. */
-.template-default .field-type.rich-text .rich-text-lexical:before {
+.template-default .rich-text-lexical:before {
   content: 'RICH TEXT';
   position: absolute;
   top: -9px;
@@ -3461,7 +4170,7 @@ html.admin-light .collection-list .no-results::before {
   z-index: 2;
 }
 
-.template-default .field-type.rich-text .rich-text-lexical:hover {
+.template-default .rich-text-lexical:hover {
   border-color: #b9a799 !important; /* elevation-350 */
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
@@ -3469,7 +4178,7 @@ html.admin-light .collection-list .no-results::before {
     0 16px 30px -16px rgba(24, 21, 18, 0.16) !important;
 }
 
-.template-default .field-type.rich-text .rich-text-lexical:focus-within {
+.template-default .rich-text-lexical:focus-within {
   border-color: var(--admin-accent) !important;
   box-shadow:
     0 0 0 4px var(--admin-accent-light),
@@ -3477,13 +4186,13 @@ html.admin-light .collection-list .no-results::before {
     0 18px 32px -16px rgba(217, 119, 87, 0.22) !important;
 }
 
-.template-default .field-type.rich-text .rich-text-lexical:focus-within:before {
+.template-default .rich-text-lexical:focus-within:before {
   color: var(--admin-accent);
   border-color: var(--admin-accent);
 }
 
 /* Editor shell: the inner frame that wraps toolbar + content */
-.template-default .field-type.rich-text .editor-shell {
+.template-default .rich-text-lexical .editor-shell {
   background: transparent !important;
   border: 0 !important;
   border-radius: calc(var(--admin-radius-md) - 1px) !important;
@@ -3492,28 +4201,28 @@ html.admin-light .collection-list .no-results::before {
 }
 
 /* Fixed toolbar / inline toolbar — give the editor a real "chrome" strip */
-.template-default .field-type.rich-text .toolbar-popup,
-.template-default .field-type.rich-text .fixed-toolbar,
-.template-default .field-type.rich-text .inline-toolbar-popup {
+.template-default .rich-text-lexical .toolbar-popup,
+.template-default .rich-text-lexical .fixed-toolbar,
+.template-default .rich-text-lexical .inline-toolbar-popup {
   background: var(--admin-bg-secondary) !important;
   border-bottom: 1px solid var(--admin-border) !important;
   padding: 6px 8px !important;
   border-radius: calc(var(--admin-radius-md) - 1px) calc(var(--admin-radius-md) - 1px) 0 0 !important;
 }
 
-.template-default .field-type.rich-text .toolbar-popup button,
-.template-default .field-type.rich-text .fixed-toolbar button {
+.template-default .rich-text-lexical .toolbar-popup button,
+.template-default .rich-text-lexical .fixed-toolbar button {
   border-radius: 6px !important;
   transition: background-color var(--admin-transition-fast);
 }
 
-.template-default .field-type.rich-text .toolbar-popup button:hover,
-.template-default .field-type.rich-text .fixed-toolbar button:hover {
+.template-default .rich-text-lexical .toolbar-popup button:hover,
+.template-default .rich-text-lexical .fixed-toolbar button:hover {
   background: var(--admin-bg-tertiary) !important;
 }
 
 /* Container: keep position:relative for floating buttons */
-.template-default .field-type.rich-text .editor-container {
+.template-default .rich-text-lexical .editor-container {
   position: relative;
   background: transparent !important;
   font-size: 14px !important;
@@ -3523,8 +4232,8 @@ html.admin-light .collection-list .no-results::before {
 
 /* The editable area. Use the SAME direct-child selector Payload uses so
    we override cleanly. Preserve the 48px left gutter for the + / drag icons. */
-.template-default .field-type.rich-text .editor-container > .editor-scroller > .editor > .ContentEditable__root,
-.template-default .field-type.rich-text .ContentEditable__root {
+.template-default .rich-text-lexical .editor-container > .editor-scroller > .editor > .ContentEditable__root,
+.template-default .rich-text-lexical .ContentEditable__root {
   padding: 14px 18px 14px 48px !important;
   min-height: 140px;
   font-size: 14px !important;
@@ -3534,8 +4243,8 @@ html.admin-light .collection-list .no-results::before {
 }
 
 /* Placeholder ("Start typing, or press '/' ...") — anchor to matching gutter */
-.template-default .field-type.rich-text .editor-container > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder,
-.template-default .field-type.rich-text .LexicalEditorTheme__placeholder {
+.template-default .rich-text-lexical .editor-container > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder,
+.template-default .rich-text-lexical .LexicalEditorTheme__placeholder {
   top: 14px !important;
   left: 48px !important;
   font-size: 14px !important;
@@ -3544,7 +4253,7 @@ html.admin-light .collection-list .no-results::before {
 }
 
 /* The left guide line that Payload renders via :before — recolor it */
-.template-default .field-type.rich-text .editor-container > .editor-scroller > .editor > .ContentEditable__root:before {
+.template-default .rich-text-lexical .editor-container > .editor-scroller > .editor > .ContentEditable__root:before {
   border-left-color: var(--admin-border) !important;
   left: 32px !important;
 }
@@ -3552,35 +4261,59 @@ html.admin-light .collection-list .no-results::before {
 /* The floating "+" (add-block-menu) and drag handle — make them visible by
    default at a subtle opacity instead of 0 so users understand what they do.
    Also theme them with our accent on hover. */
-.template-default .field-type.rich-text .add-block-menu,
-.template-default .field-type.rich-text .draggable-block-menu {
+.template-default .rich-text-lexical .add-block-menu,
+.template-default .rich-text-lexical .draggable-block-menu {
   opacity: 0.45 !important;
   border-radius: 6px !important;
   transition: opacity var(--admin-transition-fast),
               background-color var(--admin-transition-fast);
 }
 
-.template-default .field-type.rich-text .rich-text-lexical:hover .add-block-menu,
-.template-default .field-type.rich-text .rich-text-lexical:hover .draggable-block-menu {
+.template-default .rich-text-lexical:hover .add-block-menu,
+.template-default .rich-text-lexical:hover .draggable-block-menu {
   opacity: 0.7 !important;
 }
 
-.template-default .field-type.rich-text .add-block-menu:hover,
-.template-default .field-type.rich-text .draggable-block-menu:hover {
+.template-default .rich-text-lexical .add-block-menu:hover,
+.template-default .rich-text-lexical .draggable-block-menu:hover {
   opacity: 1 !important;
   background-color: var(--admin-accent-light) !important;
 }
 
-.template-default .field-type.rich-text .add-block-menu:hover .icon,
-.template-default .field-type.rich-text .draggable-block-menu:hover .icon {
+.template-default .rich-text-lexical .add-block-menu:hover .icon,
+.template-default .rich-text-lexical .draggable-block-menu:hover .icon {
   opacity: 1 !important;
 }
 
+/* Insert-paragraph strip — hide the strip's background so the editor
+   card background shows through cleanly. The strip extends below the
+   editor content due to margin-top:-16px; without this it inherits the
+   page/card background (#fff8f1 warm cream) which appears pinkish. */
+.template-default .rich-text-lexical .insert-paragraph-at-end,
+.template-default .rich-text-lexical .insert-paragraph-at-end-inside {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+.template-default .rich-text-lexical .insert-paragraph-at-end:hover .insert-paragraph-at-end-inside {
+  background-color: rgba(217, 119, 87, 0.08) !important;
+}
+
+/* Force all inner editor layers transparent so the editor card bg shows through */
+.template-default .rich-text-lexical .rich-text-lexical__wrap,
+.template-default .rich-text-lexical .editor-shell,
+.template-default .rich-text-lexical .editor-container,
+.template-default .rich-text-lexical .editor-scroller,
+.template-default .rich-text-lexical .editor,
+.template-default .rich-text-lexical .ContentEditable__root {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* Dark mode: flip to dark elevated surface with warm border */
-html.dark .template-default .field-type.rich-text .rich-text-lexical,
-html.admin-dark .template-default .field-type.rich-text .rich-text-lexical,
-html.dark .template-default .field-type.rich-text .rich-text-lexical__wrap,
-html.admin-dark .template-default .field-type.rich-text .rich-text-lexical__wrap {
+html.dark .template-default .rich-text-lexical,
+html.admin-dark .template-default .rich-text-lexical,
+html.dark .template-default .rich-text-lexical .rich-text-lexical__wrap,
+html.admin-dark .template-default .rich-text-lexical .rich-text-lexical__wrap {
   background: #1f1f1d !important;
   border: 1.5px solid #3a342c !important;
   box-shadow:
@@ -3589,20 +4322,20 @@ html.admin-dark .template-default .field-type.rich-text .rich-text-lexical__wrap
     0 16px 30px -14px rgba(0, 0, 0, 0.55) !important;
 }
 
-html.dark .template-default .field-type.rich-text .rich-text-lexical:before,
-html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:before {
+html.dark .template-default .rich-text-lexical:before,
+html.admin-dark .template-default .rich-text-lexical:before {
   background: #1f1f1d;
   border-color: #3a342c;
   color: var(--admin-text-muted);
 }
 
-html.dark .template-default .field-type.rich-text .rich-text-lexical:hover,
-html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:hover {
+html.dark .template-default .rich-text-lexical:hover,
+html.admin-dark .template-default .rich-text-lexical:hover {
   border-color: #524836 !important;
 }
 
-html.dark .template-default .field-type.rich-text .rich-text-lexical:focus-within,
-html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:focus-within {
+html.dark .template-default .rich-text-lexical:focus-within,
+html.admin-dark .template-default .rich-text-lexical:focus-within {
   border-color: var(--admin-accent) !important;
   box-shadow:
     0 0 0 4px var(--admin-accent-light),
@@ -3610,16 +4343,16 @@ html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:focus
     0 20px 40px -18px rgba(224, 144, 112, 0.3) !important;
 }
 
-html.dark .template-default .field-type.rich-text .rich-text-lexical:focus-within:before,
-html.admin-dark .template-default .field-type.rich-text .rich-text-lexical:focus-within:before {
+html.dark .template-default .rich-text-lexical:focus-within:before,
+html.admin-dark .template-default .rich-text-lexical:focus-within:before {
   color: var(--admin-accent);
   border-color: var(--admin-accent);
 }
 
-html.dark .template-default .field-type.rich-text .toolbar-popup,
-html.admin-dark .template-default .field-type.rich-text .toolbar-popup,
-html.dark .template-default .field-type.rich-text .fixed-toolbar,
-html.admin-dark .template-default .field-type.rich-text .fixed-toolbar {
+html.dark .template-default .rich-text-lexical .toolbar-popup,
+html.admin-dark .template-default .rich-text-lexical .toolbar-popup,
+html.dark .template-default .rich-text-lexical .fixed-toolbar,
+html.admin-dark .template-default .rich-text-lexical .fixed-toolbar {
   background: #262522 !important;
   border-bottom-color: #3a342c !important;
 }
@@ -3733,14 +4466,14 @@ html.admin-dark .template-default .field-type.rich-text .fixed-toolbar {
 /* ---------- 3. Inputs inside the white card ----------
    Warm tint so fields are clearly distinct from the card surface.
    Border is also reinforced. Focus ring unchanged (accent). */
-.template-default .document-fields__main input[type="text"],
-.template-default .document-fields__main input[type="email"],
-.template-default .document-fields__main input[type="password"],
-.template-default .document-fields__main input[type="number"],
-.template-default .document-fields__main input[type="search"],
-.template-default .document-fields__main input[type="url"],
-.template-default .document-fields__main input[type="tel"],
-.template-default .document-fields__main input[type="date"],
+.template-default .document-fields__main input[type="text"]:not(.rs__input),
+.template-default .document-fields__main input[type="email"]:not(.rs__input),
+.template-default .document-fields__main input[type="password"]:not(.rs__input),
+.template-default .document-fields__main input[type="number"]:not(.rs__input),
+.template-default .document-fields__main input[type="search"]:not(.rs__input),
+.template-default .document-fields__main input[type="url"]:not(.rs__input),
+.template-default .document-fields__main input[type="tel"]:not(.rs__input),
+.template-default .document-fields__main input[type="date"]:not(.rs__input),
 .template-default .document-fields__main select,
 .template-default .document-fields__main .field-type.textarea textarea {
   background: #faf5ec !important;
@@ -3756,23 +4489,23 @@ html.admin-dark .template-default .field-type.rich-text .fixed-toolbar {
     box-shadow var(--admin-transition-fast);
 }
 
-.template-default .document-fields__main input[type="text"]:hover,
-.template-default .document-fields__main input[type="email"]:hover,
-.template-default .document-fields__main input[type="number"]:hover,
+.template-default .document-fields__main input[type="text"]:not(.rs__input):hover,
+.template-default .document-fields__main input[type="email"]:not(.rs__input):hover,
+.template-default .document-fields__main input[type="number"]:not(.rs__input):hover,
 .template-default .document-fields__main select:hover,
 .template-default .document-fields__main .field-type.textarea textarea:hover {
   background: #fff9ee !important;
   border-color: #d8cabd !important;
 }
 
-.template-default .document-fields__main input[type="text"]:focus,
-.template-default .document-fields__main input[type="email"]:focus,
-.template-default .document-fields__main input[type="password"]:focus,
-.template-default .document-fields__main input[type="number"]:focus,
-.template-default .document-fields__main input[type="search"]:focus,
-.template-default .document-fields__main input[type="url"]:focus,
-.template-default .document-fields__main input[type="tel"]:focus,
-.template-default .document-fields__main input[type="date"]:focus,
+.template-default .document-fields__main input[type="text"]:not(.rs__input):focus,
+.template-default .document-fields__main input[type="email"]:not(.rs__input):focus,
+.template-default .document-fields__main input[type="password"]:not(.rs__input):focus,
+.template-default .document-fields__main input[type="number"]:not(.rs__input):focus,
+.template-default .document-fields__main input[type="search"]:not(.rs__input):focus,
+.template-default .document-fields__main input[type="url"]:not(.rs__input):focus,
+.template-default .document-fields__main input[type="tel"]:not(.rs__input):focus,
+.template-default .document-fields__main input[type="date"]:not(.rs__input):focus,
 .template-default .document-fields__main select:focus,
 .template-default .document-fields__main .field-type.textarea textarea:focus {
   background: #ffffff !important;
@@ -3838,47 +4571,71 @@ html.admin-dark .template-default .field-type.rich-text .fixed-toolbar {
 }
 
 /* ---------- 6. Rich-text editor inside the card ----------
-   Match the warm tinted surface used by text/email/number inputs
-   (#faf5ec + #e5dccb border) so users immediately read the field
-   as "an input I can type into" — not another card section. The
-   inset shadow reinforces a classic "input well" affordance. */
-.template-default .document-fields__main .field-type.rich-text .rich-text-lexical {
+   Warm tinted surface (#faf5ec) overrides the generic white from above.
+   .document-fields__main scope ensures this only applies to main form,
+   not sidebar or drawer. Selectors use .rich-text-lexical (the actual
+   outer class), NOT .field-type.rich-text (which doesn't exist). */
+.template-default .document-fields__main .rich-text-lexical {
   background: #faf5ec !important;
-  border-color: #e5dccb !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: var(--admin-radius-md) !important;
   box-shadow:
     0 1px 2px rgba(24, 21, 18, 0.03) inset,
-    0 0 0 1px rgba(229, 220, 203, 0.6),
     0 2px 6px -2px rgba(24, 21, 18, 0.06) !important;
 }
 
-.template-default .document-fields__main .field-type.rich-text .rich-text-lexical:hover {
+/* Force ALL inner layers transparent so the parent cream shows through. */
+.template-default .document-fields__main .rich-text-lexical .rich-text-lexical__wrap,
+.template-default .document-fields__main .rich-text-lexical .editor-shell,
+.template-default .document-fields__main .rich-text-lexical .editor-container,
+.template-default .document-fields__main .rich-text-lexical .editor-scroller,
+.template-default .document-fields__main .rich-text-lexical .editor,
+.template-default .document-fields__main .rich-text-lexical .ContentEditable__root {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.template-default .document-fields__main .rich-text-lexical:hover {
   background: #fff9ee !important;
   border-color: #d8cabd !important;
 }
 
-.template-default .document-fields__main .field-type.rich-text .rich-text-lexical:focus-within {
+.template-default .document-fields__main .rich-text-lexical:focus-within {
   background: #ffffff !important;
   border-color: var(--admin-accent) !important;
   box-shadow:
     0 0 0 3px var(--admin-accent-light),
-    0 1px 2px rgba(24, 21, 18, 0.04) inset,
-    0 4px 10px -4px rgba(217, 119, 87, 0.18) !important;
+    0 1px 2px rgba(24, 21, 18, 0.04) inset !important;
 }
 
 /* Make the toolbar strip visually obvious so the field reads as a
    rich editor at a glance instead of a bare surface. */
-.template-default .document-fields__main .field-type.rich-text .fixed-toolbar,
-.template-default .document-fields__main .field-type.rich-text .toolbar-popup {
+.template-default .document-fields__main .rich-text-lexical .fixed-toolbar,
+.template-default .document-fields__main .rich-text-lexical .toolbar-popup {
   background: #f1e9d8 !important;
   border-bottom: 1px solid #e0d3bf !important;
 }
 
-/* Stronger placeholder so the empty state clearly says "type here". */
-.template-default .document-fields__main .field-type.rich-text .LexicalEditorTheme__placeholder,
-.template-default .document-fields__main .field-type.rich-text .editor-container > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
+/* Stronger placeholder styling within the card context. */
+.template-default .document-fields__main .rich-text-lexical .LexicalEditorTheme__placeholder,
+.template-default .document-fields__main .rich-text-lexical .editor-container > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
   color: #9a8974 !important;
   font-style: italic !important;
   opacity: 1 !important;
+  top: 14px !important;
+  left: 48px !important;
+  font-size: 14px !important;
+  line-height: 1.75 !important;
+}
+
+/* "Insert paragraph" strip at the editor bottom — keep transparent. */
+.template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end,
+.template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end-inside {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+.template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end:hover .insert-paragraph-at-end-inside {
+  background-color: rgba(217, 119, 87, 0.08) !important;
 }
 
 /* ---------- 7. Upload dropzone inside the card ---------- */
@@ -3905,39 +4662,49 @@ html.admin-dark .template-default .document-fields__sidebar {
   border-color: rgba(245, 240, 232, 0.08);
 }
 
-html.dark .template-default .document-fields__main input[type="text"],
-html.dark .template-default .document-fields__main input[type="email"],
-html.dark .template-default .document-fields__main input[type="password"],
-html.dark .template-default .document-fields__main input[type="number"],
-html.dark .template-default .document-fields__main input[type="search"],
-html.dark .template-default .document-fields__main input[type="url"],
-html.dark .template-default .document-fields__main input[type="tel"],
-html.dark .template-default .document-fields__main input[type="date"],
+/* CRITICAL: use `:not(.rs__input)` so we don't paint a phantom dark box
+   onto react-select's internal invisible input element. Without this
+   exclusion, opening the Status dropdown focuses `.rs__input` and the
+   :focus rule below bleeds an accent-outlined box next to "Published"
+   that reads as a garbled glyph. Mirrors the drawer fix at line ~5083. */
+html.dark .template-default .document-fields__main input[type="text"]:not(.rs__input),
+html.dark .template-default .document-fields__main input[type="email"]:not(.rs__input),
+html.dark .template-default .document-fields__main input[type="password"]:not(.rs__input),
+html.dark .template-default .document-fields__main input[type="number"]:not(.rs__input),
+html.dark .template-default .document-fields__main input[type="search"]:not(.rs__input),
+html.dark .template-default .document-fields__main input[type="url"]:not(.rs__input),
+html.dark .template-default .document-fields__main input[type="tel"]:not(.rs__input),
+html.dark .template-default .document-fields__main input[type="date"]:not(.rs__input),
 html.dark .template-default .document-fields__main select,
 html.dark .template-default .document-fields__main .field-type.textarea textarea,
-html.admin-dark .template-default .document-fields__main input[type="text"],
-html.admin-dark .template-default .document-fields__main input[type="email"],
-html.admin-dark .template-default .document-fields__main input[type="password"],
-html.admin-dark .template-default .document-fields__main input[type="number"],
-html.admin-dark .template-default .document-fields__main input[type="search"],
-html.admin-dark .template-default .document-fields__main input[type="url"],
-html.admin-dark .template-default .document-fields__main input[type="tel"],
-html.admin-dark .template-default .document-fields__main input[type="date"],
+html.admin-dark .template-default .document-fields__main input[type="text"]:not(.rs__input),
+html.admin-dark .template-default .document-fields__main input[type="email"]:not(.rs__input),
+html.admin-dark .template-default .document-fields__main input[type="password"]:not(.rs__input),
+html.admin-dark .template-default .document-fields__main input[type="number"]:not(.rs__input),
+html.admin-dark .template-default .document-fields__main input[type="search"]:not(.rs__input),
+html.admin-dark .template-default .document-fields__main input[type="url"]:not(.rs__input),
+html.admin-dark .template-default .document-fields__main input[type="tel"]:not(.rs__input),
+html.admin-dark .template-default .document-fields__main input[type="date"]:not(.rs__input),
 html.admin-dark .template-default .document-fields__main select,
 html.admin-dark .template-default .document-fields__main .field-type.textarea textarea {
-  background: #14120f !important;
-  border-color: rgba(245, 240, 232, 0.14) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) inset;
+  /* Input surface: darker than card (#1c1b19) with visible warm border.
+     Previous 0.14 alpha border was nearly invisible against the card bg,
+     so the Hero tagline and similar fields disappeared entirely. */
+  background: #121009 !important;
+  border-color: rgba(245, 240, 232, 0.24) !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5) inset,
+    0 0 0 1px rgba(245, 240, 232, 0.04) !important;
 }
 
-html.dark .template-default .document-fields__main input[type="text"]:focus,
-html.dark .template-default .document-fields__main input[type="email"]:focus,
-html.dark .template-default .document-fields__main input[type="number"]:focus,
+html.dark .template-default .document-fields__main input[type="text"]:not(.rs__input):focus,
+html.dark .template-default .document-fields__main input[type="email"]:not(.rs__input):focus,
+html.dark .template-default .document-fields__main input[type="number"]:not(.rs__input):focus,
 html.dark .template-default .document-fields__main select:focus,
 html.dark .template-default .document-fields__main .field-type.textarea textarea:focus,
-html.admin-dark .template-default .document-fields__main input[type="text"]:focus,
-html.admin-dark .template-default .document-fields__main input[type="email"]:focus,
-html.admin-dark .template-default .document-fields__main input[type="number"]:focus,
+html.admin-dark .template-default .document-fields__main input[type="text"]:not(.rs__input):focus,
+html.admin-dark .template-default .document-fields__main input[type="email"]:not(.rs__input):focus,
+html.admin-dark .template-default .document-fields__main input[type="number"]:not(.rs__input):focus,
 html.admin-dark .template-default .document-fields__main select:focus,
 html.admin-dark .template-default .document-fields__main .field-type.textarea textarea:focus {
   background: #0f0d0b !important;
@@ -3947,48 +4714,92 @@ html.admin-dark .template-default .document-fields__main .field-type.textarea te
 
 html.dark .template-default .document-fields__main .group-field__wrap,
 html.admin-dark .template-default .document-fields__main .group-field__wrap {
-  border-left-color: rgba(245, 240, 232, 0.14);
+  /* Group accent rule needs to survive on dark card — 0.14 alpha reads
+     as almost nothing, so "Personal philosophy" looked like unattached
+     bold text instead of a framed section. */
+  border-left-color: rgba(224, 144, 112, 0.55);
 }
 
-html.dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical,
-html.admin-dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical {
-  background: #14120f !important;
-  border-color: rgba(245, 240, 232, 0.14) !important;
+html.dark .template-default .document-fields__main .group-field__header,
+html.admin-dark .template-default .document-fields__main .group-field__header {
+  border-bottom: 1px solid rgba(245, 240, 232, 0.08);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+html.dark .template-default .document-fields__main .rich-text-lexical,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical {
+  /* Match the dark-mode input surface so the Lexical field reads as an
+     input well, not as another floating card. Brighter border so users
+     can actually see where the field starts and ends. */
+  background: #121009 !important;
+  border: 1px solid rgba(245, 240, 232, 0.24) !important;
+  border-radius: var(--admin-radius-md) !important;
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.45) inset,
-    0 0 0 1px rgba(245, 240, 232, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.5) inset,
     0 3px 8px -4px rgba(0, 0, 0, 0.5) !important;
 }
 
-html.dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:hover,
-html.admin-dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:hover {
+html.dark .template-default .document-fields__main .rich-text-lexical .rich-text-lexical__wrap,
+html.dark .template-default .document-fields__main .rich-text-lexical .editor-shell,
+html.dark .template-default .document-fields__main .rich-text-lexical .editor-container,
+html.dark .template-default .document-fields__main .rich-text-lexical .editor-scroller,
+html.dark .template-default .document-fields__main .rich-text-lexical .editor,
+html.dark .template-default .document-fields__main .rich-text-lexical .ContentEditable__root,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .rich-text-lexical__wrap,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .editor-shell,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .editor-container,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .editor-scroller,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .editor,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .ContentEditable__root {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.dark .template-default .document-fields__main .rich-text-lexical:hover,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical:hover {
   background: #191713 !important;
   border-color: rgba(245, 240, 232, 0.22) !important;
 }
 
-html.dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:focus-within,
-html.admin-dark .template-default .document-fields__main .field-type.rich-text .rich-text-lexical:focus-within {
+html.dark .template-default .document-fields__main .rich-text-lexical:focus-within,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical:focus-within {
+  /* Softer focus ring — previous 3px accent glow looked like an error
+     badge in dark mode. Thinner ring + tinted border reads as "active
+     input" without screaming for attention. */
   background: #0f0d0b !important;
   border-color: var(--admin-accent) !important;
   box-shadow:
-    0 0 0 3px var(--admin-accent-light),
-    0 1px 2px rgba(0, 0, 0, 0.5) inset,
-    0 4px 12px -4px rgba(224, 144, 112, 0.3) !important;
+    0 0 0 2px rgba(224, 144, 112, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.5) inset !important;
 }
 
-html.dark .template-default .document-fields__main .field-type.rich-text .fixed-toolbar,
-html.dark .template-default .document-fields__main .field-type.rich-text .toolbar-popup,
-html.admin-dark .template-default .document-fields__main .field-type.rich-text .fixed-toolbar,
-html.admin-dark .template-default .document-fields__main .field-type.rich-text .toolbar-popup {
+html.dark .template-default .document-fields__main .rich-text-lexical .fixed-toolbar,
+html.dark .template-default .document-fields__main .rich-text-lexical .toolbar-popup,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .fixed-toolbar,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .toolbar-popup {
   background: #1f1c18 !important;
   border-bottom-color: rgba(245, 240, 232, 0.1) !important;
 }
 
-html.dark .template-default .document-fields__main .field-type.rich-text .LexicalEditorTheme__placeholder,
-html.admin-dark .template-default .document-fields__main .field-type.rich-text .LexicalEditorTheme__placeholder {
+html.dark .template-default .document-fields__main .rich-text-lexical .LexicalEditorTheme__placeholder,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .LexicalEditorTheme__placeholder {
   color: #8a7c6a !important;
   font-style: italic !important;
   opacity: 1 !important;
+}
+
+/* Insert-paragraph strip — dark mode */
+html.dark .template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end,
+html.dark .template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end-inside,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end-inside {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+html.dark .template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end:hover .insert-paragraph-at-end-inside,
+html.admin-dark .template-default .document-fields__main .rich-text-lexical .insert-paragraph-at-end:hover .insert-paragraph-at-end-inside {
+  background-color: rgba(224, 144, 112, 0.1) !important;
 }
 
 html.dark .template-default .document-fields__main .field-type.upload .dropzone,
@@ -4045,10 +4856,1126 @@ html.admin-dark .template-default .document-fields__main .field-type.upload .dro
    typing cursor because the container itself inherits some padding from
    less-specific input-wrapper rules. */
 .template-default .document-fields__main .rs__control .rs__input-container,
-.template-default .rs__control .rs__input-container {
+.template-default .rs__control .rs__input-container,
+.drawer__content-children .rs__control .rs__input-container {
   background: transparent !important;
   border: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
   box-shadow: none !important;
+}
+
+/* Hide the blinking text caret on react-select's internal input.
+   Payload's relationship / select fields are typeable (search), but
+   the caret leaks visually next to the selected value (e.g. "|Draft")
+   which reads as a bug. Make the caret transparent and the control
+   show a pointer cursor so it looks like a proper dropdown. Users
+   can still type to filter — only the caret is hidden. */
+.template-default .rs__control,
+.drawer__content-children .rs__control {
+  cursor: pointer !important;
+}
+
+.template-default .rs__control .rs__input,
+.template-default .rs__control input.rs__input[type="text"],
+.drawer__content-children .rs__control .rs__input,
+.drawer__content-children .rs__control input.rs__input[type="text"] {
+  caret-color: transparent !important;
+}
+
+/* React-select value-container holds the selected label / placeholder.
+   Default react-select only gives it 8px horizontal padding, which looks
+   cramped against the .rs__control border — text nearly touches the left
+   edge. Match the 14px left padding used by regular text inputs (line
+   3838) so the selected value has proper breathing room from the border. */
+.template-default .document-fields__main .rs__control .rs__value-container,
+.template-default .rs__control .rs__value-container {
+  padding-left: 14px !important;
+  padding-right: 8px !important;
+}
+
+/* react-select v5 lays out .rs__value-container as a CSS grid.
+   The default SingleValue gets grid-area via an emotion class so it
+   overlaps the invisible .rs__input-container in the same cell.
+   Custom SingleValue components (e.g. PlatformSelectField) lose
+   this emotion class → the value falls into a new grid row and the
+   icon/text renders BELOW the input instead of centered.
+   Force all .rs__single-value to occupy the full grid cell. */
+.template-default .rs__value-container .rs__single-value,
+.drawer__content-children .rs__value-container .rs__single-value {
+  grid-area: 1 / 1 / 2 / 3 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* ============================================================
+   DOCUMENT DRAWER — full styling fix
+   Bug: verified via screenshot 2026-04-12. Clicking the edit icon
+   on a relationship field (e.g. selectedWriting.post) opens a
+   DocumentDrawer, but it renders with NO visible background, NO
+   backdrop, and NO header card — the document fields float on top
+   of the underlying admin sidebar, bleeding through.
+   Root cause: Payload's drawer SCSS lives in `@layer payload-default`
+   (low priority). Our overrides are scoped to `.template-default`
+   which the drawer's rendered Document view does NOT sit inside
+   (drawers render outside the route template, only `.drawer`/
+   `.drawer__content` wrappers). Result: drawer has default Payload
+   styling but no custom theming, AND the dead `.drawer__overlay`
+   rule in admin-theme.css never matches (v3 uses `.drawer__blur-bg`).
+
+   Fix: provide a complete drawer styling pass with proper backdrop,
+   opaque content surface, header spacing, and mirror the key
+   document-field styles into the drawer scope so inputs/labels/
+   cards inside a drawer look consistent with the main edit view. */
+
+/* Backdrop: dim + blur the page behind the drawer */
+.drawer__blur-bg {
+  background: rgba(24, 21, 18, 0.45) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+html.dark .drawer__blur-bg,
+html.admin-dark .drawer__blur-bg {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Drawer panel surface: opaque warm background with left border so
+   it reads as a card sliding in from the right, not a transparent
+   overlay. Also lift with a shadow so it's clearly above the page. */
+.drawer__content {
+  background: var(--admin-bg-primary) !important;
+  border-left: 1px solid var(--admin-border) !important;
+  box-shadow: -24px 0 60px rgba(24, 21, 18, 0.18),
+              -8px 0 20px rgba(24, 21, 18, 0.1) !important;
+}
+
+html.dark .drawer__content,
+html.admin-dark .drawer__content {
+  background: var(--admin-bg-primary) !important;
+  box-shadow: -24px 0 60px rgba(0, 0, 0, 0.55),
+              -8px 0 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Inner scroll area gets breathing room so the document view isn't
+   glued to the drawer edge. */
+.drawer__content-children {
+  padding: 1.5rem 2rem 3rem 2rem !important;
+  background: var(--admin-bg-primary) !important;
+}
+
+/* Drawer header: ensure the title + close button are visible and
+   not cramped under the top edge. */
+.drawer__header {
+  margin-top: 0 !important;
+  margin-bottom: 1.25rem !important;
+  padding-bottom: 1rem !important;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.drawer__header__title {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  color: var(--admin-text-primary) !important;
+  font-family: var(--admin-font-heading) !important;
+}
+
+.drawer__header__close {
+  color: var(--admin-text-secondary) !important;
+  transition: color var(--admin-transition-fast);
+}
+
+.drawer__header__close:hover {
+  color: var(--admin-accent) !important;
+}
+
+/* ---------- Document header inside drawer ---------- */
+.drawer__content-children .doc-header {
+  margin-bottom: 1rem !important;
+  padding: 0 2px;
+}
+
+.drawer__content-children .doc-header__title.render-title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.015em;
+  color: var(--admin-text-primary) !important;
+  margin: 0 0 0.25rem !important;
+  font-family: var(--admin-font-heading);
+}
+
+/* ---------- Doc-controls top bar (Publish / API / metadata) ---------- */
+.drawer__content-children .doc-controls__wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  flex-wrap: wrap !important;
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 1.25rem !important;
+  background: var(--admin-bg-secondary) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: var(--admin-radius-md) !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.03);
+}
+
+.drawer__content-children .doc-controls__meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  font-size: 12px !important;
+  color: var(--admin-text-tertiary) !important;
+}
+
+.drawer__content-children .doc-controls__meta li {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.375rem !important;
+}
+
+.drawer__content-children .doc-controls__meta strong {
+  color: var(--admin-text-secondary) !important;
+  font-weight: 600 !important;
+}
+
+.drawer__content-children .doc-controls__controls-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+/* Primary / secondary / icon button styling for drawer doc-controls
+   is unified with the main edit view in the "UNIFIED BUTTON SYSTEM"
+   block above (search for that header). No drawer-specific overrides
+   needed here — keeps one source of truth and avoids drift. */
+
+/* ---------- Main form column (white elevated card) ---------- */
+.drawer__content-children .document-fields__main {
+  background: #ffffff !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: var(--admin-radius-xl) !important;
+  padding: 1.75rem 2rem 2rem !important;
+  box-shadow:
+    0 1px 2px rgba(24, 21, 18, 0.04),
+    0 14px 34px -20px rgba(24, 21, 18, 0.10) !important;
+}
+
+/* ---------- Sidebar column (lighter warm card) ---------- */
+.drawer__content-children .document-fields__sidebar-wrap,
+.drawer__content-children .document-fields__sidebar {
+  background: var(--admin-bg-secondary) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: var(--admin-radius-lg) !important;
+  padding: 1.25rem 1.25rem 1.5rem !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.03);
+}
+
+/* ---------- Inputs inside drawer (warm tint, same as main edit view) ---------- */
+.drawer__content-children .document-fields__main input[type="text"],
+.drawer__content-children .document-fields__main input[type="email"],
+.drawer__content-children .document-fields__main input[type="password"],
+.drawer__content-children .document-fields__main input[type="number"],
+.drawer__content-children .document-fields__main input[type="search"],
+.drawer__content-children .document-fields__main input[type="url"],
+.drawer__content-children .document-fields__main input[type="tel"],
+.drawer__content-children .document-fields__main input[type="date"],
+.drawer__content-children .document-fields__main select,
+.drawer__content-children .document-fields__main .field-type.textarea textarea,
+.drawer__content-children .document-fields__sidebar input[type="text"],
+.drawer__content-children .document-fields__sidebar input[type="number"],
+.drawer__content-children .document-fields__sidebar input[type="date"],
+.drawer__content-children .document-fields__sidebar select {
+  background: #faf5ec !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: var(--admin-radius-md) !important;
+  padding: 11px 14px !important;
+  font-size: 14px !important;
+  color: var(--admin-text-primary) !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.03) inset !important;
+  transition: background-color var(--admin-transition-fast),
+              border-color var(--admin-transition-fast),
+              box-shadow var(--admin-transition-fast);
+}
+
+.drawer__content-children .document-fields__main input:hover,
+.drawer__content-children .document-fields__main select:hover,
+.drawer__content-children .document-fields__main .field-type.textarea textarea:hover,
+.drawer__content-children .document-fields__sidebar input:hover,
+.drawer__content-children .document-fields__sidebar select:hover {
+  background: #fff9ee !important;
+  border-color: #d8cabd !important;
+}
+
+.drawer__content-children .document-fields__main input:focus,
+.drawer__content-children .document-fields__main select:focus,
+.drawer__content-children .document-fields__main .field-type.textarea textarea:focus,
+.drawer__content-children .document-fields__sidebar input:focus,
+.drawer__content-children .document-fields__sidebar select:focus {
+  background: #ffffff !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+  outline: none !important;
+}
+
+/* Rich text editor inside drawer */
+.drawer__content-children .document-fields__main .rich-text-lexical {
+  background: #faf5ec !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: var(--admin-radius-md) !important;
+  box-shadow:
+    0 1px 2px rgba(24, 21, 18, 0.03) inset,
+    0 2px 6px -2px rgba(24, 21, 18, 0.06) !important;
+}
+
+.drawer__content-children .document-fields__main .rich-text-lexical .rich-text-lexical__wrap,
+.drawer__content-children .document-fields__main .rich-text-lexical .editor-shell,
+.drawer__content-children .document-fields__main .rich-text-lexical .editor-container,
+.drawer__content-children .document-fields__main .rich-text-lexical .editor-scroller,
+.drawer__content-children .document-fields__main .rich-text-lexical .editor,
+.drawer__content-children .document-fields__main .rich-text-lexical .ContentEditable__root {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.drawer__content-children .document-fields__main .rich-text-lexical:focus-within {
+  background: #ffffff !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+}
+
+/* ---------- Field labels inside drawer ---------- */
+.drawer__content-children .field-type > label,
+.drawer__content-children .field-type__label,
+.drawer__content-children .field-label {
+  display: block !important;
+  margin-bottom: 8px !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  color: var(--admin-text-primary) !important;
+}
+
+.drawer__content-children .field-label .required,
+.drawer__content-children .field-type__label .required {
+  color: var(--admin-error) !important;
+  margin-left: 3px;
+}
+
+/* Field descriptions */
+.drawer__content-children .field-description,
+.drawer__content-children .field-type__description {
+  margin-top: 6px !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: var(--admin-text-tertiary) !important;
+}
+
+/* Form field rhythm inside drawer */
+.drawer__content-children .render-fields {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.25rem !important;
+}
+
+/* Group field header (for nested groups like meEditorial) */
+.drawer__content-children .group-field__header {
+  border-bottom: 0 !important;
+  padding-bottom: 0.25rem !important;
+  margin-bottom: 0.875rem !important;
+}
+
+.drawer__content-children .group-field__header h3 {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--admin-text-primary) !important;
+  margin: 0 !important;
+}
+
+/* ---------- React-select inside drawer ---------- */
+.drawer__content-children .rs__control {
+  background: #faf5ec !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: var(--admin-radius-md) !important;
+  min-height: 42px !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.03) inset !important;
+}
+
+.drawer__content-children .rs__control:hover {
+  background: #fff9ee !important;
+  border-color: #d8cabd !important;
+}
+
+.drawer__content-children .rs__control--is-focused {
+  background: #ffffff !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+}
+
+.drawer__content-children .rs__control .rs__input,
+.drawer__content-children .rs__control input.rs__input[type="text"] {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+.drawer__content-children .rs__control .rs__value-container {
+  padding-left: 14px !important;
+  padding-right: 8px !important;
+}
+
+.drawer__content-children .rs__menu {
+  background: #ffffff !important;
+  border: 1px solid var(--admin-border-strong) !important;
+  border-radius: var(--admin-radius-md) !important;
+  box-shadow: var(--admin-shadow-md) !important;
+  overflow: hidden;
+}
+
+.drawer__content-children .rs__option {
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  color: var(--admin-text-primary) !important;
+  cursor: pointer;
+}
+
+.drawer__content-children .rs__option--is-focused {
+  background: var(--admin-accent-light) !important;
+  color: var(--admin-accent) !important;
+}
+
+.drawer__content-children .rs__option--is-selected {
+  background: var(--admin-accent) !important;
+  color: #fff !important;
+}
+
+/* ---------- Dark mode ---------- */
+html.dark .drawer__content-children .document-fields__main,
+html.admin-dark .drawer__content-children .document-fields__main {
+  background: #1a1a18 !important;
+  border-color: rgba(245, 240, 232, 0.1) !important;
+}
+
+html.dark .drawer__content-children .document-fields__sidebar-wrap,
+html.dark .drawer__content-children .document-fields__sidebar,
+html.admin-dark .drawer__content-children .document-fields__sidebar-wrap,
+html.admin-dark .drawer__content-children .document-fields__sidebar {
+  background: #16161410 !important;
+  border-color: rgba(245, 240, 232, 0.08) !important;
+}
+
+/* Inputs in drawer — dark mode. Match the exact same selectors used
+   in the light rule (including `input[type="text"]` and
+   `.field-type.textarea textarea`) so specificity is identical,
+   otherwise light rule wins. Cover BOTH main and sidebar columns.
+   CRITICAL: use `:not(.rs__input)` so we don't paint a phantom dark
+   box onto react-select's internal invisible input element. */
+html.dark .drawer__content-children .document-fields__main input[type="text"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main input[type="email"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main input[type="password"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main input[type="number"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main input[type="search"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main input[type="url"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main input[type="tel"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main input[type="date"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__main select,
+html.dark .drawer__content-children .document-fields__main .field-type.textarea textarea,
+html.dark .drawer__content-children .document-fields__sidebar input[type="text"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__sidebar input[type="number"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__sidebar input[type="date"]:not(.rs__input),
+html.dark .drawer__content-children .document-fields__sidebar select,
+html.admin-dark .drawer__content-children .document-fields__main input[type="text"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main input[type="email"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main input[type="password"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main input[type="number"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main input[type="search"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main input[type="url"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main input[type="tel"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main input[type="date"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__main select,
+html.admin-dark .drawer__content-children .document-fields__main .field-type.textarea textarea,
+html.admin-dark .drawer__content-children .document-fields__sidebar input[type="text"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__sidebar input[type="number"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__sidebar input[type="date"]:not(.rs__input),
+html.admin-dark .drawer__content-children .document-fields__sidebar select,
+html.dark .drawer__content-children .rs__control,
+html.admin-dark .drawer__content-children .rs__control {
+  background: #1e1b18 !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+  color: var(--admin-text-primary) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Hard reset for react-select's internal <input class="rs__input"> in
+   dark mode — keep it fully transparent so the phantom box disappears. */
+html.dark .drawer__content-children .rs__control .rs__input,
+html.dark .drawer__content-children .rs__control input.rs__input[type="text"],
+html.admin-dark .drawer__content-children .rs__control .rs__input,
+html.admin-dark .drawer__content-children .rs__control input.rs__input[type="text"] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+/* React-select dropdown menu — dark mode */
+html.dark .drawer__content-children .rs__menu,
+html.admin-dark .drawer__content-children .rs__menu {
+  background: #1a1816 !important;
+  border: 1px solid rgba(245, 240, 232, 0.14) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.52), 0 8px 20px rgba(0, 0, 0, 0.32) !important;
+}
+
+html.dark .drawer__content-children .rs__menu-list,
+html.admin-dark .drawer__content-children .rs__menu-list {
+  background: transparent !important;
+}
+
+html.dark .drawer__content-children .rs__option,
+html.admin-dark .drawer__content-children .rs__option {
+  background: transparent !important;
+  color: var(--admin-text-primary) !important;
+}
+
+html.dark .drawer__content-children .rs__option--is-focused,
+html.admin-dark .drawer__content-children .rs__option--is-focused {
+  background: rgba(224, 144, 112, 0.18) !important;
+  color: var(--admin-accent) !important;
+}
+
+html.dark .drawer__content-children .rs__option--is-selected,
+html.admin-dark .drawer__content-children .rs__option--is-selected {
+  background: var(--admin-accent) !important;
+  color: #1a1310 !important;
+}
+
+html.dark .drawer__content-children .rs__single-value,
+html.admin-dark .drawer__content-children .rs__single-value {
+  color: var(--admin-text-primary) !important;
+}
+
+html.dark .drawer__content-children .rs__placeholder,
+html.admin-dark .drawer__content-children .rs__placeholder {
+  color: var(--admin-text-muted) !important;
+}
+
+/* Rich text editor surface — dark mode */
+html.dark .drawer__content-children .document-fields__main .rich-text-lexical,
+html.admin-dark .drawer__content-children .document-fields__main .rich-text-lexical {
+  background: #1e1b18 !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .drawer__content-children .document-fields__main .rich-text-lexical:focus-within,
+html.admin-dark .drawer__content-children .document-fields__main .rich-text-lexical:focus-within {
+  background: #14120f !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+}
+
+/* Focus state — dark mode */
+html.dark .drawer__content-children .document-fields__main input[type="text"]:focus,
+html.dark .drawer__content-children .document-fields__main input[type="email"]:focus,
+html.dark .drawer__content-children .document-fields__main input[type="number"]:focus,
+html.dark .drawer__content-children .document-fields__main select:focus,
+html.dark .drawer__content-children .document-fields__main .field-type.textarea textarea:focus,
+html.dark .drawer__content-children .document-fields__sidebar input[type="text"]:focus,
+html.dark .drawer__content-children .document-fields__sidebar input[type="number"]:focus,
+html.dark .drawer__content-children .document-fields__sidebar input[type="date"]:focus,
+html.dark .drawer__content-children .document-fields__sidebar select:focus,
+html.admin-dark .drawer__content-children .document-fields__main input[type="text"]:focus,
+html.admin-dark .drawer__content-children .document-fields__main input[type="email"]:focus,
+html.admin-dark .drawer__content-children .document-fields__main input[type="number"]:focus,
+html.admin-dark .drawer__content-children .document-fields__main select:focus,
+html.admin-dark .drawer__content-children .document-fields__main .field-type.textarea textarea:focus,
+html.admin-dark .drawer__content-children .document-fields__sidebar input[type="text"]:focus,
+html.admin-dark .drawer__content-children .document-fields__sidebar input[type="number"]:focus,
+html.admin-dark .drawer__content-children .document-fields__sidebar input[type="date"]:focus,
+html.admin-dark .drawer__content-children .document-fields__sidebar select:focus,
+html.dark .drawer__content-children .rs__control--is-focused,
+html.admin-dark .drawer__content-children .rs__control--is-focused {
+  background: #14120f !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+}
+
+html.dark .drawer__content-children .doc-controls__wrapper,
+html.admin-dark .drawer__content-children .doc-controls__wrapper {
+  background: rgba(245, 240, 232, 0.03) !important;
+  border-color: rgba(245, 240, 232, 0.08) !important;
+}
+
+/* ============================================================
+   DARK MODE — Button system (template-default + drawer)
+   The unified button block above hardcodes #fff / #faf5ec / #e5dccb
+   for the light palette. In dark mode these cause white-on-white
+   text. Override here with proper dark surfaces.
+   ============================================================ */
+
+/* --- Secondary / pill buttons in doc-controls --- */
+html.dark .template-default .doc-controls__controls-wrapper button.btn--style-secondary,
+html.dark .template-default .doc-controls__controls-wrapper button.btn--style-pill,
+html.dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-secondary,
+html.dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-pill,
+html.admin-dark .template-default .doc-controls__controls-wrapper button.btn--style-secondary,
+html.admin-dark .template-default .doc-controls__controls-wrapper button.btn--style-pill,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-secondary,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-pill {
+  background: #201d1a !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+  color: var(--admin-text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+html.dark .template-default .doc-controls__controls-wrapper button.btn--style-secondary:hover,
+html.dark .template-default .doc-controls__controls-wrapper button.btn--style-pill:hover,
+html.dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-secondary:hover,
+html.dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-pill:hover,
+html.admin-dark .template-default .doc-controls__controls-wrapper button.btn--style-secondary:hover,
+html.admin-dark .template-default .doc-controls__controls-wrapper button.btn--style-pill:hover,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-secondary:hover,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-pill:hover {
+  background: #2a2622 !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+/* --- Icon-only "..." kebab menu trigger --- */
+html.dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button,
+html.dark .template-default .doc-controls__controls-wrapper > .popup-button,
+html.dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button,
+html.dark .drawer__content-children .doc-controls__controls-wrapper > .popup-button,
+html.admin-dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button,
+html.admin-dark .template-default .doc-controls__controls-wrapper > .popup-button,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup-button {
+  background: #201d1a !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+  color: var(--admin-text-secondary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+html.dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+html.dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+html.admin-dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button:hover {
+  background: #2a2622 !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+/* --- Upload buttons (Create New / Choose from existing) ---
+   Both template-default Identity/Avatar and drawer Featured image */
+html.dark .template-default .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill,
+html.dark .template-default .field-type.upload button.upload__listToggler,
+html.dark .drawer__content-children .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill,
+html.dark .drawer__content-children .field-type.upload button.upload__listToggler,
+html.admin-dark .template-default .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill,
+html.admin-dark .template-default .field-type.upload button.upload__listToggler,
+html.admin-dark .drawer__content-children .field-type.upload .upload__dropzoneContent__buttons button.btn.btn--style-pill,
+html.admin-dark .drawer__content-children .field-type.upload button.upload__listToggler {
+  background: #201d1a !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+  color: var(--admin-text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+html.dark .template-default .field-type.upload button.upload__listToggler:hover,
+html.dark .drawer__content-children .field-type.upload button.upload__listToggler:hover,
+html.admin-dark .template-default .field-type.upload button.upload__listToggler:hover,
+html.admin-dark .drawer__content-children .field-type.upload button.upload__listToggler:hover {
+  background: #2a2622 !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+/* --- Dropzone dashed frame in dark mode --- */
+html.dark .template-default .field-type.upload .dropzone,
+html.dark .drawer__content-children .field-type.upload .dropzone,
+html.admin-dark .template-default .field-type.upload .dropzone,
+html.admin-dark .drawer__content-children .field-type.upload .dropzone {
+  background: #1a1816 !important;
+  border-color: rgba(245, 240, 232, 0.14) !important;
+}
+
+html.dark .template-default .field-type.upload .dropzone:hover,
+html.dark .drawer__content-children .field-type.upload .dropzone:hover,
+html.admin-dark .template-default .field-type.upload .dropzone:hover,
+html.admin-dark .drawer__content-children .field-type.upload .dropzone:hover,
+html.dark .template-default .field-type.upload .dropzone--drag-over,
+html.dark .drawer__content-children .field-type.upload .dropzone--drag-over,
+html.admin-dark .template-default .field-type.upload .dropzone--drag-over,
+html.admin-dark .drawer__content-children .field-type.upload .dropzone--drag-over {
+  background: rgba(224, 144, 112, 0.1) !important;
+  border-color: var(--admin-accent) !important;
+}
+
+/* --- Primary CTA (Publish / Save) — darken highlight for dark mode --- */
+html.dark .template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup,
+html.dark .drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup,
+html.admin-dark .template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup,
+html.dark .template-default .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup),
+html.dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup),
+html.admin-dark .template-default .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup),
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup) {
+  background: var(--admin-accent) !important;
+  border-color: var(--admin-accent) !important;
+  color: #1a1310 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+html.dark .template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup:hover,
+html.dark .drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup:hover,
+html.admin-dark .template-default .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup:hover,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper div.btn--style-primary.btn--withPopup:hover,
+html.dark .template-default .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):hover,
+html.dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):hover,
+html.admin-dark .template-default .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):hover,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper button.btn--style-primary:not(.btn--withPopup):hover {
+  background: var(--admin-accent-hover) !important;
+  border-color: var(--admin-accent-hover) !important;
+}
+
+/* ============================================================
+   REACT-SELECT PHANTOM BOX — FINAL HARD RESET
+   Bug: verified via screenshot 2026-04-12 04:04. Even after scoping
+   all `.document-fields__main input[type="text"]` rules with
+   `:not(.rs__input)` (both themes), the phantom dark box BEFORE the
+   selected value (e.g. "[Published") still leaks when the dropdown
+   is open. Root cause is likely unknown Payload default SCSS in
+   `@layer payload-default` or a cascade edge case we haven't found.
+
+   Fix: append a MAXIMUM-SPECIFICITY hard reset at the very end of
+   the stylesheet (wins load order), using `html.dark body` so the
+   selector is (0,6,2) — guaranteed to beat any reasonable offender.
+   Covers base / :focus / :hover / :focus-within on both .rs__input
+   and its parent .rs__input-container, nuking every visual property
+   that could render a box: background, border, shadow, outline,
+   padding, margin, caret. Applies to both `.template-default` and
+   `.drawer__content-children` scopes so it works in modals too. */
+html.dark body .template-default .rs__control .rs__input,
+html.dark body .template-default .rs__control input.rs__input[type="text"],
+html.dark body .template-default .rs__control .rs__input:focus,
+html.dark body .template-default .rs__control input.rs__input[type="text"]:focus,
+html.dark body .template-default .rs__control .rs__input:hover,
+html.dark body .template-default .rs__control input.rs__input[type="text"]:hover,
+html.dark body .drawer__content-children .rs__control .rs__input,
+html.dark body .drawer__content-children .rs__control input.rs__input[type="text"],
+html.dark body .drawer__content-children .rs__control .rs__input:focus,
+html.dark body .drawer__content-children .rs__control input.rs__input[type="text"]:focus,
+html.admin-dark body .template-default .rs__control .rs__input,
+html.admin-dark body .template-default .rs__control input.rs__input[type="text"],
+html.admin-dark body .template-default .rs__control .rs__input:focus,
+html.admin-dark body .template-default .rs__control input.rs__input[type="text"]:focus,
+html.admin-dark body .template-default .rs__control .rs__input:hover,
+html.admin-dark body .template-default .rs__control input.rs__input[type="text"]:hover,
+html.admin-dark body .drawer__content-children .rs__control .rs__input,
+html.admin-dark body .drawer__content-children .rs__control input.rs__input[type="text"],
+html.admin-dark body .drawer__content-children .rs__control .rs__input:focus,
+html.admin-dark body .drawer__content-children .rs__control input.rs__input[type="text"]:focus,
+html.light body .template-default .rs__control .rs__input,
+html.light body .template-default .rs__control input.rs__input[type="text"],
+html.light body .template-default .rs__control .rs__input:focus,
+html.light body .template-default .rs__control input.rs__input[type="text"]:focus,
+html.admin-light body .template-default .rs__control .rs__input,
+html.admin-light body .template-default .rs__control input.rs__input[type="text"],
+html.admin-light body .template-default .rs__control .rs__input:focus,
+html.admin-light body .template-default .rs__control input.rs__input[type="text"]:focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  outline-offset: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  color: inherit !important;
+  caret-color: transparent !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+/* Also reset the grid-cell wrapper (.rs__input-container) so no
+   inherited padding/background leaks around the invisible input. */
+html.dark body .template-default .rs__control .rs__input-container,
+html.dark body .drawer__content-children .rs__control .rs__input-container,
+html.admin-dark body .template-default .rs__control .rs__input-container,
+html.admin-dark body .drawer__content-children .rs__control .rs__input-container,
+html.light body .template-default .rs__control .rs__input-container,
+html.admin-light body .template-default .rs__control .rs__input-container {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* ============================================================
+   REACT-SELECT DROPDOWN MENU — MAIN DOC PAGE
+   Bug: verified via screenshot 2026-04-12 04:12. On the Author
+   Profile → Contact tab, opening the `socialLinks[].platform`
+   dropdown renders options as unstyled raw text overlapping the
+   form (no background, no padding, options bleed onto the row
+   below).
+   Root cause: existing .rs__menu / .rs__option rules were
+   scoped ONLY to `.drawer__content-children` (added when the
+   drawer fix landed). Main-page `.template-default` scope had
+   no menu styling at all, so react-select falls back to library
+   defaults which our input reset partially strips, leaving the
+   popup visually broken.
+   Fix: mirror the drawer rules into `.template-default` scope,
+   for both light and dark modes. Includes .rs__menu-portal so
+   portaled menus (if any) are also covered. */
+.template-default .rs__menu,
+.template-default .rs__menu-portal .rs__menu {
+  background: #ffffff !important;
+  border: 1px solid var(--admin-border-strong) !important;
+  border-radius: var(--admin-radius-md) !important;
+  box-shadow: var(--admin-shadow-md) !important;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.template-default .rs__menu-list {
+  background: transparent !important;
+  padding: 4px !important;
+}
+
+.template-default .rs__option {
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  color: var(--admin-text-primary) !important;
+  cursor: pointer;
+  border-radius: calc(var(--admin-radius-md) - 4px) !important;
+  background: transparent !important;
+}
+
+.template-default .rs__option--is-focused {
+  background: var(--admin-accent-light) !important;
+  color: var(--admin-accent) !important;
+}
+
+.template-default .rs__option--is-selected {
+  background: var(--admin-accent) !important;
+  color: #ffffff !important;
+}
+
+.template-default .rs__no-options-message {
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  color: var(--admin-text-muted) !important;
+}
+
+/* Dark mode */
+html.dark .template-default .rs__menu,
+html.dark .template-default .rs__menu-portal .rs__menu,
+html.admin-dark .template-default .rs__menu,
+html.admin-dark .template-default .rs__menu-portal .rs__menu {
+  background: #1a1816 !important;
+  border: 1px solid rgba(245, 240, 232, 0.14) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.52), 0 8px 20px rgba(0, 0, 0, 0.32) !important;
+}
+
+html.dark .template-default .rs__menu-list,
+html.admin-dark .template-default .rs__menu-list {
+  background: transparent !important;
+}
+
+html.dark .template-default .rs__option,
+html.admin-dark .template-default .rs__option {
+  background: transparent !important;
+  color: var(--admin-text-primary) !important;
+}
+
+html.dark .template-default .rs__option--is-focused,
+html.admin-dark .template-default .rs__option--is-focused {
+  background: rgba(224, 144, 112, 0.18) !important;
+  color: var(--admin-accent) !important;
+}
+
+html.dark .template-default .rs__option--is-selected,
+html.admin-dark .template-default .rs__option--is-selected {
+  background: var(--admin-accent) !important;
+  color: #1a1310 !important;
+}
+
+html.dark .template-default .rs__no-options-message,
+html.admin-dark .template-default .rs__no-options-message {
+  color: var(--admin-text-muted) !important;
+}
+
+/* ============================================================
+   PLATFORM SELECT — option & single-value icon alignment.
+   The custom PlatformSelectField injects a brand SVG + label
+   wrapped in `.platform-option`. Keep icon/label on one row,
+   icon fixed 16×16, small gap, crisp rendering. */
+.platform-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1;
+}
+
+.platform-option__icon {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.platform-option__icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.platform-option__label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ============================================
+   FIELD VALIDATION TOOLTIP
+   Payload v3: aside.tooltip.field-error.tooltip--show
+   ============================================ */
+
+/* Replace Payload's harsh dark-red tooltip with a clean minimal error callout */
+aside.tooltip.field-error,
+.tooltip.field-error {
+  background: var(--admin-bg-elevated) !important;
+  border: 1px solid rgba(217, 79, 79, 0.25) !important;
+  border-radius: var(--admin-radius-sm) !important;
+  box-shadow:
+    var(--admin-shadow-sm),
+    0 0 0 3px rgba(217, 79, 79, 0.06) !important;
+  color: var(--admin-error) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  max-width: 260px !important;
+  padding: 0 !important;
+  z-index: 50;
+}
+
+/* Tooltip inner text */
+.tooltip.field-error .tooltip-content {
+  padding: 5px 10px !important;
+  line-height: 1.45 !important;
+  white-space: normal;
+}
+
+/* Caret arrow — recolour to match the new elevated bg */
+.tooltip.field-error::after {
+  border-color: transparent !important;
+}
+.tooltip.field-error.tooltip--caret-right::after {
+  border-right-color: var(--admin-bg-elevated) !important;
+}
+.tooltip.field-error.tooltip--caret-left::after {
+  border-left-color: var(--admin-bg-elevated) !important;
+}
+.tooltip.field-error.tooltip--position-top::after {
+  border-top-color: var(--admin-bg-elevated) !important;
+}
+.tooltip.field-error.tooltip--position-bottom::after {
+  border-bottom-color: var(--admin-bg-elevated) !important;
+}
+
+/* Field wrapper error state — red focus ring on the input */
+.field-type.error input,
+.field-type.error textarea {
+  border-color: rgba(217, 79, 79, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(217, 79, 79, 0.1) !important;
+}
+
+/* ============================================
+   PAYLOAD TOAST NOTIFICATIONS  (Sonner, data-styled="false")
+   Structure: ol.payload-toast-container
+                > li.payload-toast-item.toast-{type}[data-type]
+                    > button.payload-toast-close-button[data-close-button]
+                    > div.toast-icon[data-icon]     ← circular SVG (hidden)
+                    > div.toast-content[data-content]
+                        > div.toast-title[data-title]
+   ============================================ */
+
+/* Slide-up entrance keyframe (Sonner drives position; we add visual polish) */
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* Container — inherit Sonner fixed positioning */
+ol.payload-toast-container {
+  padding: 0 !important;
+  list-style: none !important;
+  gap: 10px !important;
+}
+
+/* On .template-minimal (login page): centre the container horizontally */
+body:has(.template-minimal) ol.payload-toast-container {
+  right: 50% !important;
+  transform: translateX(50%) !important;
+  width: 380px !important;
+}
+
+/* ── Base toast card ───────────────────────────────────── */
+li.payload-toast-item {
+  width: 100% !important;      /* fill container so all toasts are the same width */
+  border-radius: 10px !important;
+  box-shadow:
+    0 2px 8px rgba(24, 21, 18, 0.08),
+    0 12px 28px rgba(24, 21, 18, 0.10) !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  animation: toast-slide-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: bottom center;
+}
+
+/* ── Tinted background + border + text color per type ──── */
+/* Error — warm red tint (Stripe / Supabase pattern) */
+li.payload-toast-item.toast-error,
+li.payload-toast-item[data-type="error"] {
+  background: rgba(217, 79, 79, 0.09) !important;
+  border: 1px solid rgba(217, 79, 79, 0.28) !important;
+  color: #b83535 !important;
+}
+/* Success — warm green tint */
+li.payload-toast-item.toast-success,
+li.payload-toast-item[data-type="success"] {
+  background: rgba(61, 139, 110, 0.09) !important;
+  border: 1px solid rgba(61, 139, 110, 0.28) !important;
+  color: #2b7358 !important;
+}
+/* Warning — amber tint */
+li.payload-toast-item.toast-warning,
+li.payload-toast-item[data-type="warning"] {
+  background: rgba(212, 149, 43, 0.09) !important;
+  border: 1px solid rgba(212, 149, 43, 0.28) !important;
+  color: #8f6315 !important;
+}
+
+/* Dark mode: keep tints but lighter text */
+html.dark li.payload-toast-item.toast-error,
+html.dark li.payload-toast-item[data-type="error"] {
+  background: rgba(217, 79, 79, 0.13) !important;
+  border: 1px solid rgba(217, 79, 79, 0.30) !important;
+  color: #f08080 !important;
+}
+html.dark li.payload-toast-item.toast-success,
+html.dark li.payload-toast-item[data-type="success"] {
+  background: rgba(61, 139, 110, 0.13) !important;
+  border: 1px solid rgba(61, 139, 110, 0.30) !important;
+  color: #7ecbb1 !important;
+}
+html.dark li.payload-toast-item.toast-warning,
+html.dark li.payload-toast-item[data-type="warning"] {
+  background: rgba(212, 149, 43, 0.13) !important;
+  border: 1px solid rgba(212, 149, 43, 0.30) !important;
+  color: #f0c060 !important;
+}
+
+/* ── Hide noisy circular icon ─────────────────────────── */
+div[data-icon].toast-icon,
+li.payload-toast-item .toast-icon {
+  display: none !important;
+}
+
+/* ── Content area — two different DOM shapes:
+   • Payload field-validation toast: li > div.toast-content[data-content] > div.toast-title[data-title]
+   • Payload auth-error toast:       li > div  (plain, no class/attrs)
+   Both need the same padding so heights match. ─────── */
+
+/* Shape 1 — structured (field validation) */
+div.toast-content[data-content] {
+  display: flex !important;
+  align-items: center !important;
+  padding: 16px 44px 16px 18px !important;
+  gap: 0 !important;
+  min-height: 0 !important;
+}
+div.toast-title[data-title] {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: inherit !important;
+  line-height: 1.5 !important;
+  letter-spacing: -0.01em;
+  text-align: left !important;
+}
+
+/* Shape 2 — plain div (auth error / any Sonner toast without wrapper) */
+li.payload-toast-item > div:not([data-icon]):not(.toast-content):not(.toast-icon) {
+  display: block !important;
+  padding: 16px 44px 16px 18px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: inherit !important;
+  line-height: 1.5 !important;
+  letter-spacing: -0.01em;
+  text-align: left !important;
+}
+
+/* ── Close button — inherits type color, top-right ───── */
+.payload-toast-close-button,
+[data-close-button="true"],
+li.payload-toast-item button[aria-label] {
+  position: absolute !important;
+  top: 50% !important;
+  right: 10px !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: inherit !important;   /* match type color */
+  cursor: pointer;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  opacity: 0.5;
+  transition:
+    opacity var(--admin-transition-fast),
+    background-color var(--admin-transition-fast);
+}
+
+.payload-toast-close-button:hover,
+[data-close-button="true"]:hover,
+li.payload-toast-item button[aria-label]:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  opacity: 1;
+}
+
+/* × SVG icon */
+.payload-toast-close-button svg,
+[data-close-button="true"] svg {
+  width: 11px !important;
+  height: 11px !important;
+  flex: 0 0 11px;
+  stroke-width: 2 !important;
 }

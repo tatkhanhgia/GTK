@@ -1,18 +1,25 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import { useAdminTranslation } from '../../i18n/use-admin-translation'
 
 /**
- * Renders a [ VI ] [ EN ] button group that switches the Payload admin
- * UI language. SSR-safe: renders a neutral skeleton until mounted.
+ * Renders a [ VI ] [ EN ] button group that switches BOTH the Payload admin
+ * UI language AND the content editing locale. SSR-safe: renders a neutral
+ * skeleton until mounted.
  *
  * Uses Payload's `switchLanguage` server action which sets the language
- * cookie and re-renders all i18n consumers without a full page reload.
+ * cookie and re-renders all i18n consumers without a full page reload,
+ * then updates the URL `locale` query param so the document loads the
+ * correct localized content slice.
  */
 export function LanguageSwitcherClient() {
   const { t, i18n, switchLanguage } = useAdminTranslation()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -29,9 +36,17 @@ export function LanguageSwitcherClient() {
   const currentLang = mounted ? (i18n.language as 'vi' | 'en') : initialLang
 
   const handleSwitch = (lang: 'vi' | 'en') => {
-    if (lang !== i18n.language && switchLanguage) {
+    if (lang === i18n.language) return
+
+    if (switchLanguage) {
       void switchLanguage(lang as AcceptedLanguages)
     }
+
+    // Sync the content editing locale via URL query param so Payload loads
+    // the correct localized data slice (e.g., vi vs en for author-profile).
+    const params = new URLSearchParams(searchParams?.toString() ?? '')
+    params.set('locale', lang)
+    router.replace(`${pathname}?${params.toString()}`)
   }
 
   const buttonBase = `

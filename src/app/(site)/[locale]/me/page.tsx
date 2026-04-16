@@ -309,7 +309,7 @@ export default async function MePage({ params }: Props) {
         )}
 
         {/* Principles - What I Believe — Lazy loaded */}
-        {(principles.length > 0 || philosophyPrinciples.length > 0) && (
+        {(principles.length > 0 || philosophyPrinciples.length > 0 || Boolean(philosophyStory)) && (
           <LazySection>
             <section>
               <div className="mb-8">

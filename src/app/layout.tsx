@@ -1,4 +1,5 @@
 import React from 'react'
+import { BodyUnresolvedFix } from '@/components/providers/body-unresolved-fix'
 
 /**
  * Root Layout
@@ -13,5 +14,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return (
+    <>
+      {/*
+        Next.js dev mode injects a body[unresolved] style rule to prevent FOUC.
+        When Payload CMS causes a hydration mismatch (common with style-tag
+        ordering in <head>), React re-renders on the client but can leave
+        body[unresolved] in place, making the page invisible. This client
+        component removes the attribute after hydration.
+      */}
+      <BodyUnresolvedFix />
+      {children}
+    </>
+  )
 }

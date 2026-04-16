@@ -1,5 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
+// Walk a Lexical rich-text tree and collect only the actual text content
+// from text nodes. Skips structural metadata (type, format, version, ...)
+// and nested children recursively. Returns a single space-separated string.
+function extractLexicalText(node: unknown): string {
+  if (!node || typeof node !== 'object') return ''
+  const n = node as { text?: unknown; children?: unknown[]; root?: unknown }
+  if (n.root) return extractLexicalText(n.root)
+  let out = ''
+  if (typeof n.text === 'string') out += n.text + ' '
+  if (Array.isArray(n.children)) {
+    for (const child of n.children) out += extractLexicalText(child)
+  }
+  return out
+}
+
 export const Posts: CollectionConfig = {
   slug: 'posts',
   labels: {
@@ -143,11 +158,13 @@ export const Posts: CollectionConfig = {
   hooks: {
     beforeChange: [
       ({ data }) => {
-        // Auto-calculate reading time from richtext content
+        // Auto-calculate reading time from richtext content. Walk the
+        // Lexical tree and count only real text (not JSON metadata).
+        // 200 wpm is the standard average adult silent reading speed.
         if (data.content) {
-          const textContent = JSON.stringify(data.content)
-          const wordCount = textContent.split(/\s+/).length
-          data.readingTime = Math.ceil(wordCount / 200)
+          const plain = extractLexicalText(data.content).trim()
+          const wordCount = plain ? plain.split(/\s+/).length : 0
+          data.readingTime = Math.max(1, Math.ceil(wordCount / 200))
         }
         return data
       },

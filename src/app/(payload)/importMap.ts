@@ -27,6 +27,7 @@ import { CustomDashboard as CustomDashboard_admin } from '@/admin/components/vie
 import { StatusCell as StatusCell_admin } from '@/admin/components/cells/status-cell'
 import { TypeCell as TypeCell_admin } from '@/admin/components/cells/type-cell'
 import { PriceVNDCell as PriceVNDCell_admin } from '@/admin/components/cells/price-vnd-cell'
+import { PlatformSelectField as PlatformSelectField_admin } from '@/admin/components/fields/platform-select-field'
 import { CollectionCards as CollectionCards_admin } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -59,5 +60,6 @@ export const importMap = {
   "@/admin/components/cells/status-cell#StatusCell": StatusCell_admin,
   "@/admin/components/cells/type-cell#TypeCell": TypeCell_admin,
   "@/admin/components/cells/price-vnd-cell#PriceVNDCell": PriceVNDCell_admin,
+  "@/admin/components/fields/platform-select-field#PlatformSelectField": PlatformSelectField_admin,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_admin,
 }

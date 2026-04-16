@@ -46,6 +46,11 @@ export default async function HomePage({ params }: Props) {
   const heroTagline = getLocalizedText(authorProfile?.philosophy?.heroTagline, loc)
   const story = authorProfile?.philosophy?.story as { root: { children: unknown[] } } | undefined
 
+  // DEBUG: Log data to see what's coming from CMS
+  console.log('DEBUG locale:', loc)
+  console.log('DEBUG authorProfile?.philosophy:', JSON.stringify(authorProfile?.philosophy, null, 2))
+  console.log('DEBUG story:', JSON.stringify(story, null, 2))
+
   const principlesRaw = Array.isArray(authorProfile?.philosophy?.workingPrinciples)
     ? authorProfile.philosophy.workingPrinciples
     : []

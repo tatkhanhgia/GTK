@@ -25,6 +25,13 @@ interface AdminShellContextValue {
 
 const STORAGE_KEY = 'gtkblog-admin-theme';
 const SIDEBAR_COLLAPSED_KEY = 'gtkblog-admin-sidebar-collapsed';
+const PAYLOAD_THEME_COOKIE = 'payload-theme';
+
+function setPayloadThemeCookie(theme: 'dark' | 'light') {
+  const d = new Date();
+  d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
+  document.cookie = `${PAYLOAD_THEME_COOKIE}=${theme};expires=${d.toUTCString()};path=/`;
+}
 
 const AdminShellContext = createContext<AdminShellContextValue | null>(null);
 
@@ -43,9 +50,19 @@ export function AdminThemeProviderClient({ children }: { children?: React.ReactN
     }
 
     const savedTheme = window.localStorage.getItem(STORAGE_KEY);
-    return savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system'
-      ? savedTheme
-      : 'system';
+    if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') {
+      return savedTheme;
+    }
+
+    const payloadCookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${PAYLOAD_THEME_COOKIE}=`))
+      ?.split('=')[1];
+    if (payloadCookie === 'light' || payloadCookie === 'dark') {
+      return payloadCookie;
+    }
+
+    return 'system';
   });
   const [prefersDark, setPrefersDark] = useState(() => {
     if (typeof window === 'undefined') {
@@ -116,6 +133,7 @@ export function AdminThemeProviderClient({ children }: { children?: React.ReactN
     rootElement.classList.toggle('light', isLight);
     rootElement.classList.toggle('admin-light', isLight);
     rootElement.style.colorScheme = isDark ? 'dark' : 'light';
+    setPayloadThemeCookie(resolvedTheme);
   }, [resolvedTheme]);
 
   const setThemePreference = useCallback((nextTheme: ThemePreference) => {

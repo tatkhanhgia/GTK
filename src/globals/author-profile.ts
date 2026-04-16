@@ -117,14 +117,12 @@ export const AuthorProfile: GlobalConfig = {
                     {
                       name: 'title',
                       type: 'text',
-                      required: true,
                       localized: true,
                       label: { vi: 'Tiêu đề', en: 'Title' },
                     },
                     {
                       name: 'description',
                       type: 'text',
-                      required: true,
                       localized: true,
                       label: { vi: 'Mô tả', en: 'Description' },
                     },
@@ -230,7 +228,6 @@ export const AuthorProfile: GlobalConfig = {
                 {
                   name: 'title',
                   type: 'text',
-                  required: true,
                   localized: true,
                   label: { vi: 'Tiêu đề', en: 'Title' },
                 },
@@ -286,6 +283,12 @@ export const AuthorProfile: GlobalConfig = {
                     { label: 'YouTube', value: 'youtube' },
                     { label: 'Email', value: 'email' },
                   ],
+                  admin: {
+                    components: {
+                      Field:
+                        '@/admin/components/fields/platform-select-field#PlatformSelectField',
+                    },
+                  },
                 },
                 {
                   name: 'url',
@@ -336,14 +339,12 @@ export const AuthorProfile: GlobalConfig = {
                     {
                       name: 'title',
                       type: 'text',
-                      required: true,
                       localized: true,
                       label: { vi: 'Tiêu đề', en: 'Title' },
                     },
                     {
                       name: 'description',
                       type: 'textarea',
-                      required: true,
                       localized: true,
                       label: { vi: 'Mô tả', en: 'Description' },
                     },

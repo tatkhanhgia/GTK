@@ -135,15 +135,10 @@ html.dark {
   color-scheme: dark;
 }
 
-html,
-html *,
-html *::before,
-html *::after {
-  transition:
-    background-color 200ms ease,
-    border-color 200ms ease,
-    color 150ms ease,
-    box-shadow 200ms ease;
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {

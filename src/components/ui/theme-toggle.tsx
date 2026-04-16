@@ -2,16 +2,35 @@
 
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { useCallback } from 'react'
 import { Button } from '@/components/ui/button'
+
+type DocumentWithViewTransition = Document & {
+  startViewTransition?: (cb: () => void) => { finished: Promise<void> }
+}
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+
+  const handleToggle = useCallback(() => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    const doc = document as DocumentWithViewTransition
+
+    // Firefox / older browsers: instant flip
+    if (typeof doc.startViewTransition !== 'function') {
+      setTheme(next)
+      return
+    }
+
+    // Chromium / Safari 18+: native crossfade between old & new paint
+    doc.startViewTransition(() => setTheme(next))
+  }, [theme, setTheme])
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={handleToggle}
       aria-label="Toggle theme"
       className="h-9 w-9"
     >

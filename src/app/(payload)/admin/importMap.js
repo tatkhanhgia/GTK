@@ -24,6 +24,7 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { StatusCell as StatusCell_b3739aa5b9370891decff0c8005deff4 } from '@/admin/components/cells/status-cell'
 import { TypeCell as TypeCell_f11cbf1822977889e37617e0279c5f2c } from '@/admin/components/cells/type-cell'
 import { PriceVNDCell as PriceVNDCell_38a3291a7dfc64cbc2a1398ed3df4b77 } from '@/admin/components/cells/price-vnd-cell'
+import { PlatformSelectField as PlatformSelectField_b66a053648bf57e5d757eb0808f8ee51 } from '@/admin/components/fields/platform-select-field'
 import { CustomHeader as CustomHeader_14ee10fbe7da08808b8820590f6fda8d } from '@/admin/components/layout/custom-header'
 import { AdminThemeProvider as AdminThemeProvider_7fe4dd1e13e6f2ec4022b384cdc333f5 } from '@/admin/components/providers/admin-theme-provider'
 import { CustomDashboard as CustomDashboard_81d46e85abc16f70539585d237889fa0 } from '@/admin/components/views/custom-dashboard'
@@ -56,6 +57,7 @@ export const importMap = {
   "@/admin/components/cells/status-cell#StatusCell": StatusCell_b3739aa5b9370891decff0c8005deff4,
   "@/admin/components/cells/type-cell#TypeCell": TypeCell_f11cbf1822977889e37617e0279c5f2c,
   "@/admin/components/cells/price-vnd-cell#PriceVNDCell": PriceVNDCell_38a3291a7dfc64cbc2a1398ed3df4b77,
+  "@/admin/components/fields/platform-select-field#PlatformSelectField": PlatformSelectField_b66a053648bf57e5d757eb0808f8ee51,
   "@/admin/components/layout/custom-header#CustomHeader": CustomHeader_14ee10fbe7da08808b8820590f6fda8d,
   "@/admin/components/providers/admin-theme-provider#AdminThemeProvider": AdminThemeProvider_7fe4dd1e13e6f2ec4022b384cdc333f5,
   "@/admin/components/views/custom-dashboard#CustomDashboard": CustomDashboard_81d46e85abc16f70539585d237889fa0,

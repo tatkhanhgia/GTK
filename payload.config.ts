@@ -12,8 +12,9 @@ import { Media } from './src/collections/media'
 import { Posts } from './src/collections/posts'
 import { Products } from './src/collections/products'
 import { Pages } from './src/collections/pages'
+import { Translations } from './src/collections/translations'
 import { AuthorProfile } from './src/globals/author-profile'
-import { customTranslations } from './src/admin/i18n/custom-translations'
+import { generatedTranslations } from './src/admin/i18n/generated-translations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,7 +31,7 @@ export default buildConfig({
     // module so this config file stays small. Payload merges these with the
     // core translations imported above, giving us a single `t('customHeader:...')`
     // call site for everything we own.
-    translations: customTranslations,
+    translations: generatedTranslations,
   },
   admin: {
     user: 'users',
@@ -53,7 +54,7 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Categories, Media, Posts, Products, Pages],
+  collections: [Users, Categories, Media, Posts, Products, Pages, Translations],
   globals: [AuthorProfile],
   db: postgresAdapter({
     pool: {
