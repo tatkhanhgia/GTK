@@ -5822,11 +5822,21 @@ aside.tooltip.field-error,
   to   { opacity: 1; transform: translateY(0)   scale(1);    }
 }
 
-/* Container — inherit Sonner fixed positioning */
+/* Container — inherit Sonner fixed positioning.
+   Sonner v1.7.4 relies on CSS custom props (--offset-right, --offset-bottom)
+   that can become invalid when --gutter-h is undefined, causing the toaster
+   to be placed off-screen at the bottom of the document instead of the
+   viewport. We pin it explicitly so success/error toasts are always visible. */
 ol.payload-toast-container {
+  position: fixed !important;
+  bottom: 16px !important;
+  right: 16px !important;
+  top: auto !important;
+  left: auto !important;
   padding: 0 !important;
   list-style: none !important;
   gap: 10px !important;
+  z-index: 999999999 !important;
 }
 
 /* On .template-minimal (login page): centre the container horizontally */
