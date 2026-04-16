@@ -26,6 +26,9 @@ export default defineConfig({
       exclude: ['src/lib/auth/auth-config.ts'], // DB dependency
     },
   },
+  ssr: {
+    noExternal: ['@payloadcms/ui', 'react-image-crop'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
