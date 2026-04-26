@@ -2188,10 +2188,10 @@ a.list-create-new-doc__create-new-button .btn__label {
   font-weight: 500 !important;
   color: var(--admin-text-secondary) !important;
   font-variant-numeric: tabular-nums;
-  line-height: 32px !important;
+  line-height: 36px !important;
   display: inline-flex !important;
   align-items: center !important;
-  height: 32px !important;
+  height: 36px !important;
   margin: 0 !important;
 }
 
@@ -2211,8 +2211,8 @@ a.list-create-new-doc__create-new-button .btn__label {
   border-radius: var(--admin-radius-md) !important;
   padding: 0 10px !important;
   min-width: 32px;
-  height: 32px !important;
-  min-height: 32px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   font-size: 13px !important;
   font-weight: 500 !important;
   font-variant-numeric: tabular-nums;
@@ -2256,6 +2256,54 @@ a.list-create-new-doc__create-new-button .btn__label {
 .collection-list .per-page > span {
   font-size: 13px !important;
   color: var(--admin-text-secondary) !important;
+}
+
+/* I5b — Redesigned per-page base button: no wrap, consistent height,
+   wider min-width for Vietnamese text, clearer chevron icon */
+.collection-list .per-page__base-button {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 14px !important;
+  min-width: 170px !important;
+  white-space: nowrap !important;
+  gap: 10px !important;
+  justify-content: space-between !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--admin-tracking-normal) !important;
+}
+
+.collection-list .per-page__base-button:hover {
+  background: var(--admin-accent-light) !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+.collection-list .per-page__icon {
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.6;
+  flex-shrink: 0 !important;
+  transition: transform var(--admin-transition-fast),
+              opacity var(--admin-transition-fast);
+}
+
+.collection-list .per-page__base-button[aria-expanded="true"] .per-page__icon,
+.collection-list .per-page .popup--is-open .per-page__icon {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+/* I5c — Per-page dropdown active option */
+.collection-list .per-page__button-active {
+  color: var(--admin-accent) !important;
+  font-weight: 600 !important;
+  background: var(--admin-accent-light) !important;
+}
+
+/* I5d — Per-page dropdown items hover */
+.collection-list .per-page__button:hover:not(.per-page__button-active) {
+  background: var(--admin-bg-secondary) !important;
+  color: var(--admin-text-primary) !important;
 }
 
 /* I6a — Search input v3. Round-3 root cause: the GRANDPARENT `.search-bar`
@@ -4948,6 +4996,15 @@ html.admin-dark .drawer__blur-bg {
   border-left: 1px solid var(--admin-border) !important;
   box-shadow: -24px 0 60px rgba(24, 21, 18, 0.18),
               -8px 0 20px rgba(24, 21, 18, 0.1) !important;
+  /* Prevent drawer from collapsing too narrow on smaller viewports
+     or when the custom sidebar eats horizontal space. */
+  min-width: 360px !important;
+  /* Fix: Payload's inline width calc(100% - var(--gutter-h)) breaks
+     because --gutter-h is undefined in our admin theme, causing the
+     drawer content to stay at min-width (360px). Override with a
+     sensible panel width and pin to the right side. */
+  width: min(720px, 90%) !important;
+  margin-left: auto !important;
 }
 
 html.dark .drawer__content,
@@ -4955,6 +5012,16 @@ html.admin-dark .drawer__content {
   background: var(--admin-bg-primary) !important;
   box-shadow: -24px 0 60px rgba(0, 0, 0, 0.55),
               -8px 0 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Fix: Payload's DIALOG.drawer shrinks to fit its content (360px),
+   so the blur backdrop only covers a narrow strip. Force the drawer
+   to fill the modal container so the backdrop covers the viewport. */
+.drawer,
+[role="dialog"].drawer {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
 }
 
 /* Inner scroll area gets breathing room so the document view isn't
@@ -4978,6 +5045,10 @@ html.admin-dark .drawer__content {
   font-weight: 600 !important;
   color: var(--admin-text-primary) !important;
   font-family: var(--admin-font-heading) !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .drawer__header__close {
@@ -5988,4 +6059,72 @@ li.payload-toast-item button[aria-label]:hover {
   height: 11px !important;
   flex: 0 0 11px;
   stroke-width: 2 !important;
+}
+
+/* ============================================================
+   BULK EDIT / MODAL FIX
+   Fix text wrapping and width issues in Payload bulk-edit
+   drawers and modals that appear when selecting records.
+   ============================================================ */
+
+/* Ensure modal/drawer has minimum usable width */
+.payload__modal-container,
+.drawer,
+[role="dialog"] {
+  min-width: 320px !important;
+}
+
+/* Prevent aggressive text wrapping in modal headers and labels */
+.payload__modal-container h1,
+.payload__modal-container h2,
+.payload__modal-container h3,
+.payload__modal-container h4,
+.payload__modal-container .drawer__header__title,
+.drawer h1,
+.drawer h2,
+.drawer h3,
+.drawer h4 {
+  line-height: 1.3 !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+}
+
+/* Fix paragraph/span text inside narrow modals — reset the
+   overly-tall line-height so words stay on reasonable lines
+   instead of wrapping one-character-per-line in tight spaces. */
+.payload__modal-container p,
+.payload__modal-container span,
+.drawer p,
+.drawer span,
+[role="dialog"] p,
+[role="dialog"] span {
+  line-height: 1.5 !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+}
+
+/* ---------- Payload Edit-Many sidebar (bulk edit) ----------
+   The edit-many sidebar is only 300px wide and its title text
+   wraps aggressively when the global line-height is too tall.
+   Give it a bit more room and clamp line-height. */
+.edit-many__sidebar,
+.edit-many__sidebar-wrap,
+.edit-many__sidebar-sticky-wrap {
+  min-width: 320px !important;
+  width: 320px !important;
+}
+
+.edit-many__sidebar h1,
+.edit-many__sidebar h2,
+.edit-many__sidebar h3,
+.edit-many__sidebar h4,
+.edit-many__sidebar p,
+.edit-many__sidebar span,
+.edit-many__sidebar label,
+.edit-many__sidebar .field-label {
+  line-height: 1.4 !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
 }

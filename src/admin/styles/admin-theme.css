@@ -403,9 +403,17 @@ h4 {
   letter-spacing: var(--admin-tracking-tight);
 }
 
-p,
-li,
-span {
+/* Scoped line-height for readable body text — avoid global span/p/li
+   because Payload drawers, bulk-edit panels, and small UI chips
+   inherit it and wrap/cut text in narrow containers. */
+.template-default p,
+.template-default li,
+.drawer__content-children p,
+.drawer__content-children li,
+.dashboard-content p,
+.dashboard-content li,
+.card p,
+.card li {
   line-height: var(--admin-leading-relaxed);
 }
 
