@@ -1,6 +1,6 @@
 import config from '@payload-config'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
-import type { ServerFunctionClient } from 'payload'
+import type { SanitizedConfig, ServerFunctionClient } from 'payload'
 import React from 'react'
 import { importMap } from './importMap'
 import '@/app/globals.css'
@@ -8,10 +8,15 @@ import '@/admin/styles/admin-theme.css'
 import '@/admin/styles/component-overrides.css'
 import { AdminHydrationSuppressor } from './admin-hydration-suppressor'
 
-// Bound server action — passes config + importMap to handleServerFunctions
+type ConfigExport = SanitizedConfig | { default: SanitizedConfig }
+
+const serverConfig = Promise.resolve(config as unknown as ConfigExport).then((resolvedConfig) =>
+  'default' in resolvedConfig ? resolvedConfig.default : resolvedConfig,
+)
+
 const serverFunction: ServerFunctionClient = async (args) => {
   'use server'
-  return handleServerFunctions({ ...args, config, importMap })
+  return handleServerFunctions({ ...args, config: serverConfig, importMap })
 }
 
 // Force dynamic rendering to avoid stale static shells after HMR,
@@ -35,7 +40,7 @@ export const dynamic = 'force-dynamic'
 export default async function PayloadAdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <RootLayout
-      config={config}
+      config={serverConfig}
       importMap={importMap}
       serverFunction={serverFunction}
     >

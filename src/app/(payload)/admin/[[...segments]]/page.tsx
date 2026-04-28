@@ -1,9 +1,8 @@
-import { RootPage, generatePageMetadata } from '@payloadcms/next/views'
+import { RootPage } from '@payloadcms/next/views'
 import { importMap } from '../../importMap'
 import config from '@payload-config'
-import type { Metadata } from 'next'
+import type { SanitizedConfig } from 'payload'
 
-// Force dynamic to avoid Turbopack static optimization issues with Payload
 export const dynamic = 'force-dynamic'
 
 type Args = {
@@ -11,10 +10,13 @@ type Args = {
   searchParams: Promise<{ [key: string]: string | string[] }>
 }
 
-export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
-  generatePageMetadata({ config, params, searchParams })
+type ConfigExport = SanitizedConfig | { default: SanitizedConfig }
+
+const serverConfig = Promise.resolve(config as unknown as ConfigExport).then((resolvedConfig) =>
+  'default' in resolvedConfig ? resolvedConfig.default : resolvedConfig,
+)
 
 const Page = ({ params, searchParams }: Args) =>
-  RootPage({ config, importMap, params, searchParams })
+  RootPage({ config: serverConfig, importMap, params, searchParams })
 
 export default Page
