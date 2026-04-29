@@ -11,6 +11,12 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV SKIP_ADMIN_TRANSLATION_GENERATION=true
+ENV SKIP_DB_TRANSLATIONS=true
+ENV SKIP_BUILD_DB_ACCESS=true
+ENV DATABASE_URL=postgresql://gtkblog:gtkblog@postgres:5432/gtkblog
+ENV BETTER_AUTH_SECRET=build-time-placeholder-secret
+ENV BETTER_AUTH_URL=http://localhost:3000
 RUN npm run build
 
 # Stage 3: Minimal runtime image

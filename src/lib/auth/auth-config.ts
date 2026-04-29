@@ -4,17 +4,17 @@ import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins/admin'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
+import * as authSchema from '@/db/schema/auth'
 
-// Better Auth manages its own DB tables (ba_users, ba_sessions, etc.)
-// Separate from Payload CMS's users collection (CMS admin only).
-// Better Auth = site user auth.
-const sql = postgres(process.env.DATABASE_URL || '')
-const db = drizzle(sql)
+function buildAuth() {
+  const sql = postgres(process.env.DATABASE_URL || '')
+  const db = drizzle(sql, { schema: authSchema })
 
-export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: 'pg',
-  }),
+  return betterAuth({
+    database: drizzleAdapter(db, {
+      provider: 'pg',
+      schema: authSchema,
+    }),
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Simplified for launch
@@ -34,11 +34,13 @@ export const auth = betterAuth({
     nextCookies(),
     admin(),
   ],
-  session: {
-    expiresIn: 60 * 60 * 24 * 30, // 30 days
-    updateAge: 60 * 60 * 24, // Update session daily
-  },
   user: {
+    modelName: 'ba_users',
+    fields: {
+      emailVerified: 'email_verified',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
     additionalFields: {
       role: {
         type: 'string',
@@ -47,10 +49,59 @@ export const auth = betterAuth({
       },
     },
   },
+  session: {
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
+    modelName: 'ba_sessions',
+    fields: {
+      expiresAt: 'expires_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      ipAddress: 'ip_address',
+      userAgent: 'user_agent',
+      userId: 'user_id',
+    },
+  },
+  account: {
+    modelName: 'ba_accounts',
+    fields: {
+      accountId: 'account_id',
+      providerId: 'provider_id',
+      userId: 'user_id',
+      accessToken: 'access_token',
+      refreshToken: 'refresh_token',
+      idToken: 'id_token',
+      accessTokenExpiresAt: 'access_token_expires_at',
+      refreshTokenExpiresAt: 'refresh_token_expires_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  },
+  verification: {
+    modelName: 'ba_verifications',
+    fields: {
+      expiresAt: 'expires_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  },
   advanced: {
     cookiePrefix: 'gtkblog',
   },
 })
+}
 
-export type Session = typeof auth.$Infer.Session
-export type User = typeof auth.$Infer.Session.user
+type AuthInstance = ReturnType<typeof buildAuth>
+
+let authSingleton: AuthInstance | undefined
+
+export function getAuth(): AuthInstance {
+  if (!authSingleton) {
+    authSingleton = buildAuth()
+  }
+
+  return authSingleton
+}
+
+export type Session = ReturnType<typeof getAuth>['$Infer']['Session']
+export type User = ReturnType<typeof getAuth>['$Infer']['Session']['user']

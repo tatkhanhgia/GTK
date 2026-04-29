@@ -29,7 +29,213 @@
 
 const { Client } = require('pg')
 
+const AUTH_SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS ba_users (
+  id text PRIMARY KEY NOT NULL,
+  name text NOT NULL,
+  email text NOT NULL,
+  email_verified boolean NOT NULL DEFAULT false,
+  image text,
+  role text NOT NULL DEFAULT 'user',
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS ba_sessions (
+  id text PRIMARY KEY NOT NULL,
+  expires_at timestamp with time zone NOT NULL,
+  token text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  ip_address text,
+  user_agent text,
+  user_id text NOT NULL,
+  CONSTRAINT ba_sessions_user_id_fk FOREIGN KEY (user_id) REFERENCES ba_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS ba_accounts (
+  id text PRIMARY KEY NOT NULL,
+  account_id text NOT NULL,
+  provider_id text NOT NULL,
+  user_id text NOT NULL,
+  access_token text,
+  refresh_token text,
+  id_token text,
+  access_token_expires_at timestamp with time zone,
+  refresh_token_expires_at timestamp with time zone,
+  scope text,
+  password text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT ba_accounts_user_id_fk FOREIGN KEY (user_id) REFERENCES ba_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS ba_verifications (
+  id text PRIMARY KEY NOT NULL,
+  identifier text NOT NULL,
+  value text NOT NULL,
+  expires_at timestamp with time zone NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ba_users_email_unique ON ba_users (email);
+CREATE UNIQUE INDEX IF NOT EXISTS ba_sessions_token_unique ON ba_sessions (token);
+CREATE INDEX IF NOT EXISTS ba_sessions_user_id_idx ON ba_sessions (user_id);
+CREATE INDEX IF NOT EXISTS ba_sessions_expires_at_idx ON ba_sessions (expires_at);
+CREATE UNIQUE INDEX IF NOT EXISTS ba_accounts_provider_account_unique ON ba_accounts (provider_id, account_id);
+CREATE INDEX IF NOT EXISTS ba_accounts_user_id_idx ON ba_accounts (user_id);
+CREATE INDEX IF NOT EXISTS ba_verifications_identifier_idx ON ba_verifications (identifier);
+`;
+
+const CUSTOM_SCHEMA_SQL = `
+DO $$ BEGIN
+  CREATE TYPE order_status AS ENUM ('pending', 'paid', 'fulfilled', 'refunded', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+DO $$ BEGIN
+  CREATE TYPE payment_method AS ENUM ('stripe', 'sepay');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+DO $$ BEGIN
+  CREATE TYPE comment_status AS ENUM ('pending', 'approved', 'rejected', 'deleted');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+DO $$ BEGIN
+  CREATE TYPE subscriber_status AS ENUM ('pending', 'active', 'unsubscribed');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS orders (
+  id text PRIMARY KEY NOT NULL,
+  user_id text NOT NULL,
+  total integer NOT NULL,
+  currency text NOT NULL DEFAULT 'USD',
+  payment_method payment_method NOT NULL,
+  payment_id text,
+  status order_status NOT NULL DEFAULT 'pending',
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id text PRIMARY KEY NOT NULL,
+  order_id text NOT NULL,
+  product_id text NOT NULL,
+  product_name text NOT NULL,
+  price integer NOT NULL,
+  currency text NOT NULL DEFAULT 'USD',
+  quantity integer NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+  id text PRIMARY KEY NOT NULL,
+  post_id text NOT NULL,
+  user_id text NOT NULL,
+  content text NOT NULL,
+  parent_id text,
+  status comment_status NOT NULL DEFAULT 'approved',
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id text PRIMARY KEY NOT NULL,
+  email text NOT NULL UNIQUE,
+  locale text NOT NULL DEFAULT 'vi',
+  status subscriber_status NOT NULL DEFAULT 'pending',
+  confirm_token text,
+  subscribed_at timestamp,
+  unsubscribed_at timestamp,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id text PRIMARY KEY NOT NULL,
+  user_id text NOT NULL UNIQUE,
+  display_name text,
+  bio text,
+  avatar_url text,
+  locale_preference text NOT NULL DEFAULT 'vi',
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS download_tokens (
+  id text PRIMARY KEY NOT NULL,
+  token text NOT NULL UNIQUE,
+  order_id text NOT NULL,
+  order_item_id text NOT NULL,
+  product_id text NOT NULL,
+  user_id text NOT NULL,
+  expires_at timestamp NOT NULL,
+  revoked boolean NOT NULL DEFAULT false,
+  download_count text NOT NULL DEFAULT '0',
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS translations (
+  id serial PRIMARY KEY NOT NULL,
+  key text NOT NULL UNIQUE,
+  vi text NOT NULL,
+  en text NOT NULL,
+  context text,
+  "group" text,
+  updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+  created_at timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS translations_created_at_idx ON translations (created_at);
+CREATE INDEX IF NOT EXISTS translations_key_idx ON translations (key);
+`
+
+
 const FIXES = [
+  {
+    name: 'better-auth tables',
+    async run(client) {
+      const { rows } = await client.query(
+        `SELECT table_name
+         FROM information_schema.tables
+         WHERE table_schema = 'public'
+           AND table_name IN (
+             'ba_users',
+             'ba_sessions',
+             'ba_accounts',
+             'ba_verifications'
+           )`,
+      )
+      if (rows.length === 4) {
+        return { status: 'up-to-date' }
+      }
+      await client.query(AUTH_SCHEMA_SQL)
+      return { status: 'applied' }
+    },
+  },
+  {
+    name: 'custom Drizzle tables',
+    async run(client) {
+      const { rows } = await client.query(
+        `SELECT table_name
+         FROM information_schema.tables
+         WHERE table_schema = 'public'
+           AND table_name IN (
+             'orders',
+             'order_items',
+             'comments',
+             'newsletter_subscribers',
+             'user_profiles',
+             'download_tokens',
+             'translations'
+           )`,
+      )
+      if (rows.length === 7) {
+        return { status: 'up-to-date' }
+      }
+      await client.query(CUSTOM_SCHEMA_SQL)
+      return { status: 'applied' }
+    },
+  },
   {
     name: 'pages_locales.content varchar -> jsonb',
     async run(client) {
@@ -73,15 +279,15 @@ const FIXES = [
 ]
 
 async function main() {
+  if (process.env.SKIP_BOOTSTRAP === 'true') {
+    console.log('[bootstrap-db] SKIP_BOOTSTRAP=true, skipping all fixes')
+    return 0
+  }
+
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {
     console.error('[bootstrap-db] DATABASE_URL is not set')
     return 2
-  }
-
-  if (process.env.SKIP_BOOTSTRAP === 'true') {
-    console.log('[bootstrap-db] SKIP_BOOTSTRAP=true, skipping all fixes')
-    return 0
   }
 
   const client = new Client({ connectionString })

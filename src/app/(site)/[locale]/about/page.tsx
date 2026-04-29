@@ -33,6 +33,10 @@ function getLocalizedText(value: unknown, locale: Locale) {
 }
 
 async function fetchAboutContent(locale: Locale) {
+  if (process.env.SKIP_BUILD_DB_ACCESS === 'true') {
+    return null
+  }
+
   try {
     const payload = await getPayload({ config })
     const result = await payload.find({

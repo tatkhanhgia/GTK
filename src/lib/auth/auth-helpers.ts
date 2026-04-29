@@ -1,12 +1,12 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { auth } from './auth-config'
+import { getAuth } from './auth-config'
 
 /**
  * Get current session server-side (App Router Server Components)
  */
 export async function getSession() {
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   })
   return session

@@ -1,6 +1,6 @@
-import { getPayload } from 'payload'
 import type { Where } from 'payload'
-import config from '@payload-config'
+
+const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
 interface GetPostsOptions {
   locale?: 'vi' | 'en'
@@ -21,6 +21,25 @@ export async function getPosts({
   limit = 12,
   status = 'published',
 }: GetPostsOptions = {}) {
+  if (shouldSkipBuildDbAccess) {
+    return {
+      docs: [],
+      totalDocs: 0,
+      limit,
+      totalPages: 0,
+      page,
+      pagingCounter: 1,
+      hasPrevPage: false,
+      hasNextPage: false,
+      prevPage: null,
+      nextPage: null,
+    }
+  }
+
+  const [{ getPayload }, { default: config }] = await Promise.all([
+    import('payload'),
+    import('@payload-config'),
+  ])
   const payload = await getPayload({ config })
 
   const where: Where = { status: { equals: status } }

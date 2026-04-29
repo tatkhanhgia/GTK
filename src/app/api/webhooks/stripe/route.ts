@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { fulfillOrder } from '@/lib/payment/fulfill-order'
-import { stripe } from '@/lib/payment/stripe-config'
+import { getStripeClient } from '@/lib/payment/stripe-config'
 
 /**
  * Stripe webhook handler.
@@ -19,7 +19,12 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+    if (!webhookSecret) {
+      return NextResponse.json({ error: 'Stripe webhook not configured' }, { status: 503 })
+    }
+    const stripe = getStripeClient()
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }

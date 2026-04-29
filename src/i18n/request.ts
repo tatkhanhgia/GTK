@@ -1,6 +1,4 @@
 import { getRequestConfig } from 'next-intl/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { routing } from './routing'
 
 async function loadStaticMessages(locale: string) {
@@ -11,8 +9,12 @@ async function loadStaticMessages(locale: string) {
   }
 }
 
+function shouldSkipDbTranslations() {
+  return process.env.SKIP_DB_TRANSLATIONS === 'true'
+}
+
 function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>, locale: string) {
-  const tree: Record<string, unknown> = {}
+  const tree: Record<string, unknown> = Object.create(null)
 
   for (const record of records) {
     const value = (record as Record<string, string>)[locale]
@@ -23,11 +25,13 @@ function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i]
+      if (part === '__proto__' || part === 'constructor' || part === 'prototype') continue
+
       if (i === parts.length - 1) {
         current[part] = value
       } else {
         if (!current[part] || typeof current[part] !== 'object') {
-          current[part] = {}
+          current[part] = Object.create(null)
         }
         current = current[part] as Record<string, unknown>
       }
@@ -45,19 +49,27 @@ export default getRequestConfig(async ({ requestLocale }) => {
     : routing.defaultLocale
 
   let messages: Record<string, unknown> = {}
-  try {
-    const payload = await getPayload({ config })
-    const result = await payload.find({
-      collection: 'translations',
-      limit: 1000,
-      depth: 0,
-      pagination: false,
-    })
-    const records = result.docs as unknown as Array<{ key: string; vi: string; en: string }>
-    messages = buildNestedTree(records, locale)
-  } catch (err) {
-    console.error('[i18n/request] Failed to load translations from DB:', err)
+  if (shouldSkipDbTranslations()) {
     messages = await loadStaticMessages(locale)
+  } else {
+    try {
+      const [{ getPayload }, { default: config }] = await Promise.all([
+        import('payload'),
+        import('@payload-config'),
+      ])
+      const payload = await getPayload({ config })
+      const result = await payload.find({
+        collection: 'translations',
+        limit: 1000,
+        depth: 0,
+        pagination: false,
+      })
+      const records = result.docs as unknown as Array<{ key: string; vi: string; en: string }>
+      messages = records.length > 0 ? buildNestedTree(records, locale) : await loadStaticMessages(locale)
+    } catch (err) {
+      console.error('[i18n/request] Failed to load translations from DB:', err)
+      messages = await loadStaticMessages(locale)
+    }
   }
 
   return {

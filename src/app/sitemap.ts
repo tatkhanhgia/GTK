@@ -1,9 +1,8 @@
 import type { MetadataRoute } from 'next'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const locales = ['vi', 'en'] as const
+const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
 type Locale = (typeof locales)[number]
 
@@ -43,7 +42,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  if (shouldSkipBuildDbAccess) {
+    return entries
+  }
+
   try {
+    const [{ getPayload }, { default: config }] = await Promise.all([
+      import('payload'),
+      import('@payload-config'),
+    ])
     const payload = await getPayload({ config })
 
     // Blog posts

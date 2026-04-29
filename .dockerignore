@@ -9,3 +9,9 @@ tests
 __tests__
 plans
 docs
+.codex
+reports
+scripts/admin-*.js
+scripts/start-with-ngrok.ps1
+yazi-x86_64-unknown-linux-gnu
+.tmp-*.log

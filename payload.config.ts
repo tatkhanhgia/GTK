@@ -15,6 +15,7 @@ import { Pages } from './src/collections/pages'
 import { Translations } from './src/collections/translations'
 import { AuthorProfile } from './src/globals/author-profile'
 import { generatedTranslations } from './src/admin/i18n/generated-translations'
+import { migrations } from './src/migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,6 +45,17 @@ export default buildConfig({
     meta: {
       titleSuffix: ' - GTKBlog Admin',
     },
+    routes: {
+      account: '/account',
+      browseByFolder: '/browse-by-folder',
+      createFirstUser: '/create-first-user',
+      forgot: '/forgot',
+      inactivity: '/logout-inactivity',
+      login: '/login',
+      logout: '/logout',
+      reset: '/reset',
+      unauthorized: '/unauthorized',
+    },
     components: {
       providers: ['@/admin/components/providers/admin-theme-provider#AdminThemeProvider'],
       header: ['@/admin/components/layout/custom-header#CustomHeader'],
@@ -56,10 +68,17 @@ export default buildConfig({
   },
   collections: [Users, Categories, Media, Posts, Products, Pages, Translations],
   globals: [AuthorProfile],
+  routes: {
+    admin: '/admin',
+    api: '/api',
+    graphQL: '/graphql',
+    graphQLPlayground: '/graphql-playground',
+  },
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    prodMigrations: migrations,
   }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-me',

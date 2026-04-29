@@ -1,6 +1,6 @@
 'use server'
 
-import { stripe } from './stripe-config'
+import { getStripeClient } from './stripe-config'
 import { getSession } from '@/lib/auth/auth-helpers'
 import { createOrder } from './create-order'
 import { redirect } from 'next/navigation'
@@ -40,6 +40,7 @@ export async function createStripeCheckout({
     paymentMethod: 'stripe',
   })
 
+  const stripe = getStripeClient()
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: stripePriceId

@@ -1,8 +1,8 @@
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { sql } from 'drizzle-orm'
 import type { Locale } from '@/i18n/config'
 import type { AchievementItem } from '@/components/sections/achievements-section'
+
+const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
 /**
  * Compute live, blog-focused stats for the Achievements section used on
@@ -18,6 +18,40 @@ import type { AchievementItem } from '@/components/sections/achievements-section
  */
 export async function getBlogStats(locale: Locale): Promise<AchievementItem[]> {
   const isVi = locale === 'vi'
+
+  if (shouldSkipBuildDbAccess) {
+    return [
+      {
+        label: isVi ? 'Bài viết đã xuất bản' : 'Articles published',
+        value: 0,
+        suffix: '',
+        icon: 'file-text',
+      },
+      {
+        label: isVi ? 'Chủ đề bao phủ' : 'Topics covered',
+        value: 0,
+        suffix: '',
+        icon: 'sparkles',
+      },
+      {
+        label: isVi ? 'Sản phẩm số' : 'Digital products',
+        value: 0,
+        suffix: '',
+        icon: 'rocket',
+      },
+      {
+        label: isVi ? 'Người đăng ký nhận bài' : 'Newsletter subscribers',
+        value: 0,
+        suffix: '',
+        icon: 'users',
+      },
+    ]
+  }
+
+  const [{ getPayload }, { default: config }] = await Promise.all([
+    import('payload'),
+    import('@payload-config'),
+  ])
   const payload = await getPayload({ config })
 
   const [postsResult, productsResult, categoriesResult, subscribersResult] =

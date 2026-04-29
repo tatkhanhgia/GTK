@@ -1,11 +1,18 @@
-import { getPayload } from 'payload'
-import config from '@payload-config'
+const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
 /**
  * Fetch all blog categories (type='blog') from Payload CMS.
  * Used for category filter tabs and sidebar navigation.
  */
 export async function getBlogCategories(locale: 'vi' | 'en' = 'vi') {
+  if (shouldSkipBuildDbAccess) {
+    return []
+  }
+
+  const [{ getPayload }, { default: config }] = await Promise.all([
+    import('payload'),
+    import('@payload-config'),
+  ])
   const payload = await getPayload({ config })
 
   const result = await payload.find({
