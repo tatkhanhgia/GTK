@@ -67,7 +67,7 @@ async function runPayloadSync() {
     const syncScript = path.join(__dirname, 'payload-db-sync.ts')
     // Use tsx directly via its CLI entry point instead of npx to avoid
     // PATH resolution issues in minimal runtime images.
-    const tsxPath = require.resolve('tsx/dist/cli.mjs')
+    const tsxPath = require.resolve('tsx')
     const child = spawn(process.execPath, [tsxPath, syncScript], {
       // Pipe stdin so we can auto-respond 'y' if Payload ever prompts
       // unexpectedly (defence-in-depth; dev-mode check should prevent it).

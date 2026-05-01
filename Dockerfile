@@ -1,11 +1,11 @@
 # Stage 1: Dependencies (production only)
-FROM node:22-alpine AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Stage 2: Full build
-FROM node:22-alpine AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -20,7 +20,7 @@ ENV BETTER_AUTH_URL=http://localhost:3000
 RUN npm run build
 
 # Stage 3: Minimal runtime image
-FROM node:22-alpine AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -32,7 +32,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 # Copy package files and install production deps (includes tsx)
 COPY --from=builder /app/package.json /app/package-lock.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Patch Payload's bin/loadEnv.js for CJS/ESM interop so tsx can load
 # payload.config.ts without hitting the require(esm) cycle.

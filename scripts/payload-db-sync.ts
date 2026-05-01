@@ -1,5 +1,5 @@
 import { getPayload } from 'payload'
-import configModule from '../payload.config.ts'
+import configModule from '../payload.config'
 
 const PREFIX = '[payload-db-sync]'
 
@@ -70,10 +70,10 @@ async function main() {
   })
 
   log('Running migrations...')
-  await payload.db.migrate({ payload })
+  await payload.db.migrate()
   log('Migrations complete')
 
-  await payload.db.destroy()
+  await payload.db.destroy?.()
   log('Disconnected')
 }
 
