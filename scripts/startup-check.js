@@ -6,28 +6,27 @@
  * (`ENTRYPOINT` in Dockerfile). Order:
  *   1. Ensure DATABASE_URL is set
  *   2. Wait for Postgres to accept connections
- *   3. Run the idempotent DB bootstrap (`bootstrap-db.js`) — this
- *      applies any known schema drift fixes so operators never have to
- *      touch the database by hand
- *   4. Exec the downstream command (`node server.js`)
+ *   3. Run Payload-managed schema sync (`payload-db-sync.ts` via tsx)
+ *      — applies pending prodMigrations so internal tables/columns are
+ *      fully aligned with the current config before traffic hits
+ *   4. Run the idempotent app bootstrap (`bootstrap-db.js`) — creates
+ *      Better Auth + custom Drizzle tables and targeted compatibility
+ *      fixes so operators never have to touch the database by hand
+ *   5. Exec the downstream command (`node server.js`)
  *
- * Why not `npx payload migrate`?
- *   - `tsx` is a devDependency, not installed in the production runtime
- *     image — the Payload CLI needs tsx to load `payload.config.ts`, so
- *     the CLI simply cannot run here.
- *   - Even where tsx IS installed (local dev), the `tsx/esm/api`
- *     programmatic loader used by `node_modules/payload/bin.js` on
- *     payload 3.81 hits a `require(esm) cycle` error under Node 22/24
- *     while resolving the extensionless relative imports in
- *     `payload.config.ts`.
- *   See `scripts/bootstrap-db.js` for the idempotent schema-fix approach
- *   we use instead.
+ * Why tsx in the runtime image?
+ *   Payload 3.81's programmatic `getPayload` path can load
+ *   `payload.config.ts` through tsx, which is now a production
+ *   dependency. The CLI loader path remains broken, but the
+ *   programmatic path works with a one-line CJS interop patch applied
+ *   during the Docker build (see Dockerfile).
  */
 'use strict'
 
 const { Client } = require('pg')
 const { spawn } = require('child_process')
 const { main: runBootstrap } = require('./bootstrap-db')
+const path = require('path')
 
 const YELLOW = '\x1b[1;33m'
 const RED = '\x1b[0;31m'
@@ -63,6 +62,36 @@ async function waitForDatabase({ retries = 30, intervalMs = 2000 } = {}) {
   return false
 }
 
+async function runPayloadSync() {
+  return new Promise((resolve, reject) => {
+    const syncScript = path.join(__dirname, 'payload-db-sync.ts')
+    // Use tsx directly via its CLI entry point instead of npx to avoid
+    // PATH resolution issues in minimal runtime images.
+    const tsxPath = require.resolve('tsx/dist/cli.mjs')
+    const child = spawn(process.execPath, [tsxPath, syncScript], {
+      // Pipe stdin so we can auto-respond 'y' if Payload ever prompts
+      // unexpectedly (defence-in-depth; dev-mode check should prevent it).
+      stdio: ['pipe', 'inherit', 'inherit'],
+      shell: false,
+      env: {
+        ...process.env,
+        PAYLOAD_MIGRATING: 'true',
+      },
+    })
+
+    child.stdin.write('y\n')
+    child.stdin.end()
+
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`Payload sync exited with code ${code}`))
+      }
+    })
+  })
+}
+
 async function main() {
   log('==========================================')
   log('  GTKBlog Startup Check')
@@ -80,6 +109,21 @@ async function main() {
     process.exit(1)
   }
   log(`${GREEN}✓ Database reachable${NC}`)
+
+  if (process.env.SKIP_PAYLOAD_SYNC === 'true') {
+    log(`${YELLOW}⚠ SKIP_PAYLOAD_SYNC=true, skipping Payload sync${NC}`)
+  } else {
+    log('')
+    log('⏳ Running Payload schema sync…')
+    try {
+      await runPayloadSync()
+      log(`${GREEN}✓ Payload schema sync complete${NC}`)
+    } catch (err) {
+      log(`${RED}✗ Payload schema sync failed: ${err.message}${NC}`)
+      log(`${RED}  Aborting startup. Inspect the logs above, fix the issue, then restart.${NC}`)
+      process.exit(1)
+    }
+  }
 
   log('')
   log('⏳ Running DB bootstrap…')

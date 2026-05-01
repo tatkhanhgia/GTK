@@ -82,12 +82,18 @@ Everything is driven from `docker-compose.yml`. The `app` container's
 entrypoint is `scripts/startup-check.js`, which:
 
 1. Waits until Postgres accepts connections (30 retries × 2 s = 1 min).
-2. Runs `scripts/bootstrap-db.js` — an idempotent, plain-JS script that
-   applies any known schema drift fixes (e.g. casting
+2. Runs `scripts/payload-db-sync.ts` — loads Payload programmatically
+   and applies pending `prodMigrations` so internal tables/columns
+   (e.g. `payload_locked_documents_rels.translations_id`) are fully
+   aligned with the current config. Dev-mode DBs (`batch: -1`) are
+   detected and skipped safely.
+3. Runs `scripts/bootstrap-db.js` — an idempotent, plain-JS script that
+   creates/verifies app-owned schema (Better Auth tables, custom Drizzle
+   tables) and applies targeted compatibility fixes (e.g. casting
    `pages_locales.content` from `varchar` to `jsonb`). Re-running is
    safe: already-applied fixes report `up-to-date` and the script
    continues.
-3. Exec's `node server.js` (Next.js standalone output).
+4. Exec's `node server.js` (Next.js standalone output).
 
 **You never need to `psql` or `exec` into the container to migrate.**
 
@@ -109,34 +115,61 @@ Expected on first boot or after a schema-drift fix:
 
 ```
 GTKBlog Startup Check
+==========================================
 ⏳ Checking database connection…
 ✓ Database reachable
 
+⏳ Running Payload schema sync…
+[payload-db-sync] Checking migration state…
+[payload-db-sync] Loading Payload config…
+[payload-db-sync] Initializing Payload (migrations mode)…
+[payload-db-sync] Running migrations…
+[payload-db-sync] Migrations complete
+[payload-db-sync] Disconnected
+[payload-db-sync] Done
+✓ Payload schema sync complete
+
 ⏳ Running DB bootstrap…
-[bootstrap-db] connected (1 fix to check)
+[bootstrap-db] connected (4 fixes to check)
+[bootstrap-db] up-to-date: better-auth tables
+[bootstrap-db] up-to-date: custom Drizzle tables
 [bootstrap-db] applied:    pages_locales.content varchar -> jsonb
+[bootstrap-db] up-to-date: payload_locked_documents_rels.translations_id
 [bootstrap-db] all fixes complete
 ✓ DB bootstrap complete
 
-Starting Application…
+==========================================
+  Starting Application…
+==========================================
 ```
 
-Subsequent restarts just show `up-to-date` for each fix.
+Subsequent restarts show `up-to-date` for every fix and migration.
 
 #### Adding a new schema fix
 
-Edit `scripts/bootstrap-db.js` and append an entry to the `FIXES`
-array. Each entry must:
-- Check current DB state via `information_schema` / `pg_catalog`.
-- Return `{ status: 'up-to-date' }` if already applied.
-- Otherwise run its `ALTER` / `CREATE` / `UPDATE` and return
-  `{ status: 'applied' }`.
+**Payload-managed schema** (internal tables, migrations, relations):
+- Create a migration in `src/migrations/` using Payload's migration format.
+- Register it in `src/migrations/index.ts`.
+- On next deploy, `payload-db-sync.ts` applies it automatically.
 
-The next `docker compose up -d --build` will apply the new fix before
-the app starts. No `npx payload migrate` or manual SQL required.
+**App-owned schema** (Better Auth tables, custom Drizzle tables,
+targeted compatibility fixes):
+- Edit `scripts/bootstrap-db.js` and append an entry to the `FIXES`
+  array. Each entry must:
+  - Check current DB state via `information_schema` / `pg_catalog`.
+  - Return `{ status: 'up-to-date' }` if already applied.
+  - Otherwise run its `ALTER` / `CREATE` / `UPDATE` and return
+    `{ status: 'applied' }`.
+
+The next `docker compose up -d --build` applies both layers before
+the app starts. No manual SQL required.
 
 #### Escape hatches
 
+- Skip Payload sync (emergencies only — bypasses migration safety):
+  ```bash
+  docker compose run --rm -e SKIP_PAYLOAD_SYNC=true app node server.js
+  ```
 - Skip bootstrap entirely (emergencies only):
   ```bash
   docker compose run --rm -e SKIP_BOOTSTRAP=true app node server.js
@@ -151,13 +184,12 @@ the app starts. No `npx payload migrate` or manual SQL required.
     -c 'ALTER TABLE "pages_locales" ALTER COLUMN "content" SET DATA TYPE jsonb USING "content"::jsonb;'
   ```
 
-**Why not `npx payload migrate`?** The Payload 3.81 CLI loads
-`payload.config.ts` via `tsx/esm/api`, which hits a `require(esm)
-cycle` error under Node 22+ with the extensionless relative imports in
-our config. On top of that, `tsx` is a devDependency that is not
-installed in the production runtime image. Both problems disappear by
-talking to Postgres directly with `pg`, which is what `bootstrap-db.js`
-does.
+**Why not `npx payload migrate`?** The Payload 3.81 CLI loader hits a
+`require(esm)` cycle under Node 22+ with extensionless relative imports.
+Instead, the runtime image runs `payload-db-sync.ts` via `tsx`
+(`tsx` is a production dependency) using Payload's programmatic
+`getPayload` API, which avoids the CLI loader entirely. App-owned fixes
+remain in `bootstrap-db.js` talking directly to Postgres with `pg`.
 
 **Dockerfile breakdown:**
 - **Stage 1 (deps):** Install production dependencies only

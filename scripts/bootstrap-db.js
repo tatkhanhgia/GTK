@@ -1,29 +1,19 @@
 #!/usr/bin/env node
 /**
- * Idempotent DB bootstrap.
+ * Idempotent app-owned DB bootstrap.
  *
- * Runs BEFORE the Next.js server starts (from `scripts/startup-check.js`
- * in the Docker entrypoint, and as a `predev` hook locally). Applies known
- * schema drift fixes so the caller never has to touch the database by
- * hand.
+ * Runs AFTER Payload schema sync and BEFORE the Next.js server starts.
+ * Creates/verifies Better Auth tables, custom Drizzle tables, and
+ * targeted compatibility fixes that sit outside Payload's migration
+ * boundary.
  *
- * Why not `npx payload migrate`?
- *   On payload 3.81 + Next 15 + Node 22/24, the Payload CLI loads
- *   `payload.config.ts` through the `tsx/esm/api` programmatic loader,
- *   which mis-handles the extensionless relative imports at the top of
- *   that file (`./src/collections/users`, …) and triggers a
- *   `require(esm) cycle` error. There is no stable workaround in 3.81,
- *   and tsx is a devDependency that is NOT installed in the production
- *   runtime image anyway. So `npx payload migrate` is doubly broken at
- *   deploy time.
+ * Ownership boundary (keep separate from Payload internals):
+ *   - Payload-managed schema  → handled by scripts/payload-db-sync.ts
+ *   - App-managed schema      → handled by this file
  *
  * This script talks to Postgres directly via `pg` (a transitive prod dep
- * of @payloadcms/db-postgres, so no extra install required), runs each
- * fix inside a single short transaction, and is safe to re-run. If a fix
- * is already applied it reports `up-to-date` and moves on.
- *
- * Add new entries to the FIXES array as the schema evolves. Each entry
- * must be idempotent — always check state before mutating.
+ * of @payloadcms/db-postgres). Each fix is idempotent — already-applied
+ * fixes report `up-to-date` and continue.
  */
 'use strict'
 
@@ -264,6 +254,39 @@ const FIXES = [
         `ALTER TABLE "pages_locales"
            ALTER COLUMN "content" SET DATA TYPE jsonb USING "content"::jsonb`,
       )
+      return { status: 'applied' }
+    },
+  },
+  {
+    name: 'payload_locked_documents_rels.translations_id',
+    async run(client) {
+      const { rows } = await client.query(
+        `SELECT column_name
+         FROM information_schema.columns
+         WHERE table_name = 'payload_locked_documents_rels'
+           AND column_name = 'translations_id'`,
+      )
+      if (rows.length > 0) {
+        return { status: 'up-to-date' }
+      }
+
+      await client.query(`
+        ALTER TABLE "payload_locked_documents_rels"
+          ADD COLUMN "translations_id" integer
+      `)
+
+      await client.query(`
+        ALTER TABLE "payload_locked_documents_rels"
+          ADD CONSTRAINT "payload_locked_documents_rels_translations_fk"
+          FOREIGN KEY ("translations_id") REFERENCES "public"."translations"("id")
+          ON DELETE cascade ON UPDATE no action
+      `)
+
+      await client.query(`
+        CREATE INDEX "payload_locked_documents_rels_translations_id_idx"
+          ON "payload_locked_documents_rels" USING btree ("translations_id")
+      `)
+
       return { status: 'applied' }
     },
   },
