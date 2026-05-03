@@ -13,7 +13,7 @@ interface Props {
 export function RichTextRenderer({ content }: Props) {
   if (!content) return null
   return (
-    <div className="prose prose-neutral dark:prose-invert max-w-none">
+    <div className="rich-text-content max-w-none text-foreground">
       <RichText data={content} />
     </div>
   )

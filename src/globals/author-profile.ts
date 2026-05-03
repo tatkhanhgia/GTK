@@ -1,3 +1,4 @@
+import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import type { GlobalConfig } from 'payload'
 
 // All user-facing strings use StaticLabel form ({ vi, en }) so that the
@@ -104,6 +105,9 @@ export const AuthorProfile: GlobalConfig = {
                   type: 'richText',
                   localized: true,
                   label: { vi: 'Đang xây dựng', en: 'Building now' },
+                  editor: lexicalEditor({
+                    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+                  }),
                 },
                 {
                   name: 'principles',
