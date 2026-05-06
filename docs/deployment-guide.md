@@ -78,8 +78,7 @@ git check-ignore .env.local
 
 ### Option A: Docker Compose (Single Machine — recommended)
 
-Everything is driven from `docker-compose.yml`. The `app` container's
-entrypoint is `scripts/startup-check.js`, which:
+Routine production releases should use the manual GitHub Actions workflow in **Production CI/CD Phase 1** below. `docker-compose.yml` still keeps a startup safety net: the `app` container's entrypoint is `scripts/startup-check.js`, which:
 
 1. Waits until Postgres accepts connections (30 retries × 2 s = 1 min).
 2. Runs `scripts/payload-db-sync.ts` — loads Payload programmatically
@@ -97,7 +96,54 @@ entrypoint is `scripts/startup-check.js`, which:
 
 **You never need to `psql` or `exec` into the container to migrate.**
 
-#### Deploy / update (single command)
+## Production CI/CD Phase 1
+
+Production deploys are manual-only through the `Deploy Production` GitHub Actions workflow. Pushes to `main` do not auto-deploy.
+
+Required GitHub Secrets:
+
+- `VPS_HOST`
+- `VPS_USER`
+- `VPS_SSH_KEY`
+- `VPS_KNOWN_HOSTS` (pinned `known_hosts` line for the VPS, not runtime `ssh-keyscan` output)
+- `VPS_PROJECT_PATH`
+- `PRODUCTION_URL`
+
+Release order:
+
+1. Validate on GitHub runner: install, DB bootstrap, typecheck, lint, tests, Next build, Docker build.
+2. SSH to VPS and reset the deployment checkout to the workflow commit SHA.
+3. Run `bash scripts/backup-production-db.sh` from repo root. Dumps are written to `backups/gtkblog-YYYYMMDD-HHMMSS.sql` and ignored by git.
+4. Run `npm run db:deploy` explicitly before app rebuild. This runs Payload schema sync then app DB bootstrap.
+5. Export `GIT_COMMIT_SHA` and run `docker compose up -d --build`.
+6. Verify `${PRODUCTION_URL}/api/health`, then smoke test `/`, `/en`, and `/admin`.
+
+Failure stop points:
+
+- Validate fails: no VPS deploy starts.
+- Backup fails: release stops before DB deploy.
+- `npm run db:deploy` fails: release stops before app rebuild.
+- Health or smoke fails: inspect app logs and decide whether app rollback is needed.
+
+The VPS project path must be a deployment checkout only. The workflow runs `git reset --hard` there.
+
+#### App rollback by commit
+
+```bash
+cd /path/to/gtkblog
+git fetch origin main
+git reset --hard <known-good-commit-sha>
+printf 'GIT_COMMIT_SHA=%s\n' '<known-good-commit-sha>' > .env.deploy
+set -a
+. ./.env.deploy
+set +a
+docker compose up -d --build
+curl --fail --silent --show-error https://yourdomain.com/api/health
+```
+
+DB rollback is not automatic. Prefer backward-compatible migrations. Restore a backup only after deciding data loss/compatibility impact is acceptable, then run a restore command appropriate for the dump format and current container names.
+
+#### Deploy / update (manual fallback)
 
 ```bash
 cd /path/to/gtkblog
@@ -431,8 +477,9 @@ npm run drizzle:migrate
 ### Basic Health Check Endpoint
 
 ```bash
-curl -I https://yourdomain.com/
-# Should return: HTTP/1.1 200 OK
+curl --fail --silent --show-error https://yourdomain.com/api/health
+# The production workflow expects JSON that satisfies:
+# {"ok":true,"database":"ok","version":"<deployed-commit-sha>"}
 ```
 
 ### PM2 Dashboard (Web UI)
@@ -546,6 +593,10 @@ pm2 logs gtkblog | tail  # Check for errors
 
 ## Rollback Procedure
 
+For Docker production, use **App rollback by commit** in the Production CI/CD Phase 1 section. Do not rely on app rollback alone if the failed release applied a non-backward-compatible DB change.
+
+For PM2 deployments:
+
 ```bash
 # If new deployment has issues, rollback to previous commit
 git log --oneline | head  # View recent commits
@@ -555,7 +606,7 @@ git push origin main
 # On server
 git pull origin main
 npm run build
-npm run drizzle:migrate   # If migrations, ensure backward compatible
+npm run db:deploy         # Ensure schema is compatible before restart
 pm2 reload gtkblog
 ```
 

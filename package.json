@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node --env-file-if-exists=.env.local scripts/bootstrap-db.js",
     "dev": "next dev",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -13,7 +13,8 @@
     "test:coverage": "vitest run --coverage",
     "prebuild": "tsx --require ./src/scripts/patch-next-env.cjs scripts/generate-admin-translations.ts",
     "seed": "tsx --require ./src/scripts/patch-next-env.cjs src/scripts/seed.ts",
-    "db:bootstrap": "node --env-file-if-exists=.env.local scripts/bootstrap-db.js"
+    "db:bootstrap": "node --env-file-if-exists=.env.local scripts/bootstrap-db.js",
+    "db:deploy": "tsx --require ./src/scripts/patch-next-env.cjs scripts/payload-db-sync.ts && node --env-file-if-exists=.env.local scripts/bootstrap-db.js"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
@@ -56,6 +57,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.2",
+    "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "~15.4.11",

@@ -21,6 +21,7 @@ bin/
 
 # production
 /build
+/backups/
 
 # misc
 .DS_Store
@@ -72,6 +73,11 @@ ck.md
 
 # Generated runtime layout for release/install smoke tests
 /.claude/
+
+# Local debug artifacts
+.codex
+.tmp-*
+yazi-x86_64-unknown-linux-gnu/
 
 # Local-only state inside tracked claude source
 claude/agent-memory/

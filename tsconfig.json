@@ -41,6 +41,7 @@
   ],
   "exclude": [
     "node_modules",
+    "tests/manual",
     "yazi-x86_64-unknown-linux-gnu"
   ]
 }

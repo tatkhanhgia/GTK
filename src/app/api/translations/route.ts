@@ -7,8 +7,7 @@ const CACHE_TTL_SECONDS = 60
 // Simple in-memory cache per Node process
 const memoryCache = new Map<string, { data: unknown; expiresAt: number }>()
 
-const LOCALE_ALLOWLIST = ['vi', 'en'] as const
-type AllowedLocale = (typeof LOCALE_ALLOWLIST)[number]
+type AllowedLocale = 'vi' | 'en'
 
 function isPrototypePollutingKey(key: string) {
   return key === '__proto__' || key === 'constructor' || key === 'prototype'
@@ -79,9 +78,8 @@ export async function GET(request: NextRequest) {
         'Cache-Control': `s-maxage=${CACHE_TTL_SECONDS}, stale-while-revalidate`,
       },
     })
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[api/translations] Failed to fetch translations:', err)
+  } catch {
+    console.error('[api/translations] Failed to fetch translations')
 
     // Serve stale cache if available
     if (cached) {

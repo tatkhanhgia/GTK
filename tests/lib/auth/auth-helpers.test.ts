@@ -16,11 +16,11 @@ vi.mock('next/navigation', () => ({
 const mockGetSession = vi.fn()
 
 vi.mock('@/lib/auth/auth-config', () => ({
-  auth: {
+  getAuth: () => ({
     api: {
       getSession: mockGetSession,
     },
-  },
+  }),
 }))
 
 describe('auth-helpers', () => {

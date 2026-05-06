@@ -14,11 +14,11 @@ vi.mock('stripe', () => ({
 
 // Mock stripe-config so the route gets the mocked Stripe instance
 vi.mock('@/lib/payment/stripe-config', () => ({
-  stripe: {
+  getStripeClient: () => ({
     webhooks: {
       constructEvent: mockConstructEvent,
     },
-  },
+  }),
 }))
 
 const mockFulfillOrder = vi.fn().mockResolvedValue(undefined)

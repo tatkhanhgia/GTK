@@ -8,6 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://gtkblog:gtkblog@postgres:5432/gtkblog
+      - GIT_COMMIT_SHA=${GIT_COMMIT_SHA:-unknown}
     env_file:
       - .env.local
     depends_on:

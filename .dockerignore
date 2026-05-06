@@ -11,12 +11,10 @@ plans
 docs
 .codex
 reports
+plans/reports
 scripts/admin-*.js
 scripts/start-with-ngrok.ps1
+scripts/db-checks
+tests/manual
 yazi-x86_64-unknown-linux-gnu
-.tmp-*.log
-test-*.ts
-test-*.mts
-check-*.js
-create-test-db.js
-recreate-test-db.js
+.tmp-*

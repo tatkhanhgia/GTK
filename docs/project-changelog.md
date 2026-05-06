@@ -5,6 +5,12 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **Safer Production CI/CD Phase 1:** Manual-only production workflow with validate → backup → explicit DB deploy → source deploy → `/api/health` verification → curl smoke tests
+  - Added `npm run db:deploy` to run Payload schema sync and app DB bootstrap explicitly before app rebuild
+  - Added `scripts/backup-production-db.sh` for timestamped Compose PostgreSQL dumps under git-ignored `backups/`
+  - Production workflow now verifies `${PRODUCTION_URL}/api/health` with `jq`, requiring `ok: true`, `database: "ok"`, and `version == github.sha`
+  - Production workflow now deploys a known commit SHA and injects `GIT_COMMIT_SHA` into Docker runtime
+  - Deployment guide now documents manual trigger, failure stop points, rollback commands, and DB rollback caveat
 - **Unified DB-Driven Translations:** Replaced static JSON message files with a live `Translations` collection in Payload CMS
   - New collection: `translations` (`src/collections/translations.ts`) with fields `key`, `vi`, `en`, `group`, and `context`
   - New grouping collection: `translationGroups` (`src/collections/translation-groups.ts`) for organizing translation keys
