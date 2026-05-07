@@ -260,10 +260,21 @@ const FIXES = [
   {
     name: 'payload_locked_documents_rels.translations_id',
     async run(client) {
+      const tableCheck = await client.query(
+        `SELECT 1
+         FROM information_schema.tables
+         WHERE table_schema = 'public'
+           AND table_name = 'payload_locked_documents_rels'`,
+      )
+      if (tableCheck.rows.length === 0) {
+        return { status: 'skipped', reason: 'table does not exist yet' }
+      }
+
       const { rows } = await client.query(
         `SELECT column_name
          FROM information_schema.columns
-         WHERE table_name = 'payload_locked_documents_rels'
+         WHERE table_schema = 'public'
+           AND table_name = 'payload_locked_documents_rels'
            AND column_name = 'translations_id'`,
       )
       if (rows.length > 0) {
