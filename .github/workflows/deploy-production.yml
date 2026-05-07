@@ -145,7 +145,6 @@ jobs:
             test "$(git rev-parse HEAD)" = "${{ github.sha }}"
 
             bash scripts/backup-production-db.sh
-            npm run db:deploy
 
             printf 'APP_IMAGE=%s\nGIT_COMMIT_SHA=%s\n' "${{ env.IMAGE_NAME }}:${{ github.sha }}" "${{ github.sha }}" > .env.deploy
             set -a

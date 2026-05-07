@@ -117,17 +117,17 @@ Release order:
 2. Build and push `ghcr.io/<owner>/gtkblog:<commit-sha>` from GitHub Actions.
 3. SSH to VPS and reset the deployment checkout to the workflow commit SHA.
 4. Run `bash scripts/backup-production-db.sh` from repo root. Dumps are written to `backups/gtkblog-YYYYMMDD-HHMMSS.sql` and ignored by git.
-5. Run `npm run db:deploy` explicitly before app restart. This runs Payload schema sync then app DB bootstrap.
-6. Write `APP_IMAGE` and `GIT_COMMIT_SHA`, then run `docker compose pull app` and `docker compose up -d --no-build app`.
+5. Write `APP_IMAGE` and `GIT_COMMIT_SHA`, then run `docker compose pull app` and `docker compose up -d --no-build app`.
+6. Container startup runs Payload schema sync and app DB bootstrap before Next.js starts.
 7. Verify `${PRODUCTION_URL}/api/health`, then smoke test `/`, `/en`, and `/admin`.
 
 Failure stop points:
 
 - Validate fails: no VPS deploy starts.
 - Image publish fails: no VPS deploy starts.
-- Backup fails: release stops before DB deploy.
-- `npm run db:deploy` fails: release stops before app restart.
+- Backup fails: release stops before app restart.
 - GHCR login/pull fails: old app container remains running.
+- Container startup DB sync/bootstrap fails: new app container exits and health check fails.
 - Health or smoke fails: inspect app logs and decide whether app rollback is needed.
 
 The VPS project path must be a deployment checkout only. The workflow runs `git reset --hard` there. Production compose operations must source `.env.deploy` or export `APP_IMAGE` and `GIT_COMMIT_SHA`; otherwise Compose falls back to the local placeholder image.
