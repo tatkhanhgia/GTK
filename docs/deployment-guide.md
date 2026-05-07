@@ -78,7 +78,7 @@ git check-ignore .env.local
 
 ### Option A: Docker Compose (Single Machine — recommended)
 
-Routine production releases should use the manual GitHub Actions workflow in **Production CI/CD Phase 1** below. `docker-compose.yml` still keeps a startup safety net: the `app` container's entrypoint is `scripts/startup-check.js`, which:
+Routine production releases should use the manual GitHub Actions workflow in **Production CI/CD Phase 2** below. `docker-compose.yml` still keeps a startup safety net: the `app` container's entrypoint is `scripts/startup-check.js`, which:
 
 1. Waits until Postgres accepts connections (30 retries × 2 s = 1 min).
 2. Runs `scripts/payload-db-sync.ts` — loads Payload programmatically
@@ -96,9 +96,9 @@ Routine production releases should use the manual GitHub Actions workflow in **P
 
 **You never need to `psql` or `exec` into the container to migrate.**
 
-## Production CI/CD Phase 1
+## Production CI/CD Phase 2
 
-Production deploys are manual-only through the `Deploy Production` GitHub Actions workflow. Pushes to `main` do not auto-deploy.
+Production deploys are manual-only through the `Deploy Production` GitHub Actions workflow. Pushes to `main` do not auto-deploy. GitHub Actions builds and pushes the app image to GHCR; the VPS only pulls and starts that image.
 
 Required GitHub Secrets:
 
@@ -108,36 +108,46 @@ Required GitHub Secrets:
 - `VPS_KNOWN_HOSTS` (pinned `known_hosts` line for the VPS, not runtime `ssh-keyscan` output)
 - `VPS_PROJECT_PATH`
 - `PRODUCTION_URL`
+- `GHCR_USERNAME` (account that can read `ghcr.io/<owner>/gtkblog`)
+- `GHCR_TOKEN` (package read access for the VPS pull; GitHub-side publish uses the built-in `GITHUB_TOKEN`)
 
 Release order:
 
 1. Validate on GitHub runner: install, DB bootstrap, typecheck, lint, tests, Next build, Docker build.
-2. SSH to VPS and reset the deployment checkout to the workflow commit SHA.
-3. Run `bash scripts/backup-production-db.sh` from repo root. Dumps are written to `backups/gtkblog-YYYYMMDD-HHMMSS.sql` and ignored by git.
-4. Run `npm run db:deploy` explicitly before app rebuild. This runs Payload schema sync then app DB bootstrap.
-5. Export `GIT_COMMIT_SHA` and run `docker compose up -d --build`.
-6. Verify `${PRODUCTION_URL}/api/health`, then smoke test `/`, `/en`, and `/admin`.
+2. Build and push `ghcr.io/<owner>/gtkblog:<commit-sha>` from GitHub Actions.
+3. SSH to VPS and reset the deployment checkout to the workflow commit SHA.
+4. Run `bash scripts/backup-production-db.sh` from repo root. Dumps are written to `backups/gtkblog-YYYYMMDD-HHMMSS.sql` and ignored by git.
+5. Run `npm run db:deploy` explicitly before app restart. This runs Payload schema sync then app DB bootstrap.
+6. Write `APP_IMAGE` and `GIT_COMMIT_SHA`, then run `docker compose pull app` and `docker compose up -d --no-build app`.
+7. Verify `${PRODUCTION_URL}/api/health`, then smoke test `/`, `/en`, and `/admin`.
 
 Failure stop points:
 
 - Validate fails: no VPS deploy starts.
+- Image publish fails: no VPS deploy starts.
 - Backup fails: release stops before DB deploy.
-- `npm run db:deploy` fails: release stops before app rebuild.
+- `npm run db:deploy` fails: release stops before app restart.
+- GHCR login/pull fails: old app container remains running.
 - Health or smoke fails: inspect app logs and decide whether app rollback is needed.
 
-The VPS project path must be a deployment checkout only. The workflow runs `git reset --hard` there.
+The VPS project path must be a deployment checkout only. The workflow runs `git reset --hard` there. Production compose operations must source `.env.deploy` or export `APP_IMAGE` and `GIT_COMMIT_SHA`; otherwise Compose falls back to the local placeholder image.
 
-#### App rollback by commit
+#### App rollback by commit image
 
 ```bash
 cd /path/to/gtkblog
+cat .env.deploy
 git fetch origin main
 git reset --hard <known-good-commit-sha>
-printf 'GIT_COMMIT_SHA=%s\n' '<known-good-commit-sha>' > .env.deploy
+cat > .env.deploy <<'DEPLOY_ENV'
+APP_IMAGE=ghcr.io/<owner>/gtkblog:<known-good-commit-sha>
+GIT_COMMIT_SHA=<known-good-commit-sha>
+DEPLOY_ENV
 set -a
 . ./.env.deploy
 set +a
-docker compose up -d --build
+docker compose pull app
+docker compose up -d --no-build app
 curl --fail --silent --show-error https://yourdomain.com/api/health
 ```
 
@@ -147,8 +157,12 @@ DB rollback is not automatic. Prefer backward-compatible migrations. Restore a b
 
 ```bash
 cd /path/to/gtkblog
-git pull
-docker compose up -d --build
+git fetch origin main
+git reset --hard <commit-sha>
+export APP_IMAGE=ghcr.io/<owner>/gtkblog:<commit-sha>
+export GIT_COMMIT_SHA=<commit-sha>
+docker compose pull app
+docker compose up -d --no-build app
 ```
 
 That's the whole deploy flow. Watch the logs if you want:
@@ -207,8 +221,8 @@ targeted compatibility fixes):
   - Otherwise run its `ALTER` / `CREATE` / `UPDATE` and return
     `{ status: 'applied' }`.
 
-The next `docker compose up -d --build` applies both layers before
-the app starts. No manual SQL required.
+The next production deploy applies both layers before the app starts.
+No manual SQL required.
 
 #### Escape hatches
 
@@ -593,7 +607,7 @@ pm2 logs gtkblog | tail  # Check for errors
 
 ## Rollback Procedure
 
-For Docker production, use **App rollback by commit** in the Production CI/CD Phase 1 section. Do not rely on app rollback alone if the failed release applied a non-backward-compatible DB change.
+For Docker production, use **App rollback by commit image** in the Production CI/CD Phase 2 section. Do not rely on app rollback alone if the failed release applied a non-backward-compatible DB change.
 
 For PM2 deployments:
 

@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${APP_IMAGE:-gtkblog-app:local}
     ports:
       - "3000:3000"
     environment:
