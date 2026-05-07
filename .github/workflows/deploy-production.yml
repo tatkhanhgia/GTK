@@ -184,7 +184,7 @@ jobs:
                     console.error(error.message)
                     process.exit(1)
                   })
-              ' "${{ github.sha }}"; then
+              ' "${{ github.sha }}" < /dev/null; then
                 printf 'Health check passed on attempt %s\n' "${attempt}"
                 exit 0
               fi
