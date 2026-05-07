@@ -1,5 +1,4 @@
-import { getPayload } from 'payload'
-import config from '@payload-config'
+const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
 /**
  * Fetch related posts in the same category, excluding the current post.
@@ -11,6 +10,14 @@ export async function getRelatedPosts(
   locale: 'vi' | 'en' = 'vi',
   limit = 3
 ) {
+  if (shouldSkipBuildDbAccess) {
+    return []
+  }
+
+  const [{ getPayload }, { default: config }] = await Promise.all([
+    import('payload'),
+    import('@payload-config'),
+  ])
   const payload = await getPayload({ config })
 
   const result = await payload.find({

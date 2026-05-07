@@ -69,6 +69,8 @@ jobs:
         run: npm run build
         env:
           SKIP_ADMIN_TRANSLATION_GENERATION: 'true'
+          SKIP_BUILD_DB_ACCESS: 'true'
+          SKIP_DB_TRANSLATIONS: 'true'
 
       - name: Build Docker image
         run: docker build -t gtkblog-ci:${{ github.sha }} .
