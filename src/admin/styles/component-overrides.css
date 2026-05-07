@@ -1413,7 +1413,6 @@ table td:first-child input[type="checkbox"] {
 .rich-text-lexical .editor-container,
 .rich-text-lexical .editor-scroller,
 .rich-text-lexical .ContentEditable__root,
-.rich-text-lexical .ContentEditable__root *,
 .rich-text-lexical .LexicalEditorTheme__placeholder,
 .editor-container [contenteditable="true"] {
   font-family: var(--admin-font-vietnamese-safe) !important;
@@ -1425,20 +1424,21 @@ table td:first-child input[type="checkbox"] {
   font-kerning: normal;
 }
 
-/* Headings inside the editor must stay on the Vietnamese-safe sans stack */
-.rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6, p, li, blockquote) {
+.rich-text-lexical .ContentEditable__root [data-lexical-text="true"],
+.ContentEditable__root [data-lexical-text="true"],
+.LexicalEditorTheme__paragraph,
+.LexicalEditorTheme__quote {
   font-family: var(--admin-font-vietnamese-safe) !important;
   line-height: 1.8 !important;
   letter-spacing: normal !important;
+  text-rendering: auto !important;
+  -webkit-font-feature-settings: normal !important;
+  font-feature-settings: normal !important;
+  font-kerning: normal !important;
 }
 
-
-/* Final override: keep Lexical editor on a Windows-safe Vietnamese stack */
-.ContentEditable__root,
-.ContentEditable__root *,
-.ContentEditable__root [data-lexical-text="true"],
-.LexicalEditorTheme__paragraph,
-.LexicalEditorTheme__quote,
+/* Headings keep Payload's block sizing while using Vietnamese-safe glyphs. */
+.rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6),
 .LexicalEditorTheme__h1,
 .LexicalEditorTheme__h2,
 .LexicalEditorTheme__h3,
@@ -1447,7 +1447,6 @@ table td:first-child input[type="checkbox"] {
 .LexicalEditorTheme__h6 {
   font-family: var(--admin-font-vietnamese-safe) !important;
   letter-spacing: normal !important;
-  line-height: 1.8 !important;
   text-rendering: auto !important;
   -webkit-font-feature-settings: normal !important;
   font-feature-settings: normal !important;
