@@ -129,18 +129,26 @@ jobs:
       - name: Health check
         shell: bash
         run: |
-          for attempt in {1..30}; do
-            health_json="$(curl --fail --silent --show-error "${{ secrets.PRODUCTION_URL }}/api/health" || true)"
-            if echo "${health_json}" | jq --exit-status --arg version "${{ github.sha }}" \
-              '.ok == true and .database == "ok" and .version == $version' > /dev/null; then
-              printf 'Health check passed on attempt %s\n' "${attempt}"
-              exit 0
-            fi
-            sleep 5
-          done
+          ssh -i ~/.ssh/deploy_key "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<'EOF'
+            set -euo pipefail
 
-          printf 'Health check failed after retries\n' >&2
-          exit 1
+            cd "${{ secrets.VPS_PROJECT_PATH }}"
+
+            for attempt in {1..30}; do
+              health_json="$(docker compose exec -T app curl --fail --silent --show-error http://127.0.0.1:3000/api/health || true)"
+              if echo "${health_json}" | jq --exit-status --arg version "${{ github.sha }}" \
+                '.ok == true and .database == "ok" and .version == $version' > /dev/null; then
+                printf 'Health check passed on attempt %s\n' "${attempt}"
+                exit 0
+              fi
+              sleep 5
+            done
+
+            printf 'Health check failed after retries\n' >&2
+            docker compose ps >&2 || true
+            docker compose logs --tail=200 app >&2 || true
+            exit 1
+          EOF
 
       - name: Smoke test critical routes
         shell: bash
