@@ -4289,6 +4289,83 @@ html.admin-dark :is(.template-default, .drawer__content-children) .field-type.ar
   caret-color: var(--admin-accent);
 }
 
+.template-default .rich-text-lexical .ContentEditable__root ul,
+.template-default .rich-text-lexical .ContentEditable__root ol {
+  margin: 0.5rem 0 0.5rem 1.5rem !important;
+  padding-left: 1.25rem !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root ul {
+  list-style: disc outside !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root ol {
+  list-style: decimal outside !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root li,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItem {
+  display: list-item !important;
+  padding-left: 0.25rem !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root li::marker {
+  color: var(--admin-accent) !important;
+  font-weight: 600;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__checklist {
+  list-style: none !important;
+  margin: 0.5rem 0 !important;
+  padding-left: 0 !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemChecked,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemUnchecked {
+  display: block !important;
+  position: relative;
+  min-height: 1.8rem;
+  list-style: none !important;
+  padding-left: 1.75rem !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemChecked::before,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemUnchecked::before {
+  content: '';
+  position: absolute;
+  top: 0.42rem;
+  left: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1.5px solid var(--admin-accent);
+  border-radius: 4px;
+  background: var(--admin-bg-primary);
+  box-sizing: border-box;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemChecked::before {
+  content: '✓';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-accent);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root blockquote,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__quote {
+  margin: 0.75rem 0 !important;
+  padding: 0.85rem 1rem 0.85rem 1.25rem !important;
+  border-left: 4px solid var(--admin-accent) !important;
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in oklab, var(--admin-accent) 8%, transparent) !important;
+  color: var(--admin-text-secondary) !important;
+  font-style: italic;
+}
+
 /* Placeholder ("Start typing, or press '/' ...") — anchor to matching gutter */
 .template-default .rich-text-lexical .editor-container > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder,
 .template-default .rich-text-lexical .LexicalEditorTheme__placeholder {

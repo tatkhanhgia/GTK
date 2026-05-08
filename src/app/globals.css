@@ -212,6 +212,51 @@ h4 { font-size: 1.125rem; }
   margin-top: 0.5rem;
 }
 
+.rich-text-content blockquote {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--primary);
+  border-radius: 0 0.75rem 0.75rem 0;
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.rich-text-content .list-item-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-left: -2.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
+  list-style: none;
+  background: color-mix(in oklab, var(--muted) 35%, transparent);
+}
+
+.rich-text-content .list-item-checkbox + .list-item-checkbox {
+  margin-top: 0.5rem;
+}
+
+.rich-text-content .list-item-checkbox input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.35rem;
+  accent-color: var(--primary);
+  flex: 0 0 auto;
+}
+
+.rich-text-content .list-item-checkbox-checked {
+  background: color-mix(in oklab, var(--primary) 9%, transparent);
+  color: var(--foreground);
+}
+
+.rich-text-content .list-item-checkbox-checked > span,
+.rich-text-content .list-item-checkbox-checked p {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklab, var(--primary) 65%, transparent);
+  color: var(--muted-foreground);
+}
+
 /* ============================================================
    Gradient Utilities
    ============================================================ */
