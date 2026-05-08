@@ -106,7 +106,10 @@ export const AuthorProfile: GlobalConfig = {
                   localized: true,
                   label: { vi: 'Đang xây dựng', en: 'Building now' },
                   editor: lexicalEditor({
-                    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+                    features: ({ defaultFeatures }) => [
+                      ...defaultFeatures,
+                      FixedToolbarFeature({ applyToFocusedEditor: true }),
+                    ],
                   }),
                 },
                 {

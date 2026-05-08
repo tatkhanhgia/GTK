@@ -458,11 +458,16 @@ pre {
   line-height: var(--admin-leading-normal);
 }
 
-/* Fix for lexical editor content editable area */
+/* Fix for lexical editor text rendering without flattening block styles */
 .ContentEditable__root,
-.ContentEditable__root *,
+.ContentEditable__root [data-lexical-text="true"],
 .LexicalEditorTheme__paragraph,
-.LexicalEditorTheme__quote,
+.LexicalEditorTheme__quote {
+  font-family: var(--admin-font-vietnamese-safe);
+  line-height: var(--admin-leading-relaxed);
+  letter-spacing: normal;
+}
+
 .LexicalEditorTheme__h1,
 .LexicalEditorTheme__h2,
 .LexicalEditorTheme__h3,
@@ -470,7 +475,6 @@ pre {
 .LexicalEditorTheme__h5,
 .LexicalEditorTheme__h6 {
   font-family: var(--admin-font-vietnamese-safe);
-  line-height: var(--admin-leading-relaxed);
   letter-spacing: normal;
 }
 

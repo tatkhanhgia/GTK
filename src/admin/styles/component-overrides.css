@@ -1413,7 +1413,6 @@ table td:first-child input[type="checkbox"] {
 .rich-text-lexical .editor-container,
 .rich-text-lexical .editor-scroller,
 .rich-text-lexical .ContentEditable__root,
-.rich-text-lexical .ContentEditable__root *,
 .rich-text-lexical .LexicalEditorTheme__placeholder,
 .editor-container [contenteditable="true"] {
   font-family: var(--admin-font-vietnamese-safe) !important;
@@ -1425,20 +1424,21 @@ table td:first-child input[type="checkbox"] {
   font-kerning: normal;
 }
 
-/* Headings inside the editor must stay on the Vietnamese-safe sans stack */
-.rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6, p, li, blockquote) {
+.rich-text-lexical .ContentEditable__root [data-lexical-text="true"],
+.ContentEditable__root [data-lexical-text="true"],
+.LexicalEditorTheme__paragraph,
+.LexicalEditorTheme__quote {
   font-family: var(--admin-font-vietnamese-safe) !important;
   line-height: 1.8 !important;
   letter-spacing: normal !important;
+  text-rendering: auto !important;
+  -webkit-font-feature-settings: normal !important;
+  font-feature-settings: normal !important;
+  font-kerning: normal !important;
 }
 
-
-/* Final override: keep Lexical editor on a Windows-safe Vietnamese stack */
-.ContentEditable__root,
-.ContentEditable__root *,
-.ContentEditable__root [data-lexical-text="true"],
-.LexicalEditorTheme__paragraph,
-.LexicalEditorTheme__quote,
+/* Headings keep Payload's block sizing while using Vietnamese-safe glyphs. */
+.rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6),
 .LexicalEditorTheme__h1,
 .LexicalEditorTheme__h2,
 .LexicalEditorTheme__h3,
@@ -1447,7 +1447,6 @@ table td:first-child input[type="checkbox"] {
 .LexicalEditorTheme__h6 {
   font-family: var(--admin-font-vietnamese-safe) !important;
   letter-spacing: normal !important;
-  line-height: 1.8 !important;
   text-rendering: auto !important;
   -webkit-font-feature-settings: normal !important;
   font-feature-settings: normal !important;
@@ -4288,6 +4287,83 @@ html.admin-dark :is(.template-default, .drawer__content-children) .field-type.ar
   line-height: 1.75 !important;
   color: var(--admin-text-primary) !important;
   caret-color: var(--admin-accent);
+}
+
+.template-default .rich-text-lexical .ContentEditable__root ul,
+.template-default .rich-text-lexical .ContentEditable__root ol {
+  margin: 0.5rem 0 0.5rem 1.5rem !important;
+  padding-left: 1.25rem !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root ul {
+  list-style: disc outside !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root ol {
+  list-style: decimal outside !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root li,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItem {
+  display: list-item !important;
+  padding-left: 0.25rem !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root li::marker {
+  color: var(--admin-accent) !important;
+  font-weight: 600;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__checklist {
+  list-style: none !important;
+  margin: 0.5rem 0 !important;
+  padding-left: 0 !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemChecked,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemUnchecked {
+  display: block !important;
+  position: relative;
+  min-height: 1.8rem;
+  list-style: none !important;
+  padding-left: 1.75rem !important;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemChecked::before,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemUnchecked::before {
+  content: '';
+  position: absolute;
+  top: 0.42rem;
+  left: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1.5px solid var(--admin-accent);
+  border-radius: 4px;
+  background: var(--admin-bg-primary);
+  box-sizing: border-box;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__listItemChecked::before {
+  content: '✓';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-accent);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.template-default .rich-text-lexical .ContentEditable__root blockquote,
+.template-default .rich-text-lexical .ContentEditable__root .LexicalEditorTheme__quote {
+  margin: 0.75rem 0 !important;
+  padding: 0.85rem 1rem 0.85rem 1.25rem !important;
+  border-left: 4px solid var(--admin-accent) !important;
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in oklab, var(--admin-accent) 8%, transparent) !important;
+  color: var(--admin-text-secondary) !important;
+  font-style: italic;
 }
 
 /* Placeholder ("Start typing, or press '/' ...") — anchor to matching gutter */

@@ -14,7 +14,7 @@ function shouldSkipDbTranslations() {
 }
 
 function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>, locale: string) {
-  const tree: Record<string, unknown> = Object.create(null)
+  const tree: Record<string, unknown> = {}
 
   for (const record of records) {
     const value = (record as Record<string, string>)[locale]
@@ -31,7 +31,7 @@ function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>
         current[part] = value
       } else {
         if (!current[part] || typeof current[part] !== 'object') {
-          current[part] = Object.create(null)
+          current[part] = {}
         }
         current = current[part] as Record<string, unknown>
       }
