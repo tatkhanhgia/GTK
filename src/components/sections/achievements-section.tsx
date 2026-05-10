@@ -66,7 +66,7 @@ const ICON_MAP: Record<AchievementIcon, LucideIcon> = {
 }
 
 /**
- * AchievementsSection — portfolio-style stats block with staggered scroll
+ * AchievementsSection - portfolio-style stats block with staggered scroll
  * reveal and per-item count-up animation. Designed to sit between hero and
  * content sections on the homepage + About page.
  */
@@ -157,7 +157,7 @@ export function AchievementsSection({
                 {/* Subtle gradient glow on hover */}
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-primary/0 via-primary/0 to-accent/0 opacity-0 transition-opacity duration-500 group-hover:from-primary/10 group-hover:to-accent/10 group-hover:opacity-100"
+                  className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-primary/0 via-primary/0 to-accent/0 opacity-0 transition-opacity duration-300 ease-enter group-hover:from-primary/10 group-hover:to-accent/10 group-hover:opacity-100"
                 />
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 md:h-14 md:w-14">
                   <Icon className="h-5 w-5 text-primary md:h-6 md:w-6" aria-hidden="true" />

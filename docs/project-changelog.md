@@ -16,6 +16,7 @@ All significant changes to the GTK Blog project are documented here.
   - Added feature intake, story packet, decision, validation report, and high-risk story templates under `docs/`
   - Added `docs/TEST_MATRIX.md` as behavior-to-proof tracker seeded with current GTKBlog domains
   - Adapted harness architecture notes to reference existing Next.js/Payload/Better Auth architecture instead of generic greenfield guidance
+- **Anthropic-Inspired Motion Refresh:** Added shared public/admin motion tokens, smoother scroll/card/surface motion, and a meaningful homepage topic marquee with hover/focus pause plus reduced-motion static fallback.
 - **Safer Production CI/CD Phase 1:** Manual-only production workflow with validate → backup → explicit DB deploy → source deploy → `/api/health` verification → curl smoke tests
   - Added `npm run db:deploy` to run Payload schema sync and app DB bootstrap explicitly before app rebuild
   - Added `scripts/backup-production-db.sh` for timestamped Compose PostgreSQL dumps under git-ignored `backups/`

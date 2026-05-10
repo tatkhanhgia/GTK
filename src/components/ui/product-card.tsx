@@ -49,7 +49,7 @@ export function ProductCard({
     : formatPrice(priceUSD, 'USD', locale)
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-250 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
+    <article className="motion-card group flex flex-col overflow-hidden rounded-xl border border-border bg-card hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
       {/* Image */}
       <Link href={`/${locale}/products/${slug}`}>
         <div className="relative aspect-video overflow-hidden bg-muted">
@@ -58,7 +58,7 @@ export function ProductCard({
               src={image.url}
               alt={image.alt}
               fill
-              className="object-cover transition-transform duration-400 group-hover:scale-103"
+              className="motion-media object-cover group-hover:scale-103"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (

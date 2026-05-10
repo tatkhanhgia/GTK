@@ -36,15 +36,18 @@
   --spacing-16: 64px;
   --spacing-20: 80px;
 
-  /* Animation durations */
+  /* Motion tokens */
   --duration-fast: 150ms;
+  --duration-micro: 200ms;
   --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --duration-slower: 600ms;
+  --duration-surface: 280ms;
+  --duration-route: 320ms;
+  --duration-section: 400ms;
+  --duration-marquee: 48s;
 
   /* Easing */
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 
   /* Color tokens (light mode defaults mapped to Tailwind utilities) */
@@ -137,8 +140,8 @@ html.dark {
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 320ms;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-duration: var(--duration-route);
+  animation-timing-function: var(--ease-default);
 }
 
 body {
@@ -372,6 +375,44 @@ h4 { font-size: 1.125rem; }
   backface-visibility: hidden;
 }
 
+.motion-card {
+  transition:
+    border-color var(--duration-normal) var(--ease-enter),
+    box-shadow var(--duration-normal) var(--ease-enter),
+    transform var(--duration-normal) var(--ease-enter);
+}
+
+.motion-media {
+  transition: transform var(--duration-section) var(--ease-enter);
+}
+
+.motion-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.motion-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: motion-marquee-scroll var(--duration-marquee) linear infinite;
+}
+
+.motion-marquee:hover .motion-marquee-track,
+.motion-marquee:focus-within .motion-marquee-track,
+.motion-marquee:focus .motion-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes motion-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 /* Touch target sizing — minimum 44px for accessibility */
 .touch-target {
   min-height: 44px;
@@ -395,4 +436,18 @@ h4 { font-size: 1.125rem; }
 
 .aspect-4-3 {
   aspect-ratio: 4 / 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-marquee {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .motion-marquee-track {
+    animation: none !important;
+    flex-wrap: wrap;
+    width: auto;
+  }
 }

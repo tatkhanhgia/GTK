@@ -32,7 +32,7 @@ export function BlogCard({
   locale = 'vi',
 }: BlogCardProps) {
   return (
-    <article className="group rounded-xl border border-border bg-card overflow-hidden transition-all duration-250 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/20">
+    <article className="motion-card group overflow-hidden rounded-xl border border-border bg-card hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
       {/* Thumbnail */}
       <Link href={`/${locale}/blog/${slug}`}>
         <div className="aspect-video relative overflow-hidden bg-muted">
@@ -41,7 +41,7 @@ export function BlogCard({
               src={featuredImage.url}
               alt={featuredImage.alt}
               fill
-              className="object-cover transition-transform duration-400 group-hover:scale-103"
+              className="motion-media object-cover group-hover:scale-103"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
