@@ -5,6 +5,16 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **Warm Editorial Motion System:** Centralized public-site motion presets and replay behavior for section reveals, counters, and reduced-motion users
+  - Added `src/lib/motion/motion-presets.ts` for shared Motion durations, easing, viewport defaults, reveal variants, stagger variants, and counter transitions
+  - `ScrollReveal` now defaults to one reveal per mount, replays naturally on route/remount, and exposes explicit `replayOnScroll` / `viewportMargin` controls
+  - `AnimatedCounter` now uses shared counter transitions and remains once-per-mount with static values for reduced-motion users
+  - `/me`, blog, and products pages now use section-level `ScrollReveal` wrappers instead of visual lazy fades or uncoordinated page motion
+  - Consolidated duplicate reduced-motion CSS and removed the mobile global transition-duration override that conflicted with component-level motion timing
+- **Harness v0 workflow integration:** Imported `hoangnb24/harness-experimental` docs/templates in merge mode without overwriting GTKBlog source files
+  - Added feature intake, story packet, decision, validation report, and high-risk story templates under `docs/`
+  - Added `docs/TEST_MATRIX.md` as behavior-to-proof tracker seeded with current GTKBlog domains
+  - Adapted harness architecture notes to reference existing Next.js/Payload/Better Auth architecture instead of generic greenfield guidance
 - **Safer Production CI/CD Phase 1:** Manual-only production workflow with validate → backup → explicit DB deploy → source deploy → `/api/health` verification → curl smoke tests
   - Added `npm run db:deploy` to run Payload schema sync and app DB bootstrap explicitly before app rebuild
   - Added `scripts/backup-production-db.sh` for timestamped Compose PostgreSQL dumps under git-ignored `backups/`
@@ -44,6 +54,10 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **DB check script safety:** Removed hardcoded PostgreSQL credentials and fixed destructive database targets from `scripts/db-checks`
+  - DB check scripts now read connection details from `DATABASE_URL` or `TEST_DATABASE_URL`
+  - Test DB create/recreate scripts require `TEST_DATABASE_NAME`, require it to match `TEST_DATABASE_URL`, and refuse protected database names
+  - `create-test-db.js` now creates only; destructive reset behavior stays in `recreate-test-db.js`
 - **ESLint v9 flat-config breakage:** `eslint.config.mjs` previously imported `eslint-config-next/core-web-vitals` as if it were a flat-config array, but `eslint-config-next@15.4.x` still ships legacy `.eslintrc`-style configs → ESLint failed to start, CI lint step was dead.
   - Rewired via `@eslint/eslintrc` `FlatCompat` bridge (the pattern Next.js itself recommends until a native flat-config export lands)
   - Added explicit override for `**/*.cjs` disabling `@typescript-eslint/no-require-imports` (CommonJS files legitimately use `require()`)

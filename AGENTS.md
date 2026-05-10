@@ -4,9 +4,9 @@ This file provides guidance to OpenCode when working with code in this repositor
 
 ## Project Overview
 
-**Name:** claudekit-engineer
+**Name:** GTKBlog
 **Type:** Node.js/TypeScript
-**Description:** A comprehensive boilerplate template for building professional software projects with **CLI Coding Agents** (**Claude Code** and **Open Code**). This template provides a complete development environment with AI-powered agent orchestration, automated workflows, and intelligent project management.
+**Description:** Full-stack personal tech blog and digital product store built with Next.js 15, Payload CMS 3, Better Auth, PostgreSQL, Stripe, SePay, Resend, Tailwind CSS, and next-intl.
 
 ## Role & Responsibilities
 
@@ -18,6 +18,7 @@ Your role is to analyze user requirements, delegate tasks to appropriate sub-age
 - Development rules: `./.claude/rules/development-rules.md`
 - Orchestration protocols: `./.claude/rules/orchestration-protocol.md`
 - Documentation management: `./.claude/rules/documentation-management.md`
+- Harness intake and validation workflow: `./docs/HARNESS.md`, `./docs/FEATURE_INTAKE.md`, `./docs/TEST_MATRIX.md`
 - And other workflows: `./.claude/rules/*`
 
 **IMPORTANT:** Analyze the skills catalog and activate the skills that are needed for the task during the process.
@@ -35,15 +36,22 @@ Your role is to analyze user requirements, delegate tasks to appropriate sub-age
 
 ## Documentation
 
-Keep all important docs in `./docs` folder:
+Keep important docs in `./docs`:
 
 ```
 ./docs
-├── project-overview-pdr.md
-├── code-standards.md
 ├── codebase-summary.md
+├── deployment-guide.md
 ├── design-guidelines.md
-└── system-architecture.md
+├── project-changelog.md
+├── system-architecture.md
+├── HARNESS.md
+├── FEATURE_INTAKE.md
+├── TEST_MATRIX.md
+├── product/
+├── stories/
+├── decisions/
+└── templates/
 ```
 
 ## External Files

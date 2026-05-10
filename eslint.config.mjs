@@ -23,11 +23,20 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-require-imports": "off",
     },
   },
+  // Project utility scripts run directly in Node and commonly use CommonJS.
+  {
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     ".next/**",
     "out/**",
     "build/**",
+    ".claude/**",
+    ".opencode/**",
     "next-env.d.ts",
   ]),
 ]);

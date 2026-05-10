@@ -15,6 +15,12 @@ import {
 } from 'lucide-react'
 import { motion, useReducedMotion, type Variants } from 'motion/react'
 import { AnimatedCounter } from '@/components/ui/animated-counter'
+import {
+  createRevealVariants,
+  createStaggerContainerVariants,
+  motionDurations,
+  revealViewport,
+} from '@/lib/motion/motion-presets'
 
 // Type definitions live next to the sole consumer component so data-fetching
 // helpers can depend on them without pulling in extra modules.
@@ -75,26 +81,14 @@ export function AchievementsSection({
 
   if (achievements.length === 0) return null
 
-  const containerVariants: Variants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.1,
-        delayChildren: prefersReducedMotion ? 0 : 0.08,
-      },
-    },
-  }
-
-  const itemVariants: Variants = prefersReducedMotion
-    ? { hidden: { opacity: 1 }, visible: { opacity: 1 } }
-    : {
-        hidden: { opacity: 0, y: 24 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-        },
-      }
+  const containerVariants: Variants = createStaggerContainerVariants({
+    reducedMotion: Boolean(prefersReducedMotion),
+  })
+  const itemVariants: Variants = createRevealVariants({
+    y: 12,
+    duration: motionDurations.section,
+    reducedMotion: Boolean(prefersReducedMotion),
+  })
 
   const wrapperClass =
     variant === 'contained'
@@ -115,7 +109,7 @@ export function AchievementsSection({
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ ...revealViewport, amount: 0.2 }}
           variants={containerVariants}
           className="mb-10 text-center md:mb-14"
         >
@@ -146,7 +140,7 @@ export function AchievementsSection({
         <motion.ul
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
+          viewport={revealViewport}
           variants={containerVariants}
           className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${mdCols} md:gap-6`}
         >
