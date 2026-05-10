@@ -56,6 +56,7 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **PR CI typecheck for DB guard tests:** Imported Vitest test APIs explicitly in `database-url.test.ts` so `npx tsc --noEmit` can typecheck the test file without relying on global test runner types.
 - **Manual Payload harness and destructive test DB reset guards:** Fixed `tests/manual/test-config.mts` so the direct `npx tsx` command resolves project source modules, and tightened `recreate-test-db.js` so destructive resets require a `_test` database name or exact confirmation env.
 - **DB check script safety:** Removed hardcoded PostgreSQL credentials and fixed destructive database targets from `scripts/db-checks`
   - DB check scripts now read connection details from `DATABASE_URL` or `TEST_DATABASE_URL`
