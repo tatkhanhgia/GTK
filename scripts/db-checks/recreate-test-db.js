@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 const { Client } = require('pg');
 const {
   getMaintenanceDatabaseUrl,
   quoteIdentifier,
-  requireMatchingTestDatabaseName,
+  requireRecreatableTestDatabaseName,
   requireTestDatabaseUrl,
 } = require('./database-url');
 
 async function main() {
   const testDatabaseUrl = requireTestDatabaseUrl();
-  const databaseName = requireMatchingTestDatabaseName(testDatabaseUrl);
+  const databaseName = requireRecreatableTestDatabaseName(testDatabaseUrl);
   const client = new Client({ connectionString: getMaintenanceDatabaseUrl(testDatabaseUrl) });
 
   await client.connect();
