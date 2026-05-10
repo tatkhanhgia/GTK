@@ -26,10 +26,12 @@ interface ScrollRevealProps {
   className?: string
   /** Render as a section instead of a div. */
   as?: 'div' | 'section'
+  /** Stagger child motion elements when variants are provided downstream. */
+  stagger?: number
 }
 
 /**
- * ScrollReveal — lightweight wrapper that fades + slides its children
+ * ScrollReveal - lightweight wrapper that fades + slides its children
  * into view once per mount by default. It replays on route remounts without
  * looping during normal scroll, and honors prefers-reduced-motion.
  */
@@ -43,6 +45,7 @@ export function ScrollReveal({
   viewportMargin = revealViewport.margin,
   className,
   as = 'div',
+  stagger = 0,
 }: ScrollRevealProps) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -52,6 +55,13 @@ export function ScrollReveal({
   }
 
   const variants: Variants = createRevealVariants({ y, delay, duration })
+  const visible = variants.visible
+  if (visible && typeof visible === 'object' && 'transition' in visible && stagger) {
+    visible.transition = {
+      ...(visible.transition as object),
+      staggerChildren: stagger,
+    }
+  }
 
   const MotionTag = as === 'section' ? motion.section : motion.div
 

@@ -77,8 +77,11 @@
   --admin-shadow-lg: 0 24px 54px rgba(24, 21, 18, 0.14), 0 12px 28px rgba(24, 21, 18, 0.08);
 
   /* Motion */
-  --admin-transition-fast: 150ms ease;
-  --admin-transition-normal: 200ms ease;
+  --admin-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --admin-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --admin-transition-fast: 150ms var(--admin-ease-standard);
+  --admin-transition-normal: 200ms var(--admin-ease-enter);
+  --admin-transition-surface: 280ms var(--admin-ease-enter);
 
   /* Status color tokens — Anthropic earthy palette */
   /* Draft: warm stone (in-progress, calm) */
@@ -484,7 +487,7 @@ pre {
 
 /* Smooth transition for sidebar width changes */
 .custom-sidebar {
-  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--admin-transition-surface), transform var(--admin-transition-surface);
 }
 
 /* Semi-collapsed state - 72px width optimized for icon-only */
@@ -587,7 +590,7 @@ pre {
   font-weight: 700;
   font-size: 18px;
   box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: transform var(--admin-transition-normal), box-shadow var(--admin-transition-normal);
 }
 
 .custom-sidebar.w-\[72px\] .sidebar-logo:hover {

@@ -5,6 +5,7 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **Anthropic-inspired footer refresh:** Reworked public footer into a warm dark block with stronger contrast, clearer link hierarchy, accessible focus states, and larger social touch targets.
 - **Warm Editorial Motion System:** Centralized public-site motion presets and replay behavior for section reveals, counters, and reduced-motion users
   - Added `src/lib/motion/motion-presets.ts` for shared Motion durations, easing, viewport defaults, reveal variants, stagger variants, and counter transitions
   - `ScrollReveal` now defaults to one reveal per mount, replays naturally on route/remount, and exposes explicit `replayOnScroll` / `viewportMargin` controls
@@ -15,6 +16,7 @@ All significant changes to the GTK Blog project are documented here.
   - Added feature intake, story packet, decision, validation report, and high-risk story templates under `docs/`
   - Added `docs/TEST_MATRIX.md` as behavior-to-proof tracker seeded with current GTKBlog domains
   - Adapted harness architecture notes to reference existing Next.js/Payload/Better Auth architecture instead of generic greenfield guidance
+- **Anthropic-Inspired Motion Refresh:** Added shared public/admin motion tokens, smoother scroll/card/surface motion, and a meaningful homepage topic marquee with hover/focus pause plus reduced-motion static fallback.
 - **Safer Production CI/CD Phase 1:** Manual-only production workflow with validate → backup → explicit DB deploy → source deploy → `/api/health` verification → curl smoke tests
   - Added `npm run db:deploy` to run Payload schema sync and app DB bootstrap explicitly before app rebuild
   - Added `scripts/backup-production-db.sh` for timestamped Compose PostgreSQL dumps under git-ignored `backups/`
@@ -54,6 +56,8 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **PR CI typecheck for DB guard tests:** Imported Vitest test APIs explicitly in `database-url.test.ts` so `npx tsc --noEmit` can typecheck the test file without relying on global test runner types.
+- **Manual Payload harness and destructive test DB reset guards:** Fixed `tests/manual/test-config.mts` so the direct `npx tsx` command resolves project source modules, and tightened `recreate-test-db.js` so destructive resets require a `_test` database name or exact confirmation env.
 - **DB check script safety:** Removed hardcoded PostgreSQL credentials and fixed destructive database targets from `scripts/db-checks`
   - DB check scripts now read connection details from `DATABASE_URL` or `TEST_DATABASE_URL`
   - Test DB create/recreate scripts require `TEST_DATABASE_NAME`, require it to match `TEST_DATABASE_URL`, and refuse protected database names

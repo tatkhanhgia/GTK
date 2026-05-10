@@ -166,10 +166,13 @@ https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&fami
 ### Durations
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--duration-fast` | 150ms | Hover states, toggles |
-| `--duration-normal` | 250ms | General transitions |
-| `--duration-slow` | 400ms | Page transitions, modals |
-| `--duration-slower` | 600ms | Complex animations |
+| `--duration-fast` | 150ms | Focus, pressed states |
+| `--duration-micro` | 200ms | Hover states, toggles |
+| `--duration-normal` | 250ms | Cards, links, shared UI |
+| `--duration-surface` | 280ms | Sheets, menus, modals |
+| `--duration-route` | 320ms | Theme/page view transitions |
+| `--duration-section` | 400ms | Section reveal, media scale |
+| `--duration-marquee` | 48s | Meaningful ambient strips only |
 
 ### Easing
 - **Default:** `cubic-bezier(0.4, 0, 0.2, 1)` — smooth deceleration
@@ -190,6 +193,10 @@ https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&fami
 - Counters animate once per mount when visible. Under reduced motion, render the final value with no tween.
 - Keep editorial reading surfaces stable: avoid animating article paragraphs, code blocks, table-of-contents items, and long body content.
 
+Motion rules: use `cubic-bezier(0.16, 1, 0.3, 1)` for calm editorial entrances. Marquee is allowed only for real topic/resource content, must pause on hover/focus, and must not appear in article bodies.
+
+Avoid `transition-all`, layout property animation, and decorative infinite loops.
+
 ### Reduced Motion
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -199,6 +206,8 @@ https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&fami
   }
 }
 ```
+
+Marquee strips become static/wrapping under reduced motion.
 
 ## 7. Imagery & Media
 

@@ -1,3 +1,4 @@
+import '../../src/scripts/patch-next-env.cjs'
 import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -6,16 +7,27 @@ import { vi } from '@payloadcms/translations/languages/vi'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
-import { Users } from './src/collections/users.ts'
-import { Categories } from './src/collections/categories.ts'
-import { Media } from './src/collections/media.ts'
-import { Posts } from './src/collections/posts.ts'
-import { Products } from './src/collections/products.ts'
-import { Pages } from './src/collections/pages.ts'
-import { Translations } from './src/collections/translations.ts'
-import { AuthorProfile } from './src/globals/author-profile.ts'
-import { generatedTranslations } from './src/admin/i18n/generated-translations.ts'
-import { migrations } from './src/migrations/index.ts'
+import usersModule from '../../src/collections/users.ts'
+import categoriesModule from '../../src/collections/categories.ts'
+import mediaModule from '../../src/collections/media.ts'
+import postsModule from '../../src/collections/posts.ts'
+import productsModule from '../../src/collections/products.ts'
+import pagesModule from '../../src/collections/pages.ts'
+import translationsModule from '../../src/collections/translations.ts'
+import authorProfileModule from '../../src/globals/author-profile.ts'
+import generatedTranslationsModule from '../../src/admin/i18n/generated-translations.ts'
+import migrationsModule from '../../src/migrations/index.ts'
+
+const { Users } = usersModule
+const { Categories } = categoriesModule
+const { Media } = mediaModule
+const { Posts } = postsModule
+const { Products } = productsModule
+const { Pages } = pagesModule
+const { Translations } = translationsModule
+const { AuthorProfile } = authorProfileModule
+const { generatedTranslations } = generatedTranslationsModule
+const { migrations } = migrationsModule
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

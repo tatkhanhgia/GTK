@@ -55,7 +55,7 @@ export function TopicsGrid({ locale }: TopicsGridProps) {
           return (
             <article
               key={topic.titleEn}
-              className="rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md"
+              className="motion-card rounded-2xl border border-border bg-card p-6 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md"
             >
               <Icon className="h-8 w-8 text-primary" />
               <h3 className="mt-4 font-heading text-base font-semibold">

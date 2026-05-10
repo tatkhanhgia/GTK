@@ -8,6 +8,7 @@ import { ProductCard } from '@/components/ui/product-card'
 import { NewsletterSection } from '@/components/ui/newsletter-section'
 import { PhilosophySection } from '@/components/ui/philosophy-section'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { TopicMarquee } from '@/components/ui/topic-marquee'
 import { AchievementsSection } from '@/components/sections/achievements-section'
 import { getBlogStats } from '@/lib/author/get-blog-stats'
 import type { Locale } from '@/i18n/config'
@@ -101,6 +102,16 @@ export default async function HomePage({ params }: Props) {
           subtitle={t('achievements.subtitle')}
         />
       </div>
+
+      <TopicMarquee
+        eyebrow={loc === 'vi' ? 'Dang tap trung' : 'Now exploring'}
+        items={[
+          ...blogStats.map((item) => item.label),
+          loc === 'vi' ? 'AI thuc chien' : 'Practical AI',
+          loc === 'vi' ? 'Next.js va Payload' : 'Next.js and Payload',
+          loc === 'vi' ? 'San pham so' : 'Digital products',
+        ]}
+      />
 
       {/* Featured Posts */}
       {postsResult.docs.length > 0 && (

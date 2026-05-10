@@ -48,7 +48,7 @@ export function TimelineSection({ timeline, locale, context }: TimelineSectionPr
                 className={cn(
                   'absolute top-0.5 h-4 w-4 rounded-full border-2 border-background bg-primary ring-4 ring-primary/20',
                   '-left-[43px] md:-left-[49px]',
-                  shouldAnimate && 'transition-all group-hover:scale-110 group-hover:ring-primary/40'
+                  shouldAnimate && 'transition-[box-shadow,transform] duration-200 ease-enter group-hover:scale-110 group-hover:ring-primary/40'
                 )}
               />
               <div className="mb-1 flex flex-wrap items-center gap-2 md:gap-3">

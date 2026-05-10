@@ -47,6 +47,20 @@ function requireMatchingTestDatabaseName(connectionString) {
   return databaseName;
 }
 
+function requireRecreatableTestDatabaseName(connectionString) {
+  const databaseName = requireMatchingTestDatabaseName(connectionString);
+  const confirmationName = process.env.CONFIRM_RECREATE_TEST_DATABASE_NAME;
+
+  if (databaseName.endsWith('_test') || confirmationName === databaseName) {
+    return databaseName;
+  }
+
+  throw new Error(
+    'Refusing to recreate database without a _test suffix. ' +
+      'Set CONFIRM_RECREATE_TEST_DATABASE_NAME to the exact database name to override.'
+  );
+}
+
 function getMaintenanceDatabaseUrl(connectionString) {
   const url = new URL(connectionString);
   url.pathname = `/${process.env.DB_CHECK_MAINTENANCE_DATABASE || 'postgres'}`;
@@ -63,6 +77,7 @@ module.exports = {
   quoteIdentifier,
   requireDatabaseUrl,
   requireMatchingTestDatabaseName,
+  requireRecreatableTestDatabaseName,
   requireTestDatabaseName,
   requireTestDatabaseUrl,
 };
