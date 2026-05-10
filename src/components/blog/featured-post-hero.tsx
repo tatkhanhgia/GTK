@@ -36,7 +36,7 @@ export function FeaturedPostHero({
               src={featuredImage.url}
               alt={featuredImage.alt}
               fill
-              className="object-cover transition-transform duration-400 group-hover:scale-103"
+              className="motion-media object-cover group-hover:scale-103"
               sizes="(max-width: 768px) 100vw, 1200px"
             />
           ) : (

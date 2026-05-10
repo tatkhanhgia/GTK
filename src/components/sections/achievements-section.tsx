@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { motion, useReducedMotion, type Variants } from 'motion/react'
 import { AnimatedCounter } from '@/components/ui/animated-counter'
+import { createStaggerContainer, motionTransitions } from '@/lib/motion/motion-presets'
 
 // Type definitions live next to the sole consumer component so data-fetching
 // helpers can depend on them without pulling in extra modules.
@@ -75,24 +76,19 @@ export function AchievementsSection({
 
   if (achievements.length === 0) return null
 
-  const containerVariants: Variants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.1,
-        delayChildren: prefersReducedMotion ? 0 : 0.08,
-      },
-    },
-  }
+  const containerVariants: Variants = createStaggerContainer(
+    prefersReducedMotion ? 0 : 0.08,
+    prefersReducedMotion ? 0 : 0.04
+  )
 
   const itemVariants: Variants = prefersReducedMotion
     ? { hidden: { opacity: 1 }, visible: { opacity: 1 } }
     : {
-        hidden: { opacity: 0, y: 24 },
+        hidden: { opacity: 0, y: 18 },
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+          transition: motionTransitions.reveal,
         },
       }
 
@@ -163,7 +159,7 @@ export function AchievementsSection({
                 {/* Subtle gradient glow on hover */}
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-primary/0 via-primary/0 to-accent/0 opacity-0 transition-opacity duration-500 group-hover:from-primary/10 group-hover:to-accent/10 group-hover:opacity-100"
+                  className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-primary/0 via-primary/0 to-accent/0 opacity-0 transition-opacity duration-300 ease-enter group-hover:from-primary/10 group-hover:to-accent/10 group-hover:opacity-100"
                 />
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 md:h-14 md:w-14">
                   <Icon className="h-5 w-5 text-primary md:h-6 md:w-6" aria-hidden="true" />

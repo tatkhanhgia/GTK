@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion, type Variants } from 'motion/react'
 import type { ReactNode } from 'react'
+import { createRevealVariants, motionViewport } from '@/lib/motion/motion-presets'
 
 interface ScrollRevealProps {
   children: ReactNode
@@ -17,6 +18,8 @@ interface ScrollRevealProps {
   className?: string
   /** Render as a section instead of a div. */
   as?: 'div' | 'section'
+  /** Stagger child motion elements when variants are provided downstream. */
+  stagger?: number
 }
 
 /**
@@ -26,12 +29,13 @@ interface ScrollRevealProps {
  */
 export function ScrollReveal({
   children,
-  y = 28,
+  y = 18,
   delay = 0,
-  duration = 0.7,
-  amount = 0.15,
+  duration,
+  amount = motionViewport.amount,
   className,
   as = 'div',
+  stagger = 0,
 }: ScrollRevealProps) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -40,18 +44,14 @@ export function ScrollReveal({
     return <Tag className={className}>{children}</Tag>
   }
 
-  const variants: Variants = {
-    hidden: { opacity: 0, y },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration,
-        delay,
-        // Subtle ease-out curve (close to Apple's easeOutExpo).
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
+  const variants: Variants = createRevealVariants(y, delay)
+  const visible = variants.visible
+  if (visible && typeof visible === 'object' && 'transition' in visible) {
+    visible.transition = {
+      ...(visible.transition as object),
+      ...(duration ? { duration } : {}),
+      ...(stagger ? { staggerChildren: stagger } : {}),
+    }
   }
 
   const MotionTag = as === 'section' ? motion.section : motion.div
@@ -61,7 +61,7 @@ export function ScrollReveal({
       className={className}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount, margin: '0px 0px -80px 0px' }}
+      viewport={{ ...motionViewport, amount }}
       variants={variants}
     >
       {children}
