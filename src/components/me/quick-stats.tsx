@@ -1,4 +1,14 @@
-import { Calendar, FolderGit2, FileText } from 'lucide-react'
+'use client'
+
+import { Calendar, FileText, FolderGit2 } from 'lucide-react'
+import { motion, useReducedMotion, type Variants } from 'motion/react'
+import { AnimatedCounter } from '@/components/ui/animated-counter'
+import {
+  createRevealVariants,
+  createStaggerContainerVariants,
+  motionDurations,
+  revealViewport,
+} from '@/lib/motion/motion-presets'
 
 interface QuickStatsProps {
   yearsOfExperience?: number
@@ -7,10 +17,14 @@ interface QuickStatsProps {
   locale: string
 }
 
+function toCounterValue(value?: number) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
 export function QuickStats({
-  yearsOfExperience = 0,
-  projectsCompleted = 0,
-  postsPublished = 0,
+  yearsOfExperience,
+  projectsCompleted,
+  postsPublished,
   locale,
 }: QuickStatsProps) {
   const t = {
@@ -30,42 +44,68 @@ export function QuickStats({
 
   const stats = [
     {
-      value: yearsOfExperience || '+',
+      value: toCounterValue(yearsOfExperience),
       label: labels.years,
       icon: Calendar,
     },
     {
-      value: projectsCompleted || '+',
+      value: toCounterValue(projectsCompleted),
       label: labels.projects,
       icon: FolderGit2,
     },
     {
-      value: postsPublished || '+',
+      value: toCounterValue(postsPublished),
       label: labels.posts,
       icon: FileText,
     },
   ]
 
+  const prefersReducedMotion = useReducedMotion()
+  const containerVariants: Variants = createStaggerContainerVariants({
+    reducedMotion: Boolean(prefersReducedMotion),
+  })
+  const itemVariants: Variants = createRevealVariants({
+    y: 12,
+    duration: motionDurations.section,
+    reducedMotion: Boolean(prefersReducedMotion),
+  })
+
   return (
     <section className="rounded-2xl border border-border/60 bg-card/50 p-6 md:p-8">
-      <div className="grid grid-cols-3 gap-4 md:gap-8">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={revealViewport}
+        variants={containerVariants}
+        className="grid grid-cols-3 gap-4 md:gap-8"
+      >
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <div key={stat.label} className="text-center">
+            <motion.div
+              key={stat.label}
+              variants={itemVariants}
+              whileHover={prefersReducedMotion ? undefined : { y: -4 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              className="text-center"
+            >
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 md:h-14 md:w-14">
-                <Icon className="h-5 w-5 text-primary md:h-6 md:w-6" />
+                <Icon className="h-5 w-5 text-primary md:h-6 md:w-6" aria-hidden="true" />
               </div>
               <div className="font-heading text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                {typeof stat.value === 'number' ? stat.value : stat.value}
+                {stat.value !== null ? (
+                  <AnimatedCounter value={stat.value} startDelay={0.12} />
+                ) : (
+                  '+'
+                )}
               </div>
               <div className="mt-1 text-xs text-muted-foreground md:text-sm">
                 {stat.label}
               </div>
-            </div>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
     </section>
   )
 }

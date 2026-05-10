@@ -10,7 +10,7 @@ import { QuickStats } from '@/components/me/quick-stats'
 import { BlogCard } from '@/components/ui/blog-card'
 import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
 import { PhilosophySection } from '@/components/ui/philosophy-section'
-import { LazySection } from '@/components/ui/lazy-section'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
 interface Props {
   params: Promise<{ locale: string }>
@@ -234,7 +234,7 @@ export default async function MePage({ params }: Props) {
 
       <div className="space-y-16 md:space-y-20">
         {/* Hero Section */}
-        <section className="gradient-brand-subtle relative overflow-hidden rounded-3xl border border-border/60 px-6 py-12 md:px-10 md:py-14">
+        <ScrollReveal as="section" className="gradient-brand-subtle relative overflow-hidden rounded-3xl border border-border/60 px-6 py-12 md:px-10 md:py-14">
           <div className="ambient-warm absolute inset-0" />
           <div className="relative z-10">
             <BioSection
@@ -246,10 +246,10 @@ export default async function MePage({ params }: Props) {
               socialLinks={profile.socialLinks}
             />
           </div>
-        </section>
+        </ScrollReveal>
 
-        {/* At a Glance — Lazy loaded */}
-        <LazySection>
+        {/* At a Glance */}
+        <ScrollReveal>
           <section>
             <div className="mb-8">
               <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -268,11 +268,11 @@ export default async function MePage({ params }: Props) {
               locale={loc}
             />
           </section>
-        </LazySection>
+        </ScrollReveal>
 
-        {/* Timeline - Moments that matter — Lazy loaded */}
+        {/* Timeline - Moments that matter */}
         {profile.timeline?.length > 0 && (
-          <LazySection>
+          <ScrollReveal>
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -286,12 +286,12 @@ export default async function MePage({ params }: Props) {
               </div>
               <TimelineSection timeline={profile.timeline} locale={loc} context={timelineContext} />
             </section>
-          </LazySection>
+          </ScrollReveal>
         )}
 
-        {/* Skills - My Stack — Lazy loaded */}
+        {/* Skills - My Stack */}
         {profile.skills?.length > 0 && (
-          <LazySection>
+          <ScrollReveal>
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -305,12 +305,12 @@ export default async function MePage({ params }: Props) {
               </div>
               <SkillsGrid skills={profile.skills} locale={loc} />
             </section>
-          </LazySection>
+          </ScrollReveal>
         )}
 
-        {/* Principles - What I Believe — Lazy loaded */}
+        {/* Principles - What I Believe */}
         {(principles.length > 0 || philosophyPrinciples.length > 0 || Boolean(philosophyStory)) && (
-          <LazySection>
+          <ScrollReveal>
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -345,22 +345,22 @@ export default async function MePage({ params }: Props) {
                 </div>
               )}
             </section>
-          </LazySection>
+          </ScrollReveal>
         )}
 
-        {/* Currently Building — Lazy loaded */}
+        {/* Currently Building */}
         {Boolean(buildingNow) && (
-          <LazySection>
+          <ScrollReveal>
             <section className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
               <h2 className="mb-4 font-heading text-2xl font-semibold">{t.buildingNow}</h2>
               <RichTextRenderer content={buildingNow} />
             </section>
-          </LazySection>
+          </ScrollReveal>
         )}
 
-        {/* Blog Posts — Lazy loaded */}
+        {/* Blog Posts */}
         {writingToRender.length > 0 && (
-          <LazySection>
+          <ScrollReveal>
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">{t.selectedWriting}</h2>
@@ -388,11 +388,13 @@ export default async function MePage({ params }: Props) {
                 ))}
               </div>
             </section>
-          </LazySection>
+          </ScrollReveal>
         )}
 
         {/* Contact Form */}
-        <ContactForm locale={loc} translations={t} ctaText={contactCtaText} />
+        <ScrollReveal>
+          <ContactForm locale={loc} translations={t} ctaText={contactCtaText} />
+        </ScrollReveal>
       </div>
     </div>
   )

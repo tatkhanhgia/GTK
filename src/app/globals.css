@@ -283,18 +283,6 @@ h4 { font-size: 1.125rem; }
   background: radial-gradient(circle, rgba(217, 119, 87, 0.06) 0%, transparent 70%);
 }
 
-/* ============================================================
-   Accessibility — Reduced Motion
-   ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 @theme inline {
   --font-heading: "Space Grotesk", sans-serif;
   --font-body: "Be Vietnam Pro", sans-serif;
@@ -355,16 +343,10 @@ h4 { font-size: 1.125rem; }
    Mobile Responsiveness — Animation Reduction
    ============================================================ */
 
-/* Mobile: Reduce animations for performance */
 @media (max-width: 768px) {
   .ambient-warm {
     animation: none !important;
     opacity: 0.3;
-  }
-
-  /* Simplify transitions */
-  * {
-    transition-duration: 0.15s !important;
   }
 }
 
@@ -372,10 +354,14 @@ h4 { font-size: 1.125rem; }
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
-  *::after {
+  *::after,
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0.01ms !important;
   }
 }
 

@@ -2,6 +2,11 @@
 
 import { motion, useReducedMotion, type Variants } from 'motion/react'
 import type { ReactNode } from 'react'
+import {
+  createRevealVariants,
+  motionDurations,
+  revealViewport,
+} from '@/lib/motion/motion-presets'
 
 interface ScrollRevealProps {
   children: ReactNode
@@ -13,6 +18,10 @@ interface ScrollRevealProps {
   duration?: number
   /** Viewport threshold: 0 = first pixel, 1 = fully visible. */
   amount?: number
+  /** Re-run when scrolling away and back. Defaults to one reveal per mount. */
+  replayOnScroll?: boolean
+  /** Intersection margin for early/late reveal. */
+  viewportMargin?: string
   /** Extra className applied to the wrapper element. */
   className?: string
   /** Render as a section instead of a div. */
@@ -21,15 +30,17 @@ interface ScrollRevealProps {
 
 /**
  * ScrollReveal — lightweight wrapper that fades + slides its children
- * into view the first time they intersect the viewport. Honors the user's
- * prefers-reduced-motion setting by rendering a plain wrapper with no motion.
+ * into view once per mount by default. It replays on route remounts without
+ * looping during normal scroll, and honors prefers-reduced-motion.
  */
 export function ScrollReveal({
   children,
-  y = 28,
+  y = 12,
   delay = 0,
-  duration = 0.7,
-  amount = 0.15,
+  duration = motionDurations.section,
+  amount = revealViewport.amount,
+  replayOnScroll = false,
+  viewportMargin = revealViewport.margin,
   className,
   as = 'div',
 }: ScrollRevealProps) {
@@ -40,19 +51,7 @@ export function ScrollReveal({
     return <Tag className={className}>{children}</Tag>
   }
 
-  const variants: Variants = {
-    hidden: { opacity: 0, y },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration,
-        delay,
-        // Subtle ease-out curve (close to Apple's easeOutExpo).
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
-  }
+  const variants: Variants = createRevealVariants({ y, delay, duration })
 
   const MotionTag = as === 'section' ? motion.section : motion.div
 
@@ -61,7 +60,7 @@ export function ScrollReveal({
       className={className}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount, margin: '0px 0px -80px 0px' }}
+      viewport={{ once: !replayOnScroll, amount, margin: viewportMargin }}
       variants={variants}
     >
       {children}

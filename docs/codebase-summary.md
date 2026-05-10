@@ -125,8 +125,8 @@ src/
 │       ├── product-card.tsx      # Product grid card
 │       ├── search-input.tsx      # Client-side blog search field shell
 │       ├── skeleton-page-layouts.tsx # Page-level skeleton screens (9 layouts for route loading states)
-│       ├── scroll-reveal.tsx     # Fade+slide-up on viewport intersect (motion v12, respects reduced-motion)
-│       ├── animated-counter.tsx  # Count-up on view w/ ease-out-expo easing
+│       ├── scroll-reveal.tsx     # Section reveal on viewport intersect; once per mount by default
+│       ├── animated-counter.tsx  # Count-up on view with shared motion presets and reduced-motion fallback
 │       └── ...
 │
 ├── admin/                        # Payload admin custom surface
@@ -173,6 +173,8 @@ src/
 │       └── index.ts              # Schema exports
 │
 ├── lib/                          # Business logic & utilities
+│   ├── motion/
+│   │   └── motion-presets.ts     # Shared public-site Motion durations, easing, viewport, reveal, stagger, counter helpers
 │   ├── auth/
 │   │   ├── auth-config.ts        # Better Auth instance
 │   │   ├── auth-client.ts        # Client-side auth hooks

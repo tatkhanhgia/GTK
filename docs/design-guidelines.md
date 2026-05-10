@@ -183,6 +183,13 @@ https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&fami
 - **Page transition:** opacity crossfade, 300ms
 - **Skeleton loading:** pulse animation, 1.5s infinite
 
+### Public Site Motion Contract
+- Use `src/lib/motion/motion-presets.ts` for shared Motion values; avoid hardcoded easing/duration in feature components.
+- `ScrollReveal` is the default section-level entrance wrapper. It reveals once per component mount and replays naturally when routes remount after reload/navigation.
+- Do not enable scroll-loop replay unless the interaction specifically needs it; use `replayOnScroll` as an explicit opt-in.
+- Counters animate once per mount when visible. Under reduced motion, render the final value with no tween.
+- Keep editorial reading surfaces stable: avoid animating article paragraphs, code blocks, table-of-contents items, and long body content.
+
 ### Reduced Motion
 ```css
 @media (prefers-reduced-motion: reduce) {
