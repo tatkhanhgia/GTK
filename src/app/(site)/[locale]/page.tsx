@@ -69,7 +69,11 @@ export default async function HomePage({ params }: Props) {
   return (
     <main className="flex flex-col">
       {/* Hero Section */}
-      <ScrollReveal as="section" className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center">
+      <ScrollReveal
+        as="section"
+        preset="section"
+        className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center"
+      >
         <h1 className="mb-6 font-heading text-4xl font-bold md:text-5xl">
           {t('hero.title')}{' '}
           <span className="gradient-text-brand">{t('hero.titleHighlight')}</span>
@@ -115,16 +119,17 @@ export default async function HomePage({ params }: Props) {
 
       {/* Featured Posts */}
       {postsResult.docs.length > 0 && (
-        <ScrollReveal>
-          <section className="border-t border-border px-6 py-16">
-            <div className="mx-auto max-w-5xl">
+        <section className="border-t border-border px-6 py-16">
+          <div className="mx-auto max-w-5xl">
+            <ScrollReveal preset="heading">
               <div className="mb-8 flex items-center justify-between">
                 <h2 className="font-heading text-2xl font-bold">{t('featuredPosts')}</h2>
                 <Link href={`/${loc}/blog`} className="text-sm text-muted-foreground transition-colors hover:text-primary">
                   {loc === 'vi' ? 'Xem tất cả →' : 'View all →'}
                 </Link>
               </div>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            </ScrollReveal>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {postsResult.docs.map((post, index) => {
                   const featuredImage =
                     post.featuredImage && typeof post.featuredImage === 'object'
@@ -137,9 +142,8 @@ export default async function HomePage({ params }: Props) {
                   return (
                     <ScrollReveal
                       key={post.id}
-                      y={14}
-                      delay={Math.min(index * 0.04, 0.16)}
-                      viewport="card"
+                      preset="card"
+                      delay={Math.min(index * 0.045, 0.18)}
                     >
                       <BlogCard
                       title={getLocalizedText(post.title, loc) || post.slug}
@@ -154,24 +158,24 @@ export default async function HomePage({ params }: Props) {
                     </ScrollReveal>
                   )
                 })}
-              </div>
             </div>
-          </section>
-        </ScrollReveal>
+          </div>
+        </section>
       )}
 
       {/* Featured Products */}
       {productsResult.docs.length > 0 && (
-        <ScrollReveal>
-          <section className="border-t border-border bg-secondary/20 px-6 py-16">
-            <div className="mx-auto max-w-5xl">
+        <section className="border-t border-border bg-secondary/20 px-6 py-16">
+          <div className="mx-auto max-w-5xl">
+            <ScrollReveal preset="heading">
               <div className="mb-8 flex items-center justify-between">
                 <h2 className="font-heading text-2xl font-bold">{t('featuredProducts')}</h2>
                 <Link href={`/${loc}/products`} className="text-sm text-muted-foreground transition-colors hover:text-primary">
                   {loc === 'vi' ? 'Xem tất cả →' : 'View all →'}
                 </Link>
               </div>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            </ScrollReveal>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {productsResult.docs.map((product, index) => {
                   const firstImgBlock = Array.isArray(product.images) && product.images[0]
                     ? (product.images[0] as { image: unknown }).image
@@ -182,9 +186,8 @@ export default async function HomePage({ params }: Props) {
                   return (
                     <ScrollReveal
                       key={product.id}
-                      y={14}
-                      delay={Math.min(index * 0.04, 0.16)}
-                      viewport="card"
+                      preset="card"
+                      delay={Math.min(index * 0.045, 0.18)}
                     >
                       <ProductCard
                       name={typeof product.name === 'string' ? product.name : String(product.name)}
@@ -199,14 +202,13 @@ export default async function HomePage({ params }: Props) {
                     </ScrollReveal>
                   )
                 })}
-              </div>
             </div>
-          </section>
-        </ScrollReveal>
+          </div>
+        </section>
       )}
 
       {/* Newsletter */}
-      <ScrollReveal>
+      <ScrollReveal preset="section">
         <section className="border-t border-border px-6 py-16">
           <div className="mx-auto max-w-2xl">
             <NewsletterSection locale={loc} />
@@ -216,7 +218,7 @@ export default async function HomePage({ params }: Props) {
 
       {/* Personal Story & Philosophy */}
       {(story || principles.length > 0) && (
-        <ScrollReveal>
+        <ScrollReveal preset="section">
           <section className="border-t border-border bg-secondary/30 px-6 py-16">
             <div className="mx-auto max-w-4xl">
               <div className="mb-8 text-center">

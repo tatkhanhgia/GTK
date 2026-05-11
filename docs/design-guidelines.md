@@ -171,7 +171,8 @@ https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&fami
 | `--duration-normal` | 250ms | Cards, links, shared UI |
 | `--duration-surface` | 280ms | Sheets, menus, modals |
 | `--duration-route` | 320ms | Theme/page view transitions |
-| `--duration-section` | 400ms | Section reveal, media scale |
+| `--duration-section` | 440ms | Section reveal |
+| `--duration-reveal` | 380ms | Card/item reveal |
 | `--duration-marquee` | 48s | Meaningful ambient strips only |
 
 ### Easing
@@ -180,8 +181,10 @@ https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&fami
 - **Exit:** `cubic-bezier(0.4, 0, 1, 1)` — elements leaving
 
 ### Standard Animations
-- **Fade in:** opacity 0 to 1, translateY 8px to 0, 400ms
-- **Card hover:** translateY -2px, warm shadow increase, 250ms
+- **Section reveal:** opacity 0 to 1, translateY 24px to 0, 440ms
+- **Heading reveal:** opacity 0 to 1, translateY 16px to 0, 360ms
+- **Card reveal:** opacity 0 to 1, translateY 18px to 0, scale 0.985 to 1, 380ms
+- **Card hover:** translateY -2px or subtle opacity/scale response, 250ms; avoid animating shadow on scroll-linked surfaces
 - **Button hover:** scale 1.02, warm shadow lift, 200ms
 - **Page transition:** opacity crossfade, 300ms
 - **Skeleton loading:** pulse animation, 1.5s infinite
@@ -189,6 +192,7 @@ https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&fami
 ### Public Site Motion Contract
 - Use `src/lib/motion/motion-presets.ts` for shared Motion values; avoid hardcoded easing/duration in feature components.
 - `ScrollReveal` is the default section-level entrance wrapper. It reveals once per component mount and replays naturally when routes remount after reload/navigation.
+- Use `preset="heading"` for section headers and `preset="card"` for cards/items so content enters with editorial hierarchy instead of one uniform fade.
 - Do not enable scroll-loop replay unless the interaction specifically needs it; use `replayOnScroll` as an explicit opt-in.
 - Counters animate once per mount when visible. Under reduced motion, render the final value with no tween.
 - Keep editorial reading surfaces stable: avoid animating article paragraphs, code blocks, table-of-contents items, and long body content.

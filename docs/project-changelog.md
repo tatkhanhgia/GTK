@@ -5,6 +5,7 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **Editorial Scroll Reveal Polish:** Added Anthropic-style reveal presets for sections, headings, and cards, then applied them to homepage content so below-fold elements enter with clearer hierarchy and subtler card settling.
 - **Anthropic-inspired footer refresh:** Reworked public footer into a warm dark block with stronger contrast, clearer link hierarchy, accessible focus states, and larger social touch targets.
 - **Warm Editorial Motion System:** Centralized public-site motion presets and replay behavior for section reveals, counters, and reduced-motion users
   - Added `src/lib/motion/motion-presets.ts` for shared Motion durations, easing, viewport defaults, reveal variants, stagger variants, and counter transitions

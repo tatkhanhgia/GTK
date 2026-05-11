@@ -6,8 +6,8 @@ import { AnimatedCounter } from '@/components/ui/animated-counter'
 import {
   createRevealVariants,
   createStaggerContainerVariants,
-  motionDurations,
-  revealViewport,
+  motionViewport,
+  revealPresets,
 } from '@/lib/motion/motion-presets'
 
 interface QuickStatsProps {
@@ -65,8 +65,9 @@ export function QuickStats({
     reducedMotion: Boolean(prefersReducedMotion),
   })
   const itemVariants: Variants = createRevealVariants({
-    y: 12,
-    duration: motionDurations.section,
+    y: revealPresets.card.y,
+    scale: revealPresets.card.scale,
+    duration: revealPresets.card.duration,
     reducedMotion: Boolean(prefersReducedMotion),
   })
 
@@ -75,7 +76,7 @@ export function QuickStats({
       <motion.div
         initial="hidden"
         whileInView="visible"
-        viewport={revealViewport}
+        viewport={motionViewport.editorialCard}
         variants={containerVariants}
         className="grid grid-cols-3 gap-4 md:gap-8"
       >
