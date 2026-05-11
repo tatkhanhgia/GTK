@@ -40,7 +40,7 @@ export function Navbar({ locale = 'vi' }: NavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
         {/* Logo */}
-        <LogoInline showText />
+        <LogoInline showText href={`/${locale}`} />
 
         {/* Desktop Nav — center */}
         <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
@@ -49,8 +49,8 @@ export function Navbar({ locale = 'vi' }: NavbarProps) {
               key={link.href}
               href={`/${locale}${link.href}`}
               className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
-                'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                'rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-fast ease-enter',
+                'text-muted-foreground hover:bg-secondary hover:text-foreground'
               )}
             >
               {locale === 'vi' ? link.labelVi : link.label}
@@ -101,7 +101,7 @@ export function Navbar({ locale = 'vi' }: NavbarProps) {
                     key={link.href}
                     href={`/${locale}${link.href}`}
                     onClick={() => setIsOpen(false)}
-                    className="px-4 py-3 rounded-lg font-medium hover:bg-secondary transition-colors"
+                    className="motion-surface rounded-lg px-4 py-3 font-medium hover:bg-secondary"
                   >
                     {locale === 'vi' ? link.labelVi : link.label}
                   </Link>

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import {
   createRevealVariants,
   motionDurations,
+  motionViewport,
   revealViewport,
 } from '@/lib/motion/motion-presets'
 
@@ -28,6 +29,8 @@ interface ScrollRevealProps {
   as?: 'div' | 'section'
   /** Stagger child motion elements when variants are provided downstream. */
   stagger?: number
+  /** Preset viewport behavior for large sections or card grids. */
+  viewport?: keyof typeof motionViewport
 }
 
 /**
@@ -42,10 +45,11 @@ export function ScrollReveal({
   duration = motionDurations.section,
   amount = revealViewport.amount,
   replayOnScroll = false,
-  viewportMargin = revealViewport.margin,
+  viewportMargin,
   className,
   as = 'div',
   stagger = 0,
+  viewport,
 }: ScrollRevealProps) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -63,6 +67,7 @@ export function ScrollReveal({
     }
   }
 
+  const viewportSettings = viewport ? motionViewport[viewport] : revealViewport
   const MotionTag = as === 'section' ? motion.section : motion.div
 
   return (
@@ -70,7 +75,11 @@ export function ScrollReveal({
       className={className}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: !replayOnScroll, amount, margin: viewportMargin }}
+      viewport={{
+        once: !replayOnScroll,
+        amount: amount ?? viewportSettings.amount,
+        margin: viewportMargin ?? viewportSettings.margin,
+      }}
       variants={variants}
     >
       {children}

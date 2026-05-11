@@ -63,7 +63,7 @@ export function PaymentButtons({
       <button
         onClick={handleStripe}
         disabled={stripeLoading}
-        className={cn(buttonVariants({ size: 'lg' }), 'w-full gap-2')}
+        className={cn(buttonVariants({ size: 'lg' }), 'w-full gap-2 motion-surface active:translate-y-px')}
       >
         {stripeLoading
           ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -77,7 +77,7 @@ export function PaymentButtons({
         <button
           type="button"
           onClick={onSepayClick}
-          className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'w-full gap-2')}
+          className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'w-full gap-2 motion-surface active:translate-y-px')}
         >
           <QrCode className="h-4 w-4" />
           {`Chuyển khoản VietQR (${formatPrice(priceVND, 'VND', 'vi')})`}

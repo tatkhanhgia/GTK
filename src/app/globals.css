@@ -386,6 +386,15 @@ h4 { font-size: 1.125rem; }
   transition: transform var(--duration-section) var(--ease-enter);
 }
 
+.motion-surface {
+  transition:
+    opacity var(--duration-surface) var(--ease-enter),
+    transform var(--duration-surface) var(--ease-enter),
+    box-shadow var(--duration-surface) var(--ease-enter),
+    border-color var(--duration-surface) var(--ease-enter),
+    background-color var(--duration-surface) var(--ease-enter);
+}
+
 .motion-marquee {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);

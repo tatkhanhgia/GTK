@@ -7,15 +7,16 @@ interface LogoProps {
   variant?: 'v1' | 'v2' | 'v3' | 'v4'
   showText?: boolean
   className?: string
+  href?: string
 }
 
-export function Logo({ variant = 'v1', showText = true, className }: LogoProps) {
+export function Logo({ variant = 'v1', showText = true, className, href = '/' }: LogoProps) {
   const logoSrc = `/logo-gtkblog-${variant}.svg`
 
   if (variant === 'v4') {
     // V4 is wordmark only
     return (
-      <Link href="/" className={`flex items-center ${className}`}>
+      <Link href={href} className={`flex items-center ${className}`}>
         <Image
           src={logoSrc}
           alt="GTKBlog"
@@ -29,7 +30,7 @@ export function Logo({ variant = 'v1', showText = true, className }: LogoProps) 
   }
 
   return (
-    <Link href="/" className={`flex items-center gap-3 ${className}`}>
+    <Link href={href} className={`flex items-center gap-3 ${className}`}>
       <Image
         src={logoSrc}
         alt="GTKBlog"
@@ -48,9 +49,9 @@ export function Logo({ variant = 'v1', showText = true, className }: LogoProps) 
 }
 
 // Inline SVG version for better performance (no image loading)
-export function LogoInline({ showText = true, className }: Omit<LogoProps, 'variant'>) {
+export function LogoInline({ showText = true, className, href = '/' }: Omit<LogoProps, 'variant'>) {
   return (
-    <Link href="/" className={`flex items-center gap-3 ${className}`}>
+    <Link href={href} className={`flex items-center gap-3 ${className}`}>
       {/* V1 style inline SVG */}
       <svg
         viewBox="0 0 200 200"
