@@ -286,6 +286,69 @@ h4 { font-size: 1.125rem; }
   background: radial-gradient(circle, rgba(217, 119, 87, 0.06) 0%, transparent 70%);
 }
 
+.hero-interaction-frame {
+  --hero-pointer-x: 50%;
+  --hero-pointer-y: 44%;
+  --hero-pointer-opacity: 0;
+}
+
+.hero-intelligence-grid {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--foreground) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--foreground) 10%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, black 38%, transparent 76%);
+  mask-image: radial-gradient(ellipse at center, black 0%, black 38%, transparent 76%);
+}
+
+.hero-pointer-spotlight {
+  background:
+    radial-gradient(
+      circle at var(--hero-pointer-x) var(--hero-pointer-y),
+      color-mix(in oklab, var(--primary) 22%, transparent) 0%,
+      color-mix(in oklab, var(--success) 10%, transparent) 18%,
+      transparent 36%
+    );
+  opacity: var(--hero-pointer-opacity);
+  transition: opacity 220ms var(--ease-enter);
+}
+
+.hero-intelligence-glass {
+  scale: 1;
+  box-shadow:
+    inset 0 0 60px color-mix(in oklab, var(--primary) 9%, transparent),
+    0 0 90px color-mix(in oklab, var(--primary) 10%, transparent);
+  transition:
+    border-color var(--duration-surface) var(--ease-enter),
+    box-shadow var(--duration-surface) var(--ease-enter),
+    scale var(--duration-surface) var(--ease-enter);
+}
+
+.hero-signal-line {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--primary) 46%, transparent),
+    color-mix(in oklab, var(--success) 28%, transparent),
+    transparent
+  );
+  opacity: 0.58;
+  animation: hero-signal-drift 9s var(--ease-enter) infinite;
+  transition:
+    opacity var(--duration-surface) var(--ease-enter),
+    filter var(--duration-surface) var(--ease-enter);
+}
+
+.hero-signal-node {
+  background: color-mix(in oklab, var(--primary) 72%, var(--background));
+  box-shadow: 0 0 20px color-mix(in oklab, var(--primary) 36%, transparent);
+  opacity: 0.72;
+  animation: hero-node-pulse 6s var(--ease-enter) infinite;
+  transition:
+    opacity var(--duration-surface) var(--ease-enter),
+    transform var(--duration-surface) var(--ease-enter);
+}
+
 @theme inline {
   --font-heading: "Space Grotesk", sans-serif;
   --font-body: "Be Vietnam Pro", sans-serif;
@@ -422,6 +485,50 @@ h4 { font-size: 1.125rem; }
   }
 }
 
+@keyframes hero-signal-drift {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate3d(-12px, 0, 0) scaleX(0.84);
+  }
+  45% {
+    opacity: 0.68;
+    transform: translate3d(18px, 0, 0) scaleX(1);
+  }
+}
+
+@keyframes hero-node-pulse {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scale(0.82);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-interaction-frame[data-hero-active='true'] .hero-intelligence-glass {
+    border-color: color-mix(in oklab, var(--primary) 22%, transparent);
+    box-shadow:
+      inset 0 0 76px color-mix(in oklab, var(--primary) 13%, transparent),
+      0 0 120px color-mix(in oklab, var(--primary) 16%, transparent);
+    scale: 1.015;
+  }
+
+  .hero-interaction-frame[data-hero-active='true'] .hero-signal-line {
+    opacity: 0.82;
+    filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 34%, transparent));
+    animation-duration: 5.2s;
+  }
+
+  .hero-interaction-frame[data-hero-active='true'] .hero-signal-node {
+    opacity: 0.92;
+  }
+}
+
 /* Touch target sizing — minimum 44px for accessibility */
 .touch-target {
   min-height: 44px;
@@ -458,5 +565,14 @@ h4 { font-size: 1.125rem; }
     animation: none !important;
     flex-wrap: wrap;
     width: auto;
+  }
+
+  .hero-signal-line,
+  .hero-signal-node {
+    animation: none !important;
+  }
+
+  .hero-pointer-spotlight {
+    display: none;
   }
 }

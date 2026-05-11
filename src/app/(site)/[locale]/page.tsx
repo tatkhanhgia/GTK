@@ -10,6 +10,10 @@ import { PhilosophySection } from '@/components/ui/philosophy-section'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { TopicMarquee } from '@/components/ui/topic-marquee'
 import { AchievementsSection } from '@/components/sections/achievements-section'
+import {
+  HeroIntelligenceBackground,
+  HeroInteractionFrame,
+} from '@/components/sections/hero-intelligence-background'
 import { getBlogStats } from '@/lib/author/get-blog-stats'
 import type { Locale } from '@/i18n/config'
 
@@ -72,29 +76,34 @@ export default async function HomePage({ params }: Props) {
       <ScrollReveal
         as="section"
         preset="section"
-        className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center"
+        className="relative min-h-[60vh] overflow-hidden text-center"
       >
-        <h1 className="mb-6 font-heading text-4xl font-bold md:text-5xl">
-          {t('hero.title')}{' '}
-          <span className="gradient-text-brand">{t('hero.titleHighlight')}</span>
-        </h1>
-        <p className="max-w-xl text-lg text-muted-foreground">
-          {heroTagline || t('hero.subtitle')}
-        </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Link
-            href="/blog"
-            className="motion-surface inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 font-medium text-primary-foreground hover:-translate-y-0.5 hover:opacity-90"
-          >
-            {t('hero.ctaBlog')}
-          </Link>
-          <Link
-            href="/products"
-            className="motion-surface inline-flex h-11 items-center justify-center rounded-lg border border-border bg-secondary px-6 font-medium text-secondary-foreground hover:-translate-y-0.5 hover:bg-secondary/80"
-          >
-            {t('hero.ctaProducts')}
-          </Link>
-        </div>
+        <HeroInteractionFrame>
+          <HeroIntelligenceBackground />
+          <div className="relative z-10 flex flex-col items-center">
+            <h1 className="mb-6 max-w-3xl font-heading text-4xl font-bold md:text-5xl">
+              {t('hero.title')}{' '}
+              <span className="gradient-text-brand">{t('hero.titleHighlight')}</span>
+            </h1>
+            <p className="max-w-xl text-lg text-muted-foreground">
+              {heroTagline || t('hero.subtitle')}
+            </p>
+            <div className="mt-10 flex flex-wrap justify-center gap-4">
+              <Link
+                href="/blog"
+                className="motion-surface inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 font-medium text-primary-foreground shadow-[0_12px_30px_color-mix(in_oklab,var(--primary)_20%,transparent)] hover:-translate-y-0.5 hover:opacity-90"
+              >
+                {t('hero.ctaBlog')}
+              </Link>
+              <Link
+                href="/products"
+                className="motion-surface inline-flex h-11 items-center justify-center rounded-lg border border-border bg-secondary/90 px-6 font-medium text-secondary-foreground backdrop-blur hover:-translate-y-0.5 hover:bg-secondary"
+              >
+                {t('hero.ctaProducts')}
+              </Link>
+            </div>
+          </div>
+        </HeroInteractionFrame>
       </ScrollReveal>
 
       {/* Achievements Section — real blog/store counts, not career stats */}
