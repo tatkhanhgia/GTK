@@ -153,10 +153,27 @@ jobs:
             . ./.env.deploy
             set +a
 
+            cleanup_gtkblog_docker_images() {
+              printf 'Docker disk usage before cleanup:\n'
+              docker system df || true
+
+              docker images "${{ env.IMAGE_NAME }}" --format '{{.Repository}}:{{.Tag}} {{.ID}}' \
+                | awk -v keep="${APP_IMAGE}" '$1 != keep { print $2 }' \
+                | sort -u \
+                | xargs -r docker rmi || true
+
+              docker image prune -f || true
+              docker builder prune -af || true
+
+              printf 'Docker disk usage after cleanup:\n'
+              docker system df || true
+            }
+
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            cleanup_gtkblog_docker_images
             docker compose pull app
             docker compose up -d --no-build app
-            docker image prune -f
+            cleanup_gtkblog_docker_images
 
             printf 'Deployed image: %s\n' "${APP_IMAGE}"
             printf 'Deployed commit: %s\n' "${GIT_COMMIT_SHA}"

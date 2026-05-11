@@ -58,6 +58,7 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **Production deploy disk exhaustion:** Scoped VPS Docker cleanup to old `ghcr.io/*/gtkblog` images before/after pull, pruned build cache, and added default 14-day database backup retention.
 - **Locale-aware logo home navigation:** Header logo now links to the active locale home path (`/vi` or `/en`) instead of `/`, preventing English sessions from falling back to Vietnamese.
 - **PR CI typecheck for DB guard tests:** Imported Vitest test APIs explicitly in `database-url.test.ts` so `npx tsc --noEmit` can typecheck the test file without relying on global test runner types.
 - **Manual Payload harness and destructive test DB reset guards:** Fixed `tests/manual/test-config.mts` so the direct `npx tsx` command resolves project source modules, and tightened `recreate-test-db.js` so destructive resets require a `_test` database name or exact confirmation env.
