@@ -8,8 +8,8 @@ export const motionDurations = {
   surface: 0.28,
   page: 0.32,
   route: 0.32,
-  section: 0.4,
-  reveal: 0.4,
+  section: 0.44,
+  reveal: 0.38,
   slow: 0.48,
   counter: 0.9,
 } as const
@@ -46,10 +46,21 @@ export const revealViewport = {
 export const motionViewport = {
   section: revealViewport,
   card: { once: true, amount: 0.12, margin: '0px 0px -56px 0px' },
+  editorialSection: { once: true, amount: 0.12, margin: '0px 0px -120px 0px' },
+  editorialHeading: { once: true, amount: 0.2, margin: '0px 0px -96px 0px' },
+  editorialCard: { once: true, amount: 0.1, margin: '0px 0px -72px 0px' },
+} as const
+
+export const revealPresets = {
+  default: { y: 12, duration: motionDurations.section, scale: 1, viewport: 'section' },
+  section: { y: 24, duration: motionDurations.section, scale: 1, viewport: 'editorialSection' },
+  heading: { y: 16, duration: 0.36, scale: 1, viewport: 'editorialHeading' },
+  card: { y: 18, duration: motionDurations.reveal, scale: 0.985, viewport: 'editorialCard' },
 } as const
 
 interface RevealVariantOptions {
   y?: number
+  scale?: number
   delay?: number
   duration?: number
   reducedMotion?: boolean
@@ -57,6 +68,7 @@ interface RevealVariantOptions {
 
 export function createRevealVariants({
   y = 12,
+  scale = 1,
   delay = 0,
   duration = motionDurations.section,
   reducedMotion = false,
@@ -69,10 +81,11 @@ export function createRevealVariants({
   }
 
   return {
-    hidden: { opacity: 0, y },
+    hidden: { opacity: 0, y, scale },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: {
         duration,
         delay,

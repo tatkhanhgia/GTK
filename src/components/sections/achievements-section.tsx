@@ -18,8 +18,8 @@ import { AnimatedCounter } from '@/components/ui/animated-counter'
 import {
   createRevealVariants,
   createStaggerContainerVariants,
-  motionDurations,
-  revealViewport,
+  motionViewport,
+  revealPresets,
 } from '@/lib/motion/motion-presets'
 
 // Type definitions live next to the sole consumer component so data-fetching
@@ -85,8 +85,9 @@ export function AchievementsSection({
     reducedMotion: Boolean(prefersReducedMotion),
   })
   const itemVariants: Variants = createRevealVariants({
-    y: 12,
-    duration: motionDurations.section,
+    y: revealPresets.card.y,
+    scale: revealPresets.card.scale,
+    duration: revealPresets.card.duration,
     reducedMotion: Boolean(prefersReducedMotion),
   })
 
@@ -109,7 +110,7 @@ export function AchievementsSection({
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ ...revealViewport, amount: 0.2 }}
+          viewport={motionViewport.editorialHeading}
           variants={containerVariants}
           className="mb-10 text-center md:mb-14"
         >
@@ -140,7 +141,7 @@ export function AchievementsSection({
         <motion.ul
           initial="hidden"
           whileInView="visible"
-          viewport={revealViewport}
+          viewport={motionViewport.editorialCard}
           variants={containerVariants}
           className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${mdCols} md:gap-6`}
         >

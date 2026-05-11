@@ -6,11 +6,14 @@ import {
   createRevealVariants,
   motionDurations,
   motionViewport,
+  revealPresets,
   revealViewport,
 } from '@/lib/motion/motion-presets'
 
 interface ScrollRevealProps {
   children: ReactNode
+  /** Editorial motion preset for section, heading, or card reveals. */
+  preset?: keyof typeof revealPresets
   /** Vertical offset (px) from which the element animates in. */
   y?: number
   /** Animation delay in seconds. */
@@ -40,10 +43,11 @@ interface ScrollRevealProps {
  */
 export function ScrollReveal({
   children,
-  y = 12,
+  preset = 'default',
+  y,
   delay = 0,
-  duration = motionDurations.section,
-  amount = revealViewport.amount,
+  duration,
+  amount,
   replayOnScroll = false,
   viewportMargin,
   className,
@@ -52,13 +56,19 @@ export function ScrollReveal({
   viewport,
 }: ScrollRevealProps) {
   const prefersReducedMotion = useReducedMotion()
+  const revealPreset = revealPresets[preset]
 
   if (prefersReducedMotion) {
     const Tag = as
     return <Tag className={className}>{children}</Tag>
   }
 
-  const variants: Variants = createRevealVariants({ y, delay, duration })
+  const variants: Variants = createRevealVariants({
+    y: y ?? revealPreset.y,
+    scale: revealPreset.scale,
+    delay,
+    duration: duration ?? revealPreset.duration ?? motionDurations.section,
+  })
   const visible = variants.visible
   if (visible && typeof visible === 'object' && 'transition' in visible && stagger) {
     visible.transition = {
@@ -67,7 +77,9 @@ export function ScrollReveal({
     }
   }
 
-  const viewportSettings = viewport ? motionViewport[viewport] : revealViewport
+  const viewportSettings = viewport
+    ? motionViewport[viewport]
+    : motionViewport[revealPreset.viewport] ?? revealViewport
   const MotionTag = as === 'section' ? motion.section : motion.div
 
   return (
