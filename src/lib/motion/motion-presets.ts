@@ -43,7 +43,10 @@ export const revealViewport = {
   margin: '0px 0px -80px 0px',
 } as const
 
-export const motionViewport = revealViewport
+export const motionViewport = {
+  section: revealViewport,
+  card: { once: true, amount: 0.12, margin: '0px 0px -56px 0px' },
+} as const
 
 interface RevealVariantOptions {
   y?: number
@@ -108,6 +111,21 @@ export function createStaggerContainer(
   return createStaggerContainerVariants({ staggerChildren, delayChildren })
 }
 
+export function getRevealVariants(
+  y = 20,
+  delay = 0,
+  duration: number = motionDurations.section
+): Variants {
+  return createRevealVariants({ y, delay, duration })
+}
+
+export function getStaggerTransition(itemCount = 0): Transition {
+  return {
+    staggerChildren: itemCount > 0 ? Math.min(0.06, 0.24 / itemCount) : motionStagger.child,
+    delayChildren: 0.04,
+  }
+}
+
 export function createCounterTransition(duration: number, delay = 0.12): Transition {
   return {
     duration,
@@ -139,3 +157,8 @@ export const surfaceVariants: Variants = {
     transition: { duration: motionDurations.quick, ease: motionEasings.exit },
   },
 }
+
+export const cardHoverMotion = {
+  y: -3,
+  transition: { type: 'spring', stiffness: 320, damping: 28 },
+} as const

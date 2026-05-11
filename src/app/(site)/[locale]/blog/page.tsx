@@ -128,7 +128,7 @@ export default async function BlogPage({ params, searchParams }: Props) {
               </div>
             ) : gridPosts.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {gridPosts.map((post) => {
+                {gridPosts.map((post, index) => {
                   const featuredImage =
                     post.featuredImage && typeof post.featuredImage === 'object'
                       ? {
@@ -145,17 +145,23 @@ export default async function BlogPage({ params, searchParams }: Props) {
                       : null
 
                   return (
-                    <BlogCard
+                    <ScrollReveal
                       key={post.id}
-                      title={getLocalizedText(post.title, loc) || post.slug}
-                      slug={post.slug}
-                      excerpt={getLocalizedText(post.excerpt, loc)}
-                      featuredImage={featuredImage}
-                      category={cat}
-                      publishedAt={post.publishedAt ?? undefined}
-                      readingTime={post.readingTime ?? undefined}
-                      locale={loc}
-                    />
+                      y={14}
+                      delay={Math.min(index * 0.035, 0.18)}
+                      viewport="card"
+                    >
+                      <BlogCard
+                        title={getLocalizedText(post.title, loc) || post.slug}
+                        slug={post.slug}
+                        excerpt={getLocalizedText(post.excerpt, loc)}
+                        featuredImage={featuredImage}
+                        category={cat}
+                        publishedAt={post.publishedAt ?? undefined}
+                        readingTime={post.readingTime ?? undefined}
+                        locale={loc}
+                      />
+                    </ScrollReveal>
                   )
                 })}
               </div>

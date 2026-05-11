@@ -77,7 +77,7 @@ export default async function ProductsPage({ params, searchParams }: Props) {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {result.docs.map((product) => {
+                {result.docs.map((product, index) => {
                   const firstImageBlock = Array.isArray(product.images) && product.images[0]
                     ? (product.images[0] as { image: unknown }).image
                     : null
@@ -115,19 +115,25 @@ export default async function ProductsPage({ params, searchParams }: Props) {
                     : undefined
 
                   return (
-                    <ProductCard
+                    <ScrollReveal
                       key={product.id}
-                      name={typeof product.name === 'string' ? product.name : String(product.name)}
-                      slug={product.slug}
-                      excerpt={typeof product.excerpt === 'string' ? product.excerpt : undefined}
-                      problemSolved={problemSolvedText}
-                      technologies={technologies}
-                      image={firstImage}
-                      priceUSD={product.priceUSD}
-                      priceVND={product.priceVND}
-                      type={product.type}
-                      locale={loc}
-                    />
+                      y={14}
+                      delay={Math.min(index * 0.035, 0.18)}
+                      viewport="card"
+                    >
+                      <ProductCard
+                        name={typeof product.name === 'string' ? product.name : String(product.name)}
+                        slug={product.slug}
+                        excerpt={typeof product.excerpt === 'string' ? product.excerpt : undefined}
+                        problemSolved={problemSolvedText}
+                        technologies={technologies}
+                        image={firstImage}
+                        priceUSD={product.priceUSD}
+                        priceVND={product.priceVND}
+                        type={product.type}
+                        locale={loc}
+                      />
+                    </ScrollReveal>
                   )
                 })}
               </div>

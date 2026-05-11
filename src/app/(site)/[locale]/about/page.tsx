@@ -191,7 +191,7 @@ export default async function AboutPage({ params }: Props) {
 
           {recentPosts.docs.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {recentPosts.docs.map((post) => {
+              {recentPosts.docs.map((post, index) => {
                 const featuredImage =
                   post.featuredImage && typeof post.featuredImage === 'object'
                     ? {
@@ -208,8 +208,13 @@ export default async function AboutPage({ params }: Props) {
                     : null
 
                 return (
-                  <BlogCard
+                  <ScrollReveal
                     key={post.id}
+                    y={14}
+                    delay={Math.min(index * 0.04, 0.16)}
+                    viewport="card"
+                  >
+                    <BlogCard
                     title={getLocalizedText(post.title, loc) || post.slug}
                     slug={post.slug}
                     excerpt={getLocalizedText(post.excerpt, loc)}
@@ -218,7 +223,8 @@ export default async function AboutPage({ params }: Props) {
                     publishedAt={post.publishedAt ?? undefined}
                     readingTime={post.readingTime ?? undefined}
                     locale={loc}
-                  />
+                    />
+                  </ScrollReveal>
                 )
               })}
             </div>

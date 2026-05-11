@@ -77,16 +77,16 @@ export default async function HomePage({ params }: Props) {
         <p className="max-w-xl text-lg text-muted-foreground">
           {heroTagline || t('hero.subtitle')}
         </p>
-        <div className="mt-10 flex gap-4">
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link
             href="/blog"
-            className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            className="motion-surface inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 font-medium text-primary-foreground hover:-translate-y-0.5 hover:opacity-90"
           >
             {t('hero.ctaBlog')}
           </Link>
           <Link
             href="/products"
-            className="inline-flex h-11 items-center justify-center rounded-lg border border-border bg-secondary px-6 font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
+            className="motion-surface inline-flex h-11 items-center justify-center rounded-lg border border-border bg-secondary px-6 font-medium text-secondary-foreground hover:-translate-y-0.5 hover:bg-secondary/80"
           >
             {t('hero.ctaProducts')}
           </Link>
@@ -125,7 +125,7 @@ export default async function HomePage({ params }: Props) {
                 </Link>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {postsResult.docs.map((post) => {
+                {postsResult.docs.map((post, index) => {
                   const featuredImage =
                     post.featuredImage && typeof post.featuredImage === 'object'
                       ? { url: (post.featuredImage as { url?: string }).url ?? '', alt: (post.featuredImage as { alt?: string }).alt ?? post.slug }
@@ -135,8 +135,13 @@ export default async function HomePage({ params }: Props) {
                       ? { name: getLocalizedText((post.category as { name?: unknown }).name, loc) || '', slug: (post.category as { slug: string }).slug }
                       : null
                   return (
-                    <BlogCard
+                    <ScrollReveal
                       key={post.id}
+                      y={14}
+                      delay={Math.min(index * 0.04, 0.16)}
+                      viewport="card"
+                    >
+                      <BlogCard
                       title={getLocalizedText(post.title, loc) || post.slug}
                       slug={post.slug}
                       excerpt={getLocalizedText(post.excerpt, loc)}
@@ -145,7 +150,8 @@ export default async function HomePage({ params }: Props) {
                       publishedAt={post.publishedAt ?? undefined}
                       readingTime={post.readingTime ?? undefined}
                       locale={loc}
-                    />
+                      />
+                    </ScrollReveal>
                   )
                 })}
               </div>
@@ -166,7 +172,7 @@ export default async function HomePage({ params }: Props) {
                 </Link>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {productsResult.docs.map((product) => {
+                {productsResult.docs.map((product, index) => {
                   const firstImgBlock = Array.isArray(product.images) && product.images[0]
                     ? (product.images[0] as { image: unknown }).image
                     : null
@@ -174,8 +180,13 @@ export default async function HomePage({ params }: Props) {
                     ? { url: (firstImgBlock as { url?: string }).url ?? '', alt: product.slug }
                     : null
                   return (
-                    <ProductCard
+                    <ScrollReveal
                       key={product.id}
+                      y={14}
+                      delay={Math.min(index * 0.04, 0.16)}
+                      viewport="card"
+                    >
+                      <ProductCard
                       name={typeof product.name === 'string' ? product.name : String(product.name)}
                       slug={product.slug}
                       excerpt={typeof product.excerpt === 'string' ? product.excerpt : undefined}
@@ -184,7 +195,8 @@ export default async function HomePage({ params }: Props) {
                       priceVND={product.priceVND}
                       type={product.type}
                       locale={loc}
-                    />
+                      />
+                    </ScrollReveal>
                   )
                 })}
               </div>
