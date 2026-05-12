@@ -58,6 +58,7 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **Payload media upload permissions in Docker:** Runtime image now creates `/app/public/media`, assigns it to the non-root `nextjs` user, and Compose persists uploads in a `media_data` volume so saving Media no longer fails with `EACCES: permission denied, mkdir 'public/media'`.
 - **Production deploy disk exhaustion:** Scoped VPS Docker cleanup to old `ghcr.io/*/gtkblog` images before/after pull, pruned build cache, and added default 14-day database backup retention.
 - **Locale-aware logo home navigation:** Header logo now links to the active locale home path (`/vi` or `/en`) instead of `/`, preventing English sessions from falling back to Vietnamese.
 - **PR CI typecheck for DB guard tests:** Imported Vitest test APIs explicitly in `database-url.test.ts` so `npx tsc --noEmit` can typecheck the test file without relying on global test runner types.

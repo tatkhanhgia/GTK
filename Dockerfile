@@ -55,6 +55,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Payload stores uploaded media under public/media at runtime.
+# Ensure the non-root app user can create and write that directory.
+RUN mkdir -p public/media && chown -R nextjs:nodejs public
+
 USER nextjs
 
 EXPOSE 3000

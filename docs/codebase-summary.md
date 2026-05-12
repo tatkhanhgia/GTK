@@ -483,6 +483,7 @@ pm2 start ecosystem.config.js --env production
 ```
 
 - Non-root user: `nextjs` (uid 1001)
+- Payload uploads: `/app/public/media` via Docker `media_data` volume, writable by `nextjs`
 - Port: 3000 (configurable via NODE_PORT)
 - Logs: PM2 writes to `./logs/pm2-*.log`
 

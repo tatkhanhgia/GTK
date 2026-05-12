@@ -255,6 +255,8 @@ remain in `bootstrap-db.js` talking directly to Postgres with `pg`.
 - **Stage 1 (deps):** Install production dependencies only
 - **Stage 2 (builder):** Full build with all dev dependencies + Turbopack
 - **Stage 3 (runner):** Minimal runtime image (prod deps + `.next/standalone` + entrypoint scripts)
+- Runtime media uploads are stored in the `media_data` Docker volume mounted at `/app/public/media`.
+  The image creates that directory and assigns it to the non-root `nextjs` user so Payload can write uploads.
 
 ### Option B: Kubernetes (Multi-Machine)
 
@@ -829,4 +831,3 @@ Configure to hit: `https://yourdomain.com/health` every 5 minutes
 5. Create runbook for common operations
 6. Document your infrastructure (IaC with Terraform optional)
 7. Schedule regular security audits and backups
-
