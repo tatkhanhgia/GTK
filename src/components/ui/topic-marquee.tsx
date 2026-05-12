@@ -1,12 +1,22 @@
+import type { CSSProperties } from 'react'
+
 interface TopicMarqueeProps {
   eyebrow: string
   items: string[]
+  durationSeconds?: number
 }
 
-export function TopicMarquee({ eyebrow, items }: TopicMarqueeProps) {
+type MarqueeStyle = CSSProperties & {
+  '--duration-marquee'?: string
+}
+
+export function TopicMarquee({ eyebrow, items, durationSeconds }: TopicMarqueeProps) {
   const visibleItems = items.filter(Boolean)
 
   if (visibleItems.length === 0) return null
+
+  const style: MarqueeStyle | undefined =
+    typeof durationSeconds === 'number' ? { '--duration-marquee': `${durationSeconds}s` } : undefined
 
   return (
     <section className="border-t border-border bg-background px-6 py-8">
@@ -16,6 +26,7 @@ export function TopicMarquee({ eyebrow, items }: TopicMarqueeProps) {
         </p>
         <div
           className="motion-marquee group rounded-xl border border-border/70 bg-card/70 py-3"
+          style={style}
           tabIndex={0}
         >
           <div className="motion-marquee-track">

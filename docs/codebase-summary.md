@@ -79,7 +79,7 @@ src/
 │   └── index.ts                  # Collection exports
 │
 ├── globals/                      # Payload CMS globals (singletons)
-│   ├── author-profile.ts         # Author bio, skills, timeline, social links
+│   ├── author-profile.ts         # Author bio, skills, timeline, social links, homepage marquee
 │   └── index.ts                  # Global exports
 │
 ├── scripts/                      # Development & utility scripts
@@ -199,6 +199,7 @@ src/
 │   │   └── update-profile-action.ts
 │   ├── author/
 │   │   ├── get-author-profile.ts # Fetch author-profile global from Payload
+│   │   ├── get-homepage-marquee.ts # Normalize admin-managed homepage marquee config
 │   │   └── get-blog-stats.ts     # Live counts (posts/topics/products/subscribers) for Achievements section
 │   ├── email/
 │   │   ├── resend-client.ts      # Resend email service
@@ -291,6 +292,7 @@ Configuration Files
 - `src/lib/author/get-author-profile.ts` fetches the Payload `author-profile` global for localized author metadata
 - `/[locale]/me`, `/[locale]/about`, and `/[locale]/blog` reuse the same author source instead of duplicating profile content
 - `AuthorMiniCard` standardizes the author CTA in compact and full variants
+- Homepage `TopicMarquee` content also comes from `author-profile.homepageMarquee`, with localized labels, enable/disable state, and bounded animation duration.
 
 ### 6. **Editorial Content Routing**
 - `/[locale]/about` combines static editorial sections with rich text pulled from the `pages` collection slug `about`

@@ -5,6 +5,10 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **Admin Editable Homepage Marquee:** Moved homepage topic marquee content into the Payload `author-profile` global so admins can edit localized eyebrow text, ordered topic labels, enable/disable state, and animation speed.
+  - Added `homepageMarquee` fields and a production migration for the new global columns/tables
+  - Homepage now reads marquee data from `authorProfile`, filters empty labels, clamps speed to 12-180 seconds, and falls back to static vi/en defaults when admin content is missing
+  - Removed blog statistics labels from the marquee; live counts remain in the Achievements section
 - **Homepage Intelligence Background:** Added a professional AI/tech ambient effect behind the homepage hero using lightweight CSS/SVG-style layers, signal lines, pointer-reactive spotlight, warm brand glows, and reduced-motion fallback.
 - **Editorial Scroll Reveal Polish:** Added Anthropic-style reveal presets for sections, headings, and cards, then applied them to homepage content so below-fold elements enter with clearer hierarchy and subtler card settling.
 - **Anthropic-inspired footer refresh:** Reworked public footer into a warm dark block with stronger contrast, clearer link hierarchy, accessible focus states, and larger social touch targets.

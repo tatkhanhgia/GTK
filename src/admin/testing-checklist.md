@@ -30,6 +30,9 @@
 - [ ] Navigation links work
 - [ ] Forms submit correctly
 - [ ] No console errors
+- [ ] Author Profile homepage marquee saves vi/en eyebrow and topic labels
+- [ ] Author Profile homepage marquee enable/disable toggle hides/shows the public homepage strip
+- [ ] Author Profile homepage marquee duration changes animation speed and stays within configured bounds
 
 ## Cross-browser
 - [ ] Chrome/Edge

@@ -173,6 +173,64 @@ export const AuthorProfile: GlobalConfig = {
                 },
               ],
             },
+            {
+              name: 'homepageMarquee',
+              type: 'group',
+              label: { vi: 'Marquee trang chu', en: 'Homepage marquee' },
+              admin: {
+                description: {
+                  vi: 'Noi dung dai chu de chay ngang tren trang chu. So giay lon hon nghia la chay cham hon.',
+                  en: 'Topic strip shown on the homepage. Larger duration means slower movement.',
+                },
+              },
+              fields: [
+                {
+                  name: 'enabled',
+                  type: 'checkbox',
+                  defaultValue: true,
+                  label: { vi: 'Hien thi marquee', en: 'Show marquee' },
+                },
+                {
+                  name: 'eyebrow',
+                  type: 'text',
+                  localized: true,
+                  label: { vi: 'Nhan phu', en: 'Eyebrow' },
+                  defaultValue: 'Dang tap trung',
+                },
+                {
+                  name: 'durationSeconds',
+                  type: 'number',
+                  min: 12,
+                  max: 180,
+                  defaultValue: 48,
+                  label: { vi: 'Thoi gian chay (giay)', en: 'Animation duration (seconds)' },
+                  admin: {
+                    description: {
+                      vi: 'Nhap tu 12 den 180. Gia tri lon hon se chay cham hon.',
+                      en: 'Enter 12 to 180. Higher values move more slowly.',
+                    },
+                  },
+                },
+                {
+                  name: 'items',
+                  type: 'array',
+                  label: { vi: 'Chu de', en: 'Topics' },
+                  labels: {
+                    singular: { vi: 'Chu de', en: 'Topic' },
+                    plural: { vi: 'Cac chu de', en: 'Topics' },
+                  },
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                      localized: true,
+                      required: true,
+                      label: { vi: 'Nhan', en: 'Label' },
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
         // --- Tab 3: Skills & Timeline ---

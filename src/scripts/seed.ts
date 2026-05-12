@@ -217,6 +217,16 @@ async function seed() {
       'Practical perspective on choosing CMS for Next.js.',
       'Key updates affecting DX and performance.',
     ]
+    const viHomepageMarquee = [
+      { label: 'AI thuc chien' },
+      { label: 'Next.js va Payload' },
+      { label: 'San pham so' },
+    ]
+    const enHomepageMarqueeLabels = [
+      'Practical AI',
+      'Next.js and Payload',
+      'Digital products',
+    ]
 
     // Step 1 — write vi locale fully. Array items get generated IDs here.
     await payload.updateGlobal({
@@ -249,6 +259,12 @@ async function seed() {
           contactCtaText: 'Nếu bạn muốn trao đổi về AI workflow, sản phẩm số, hoặc hợp tác kỹ thuật, cứ nhắn mình.',
         },
         contactEmail: 'contact@gtkblog.com',
+        homepageMarquee: {
+          enabled: true,
+          eyebrow: 'Dang tap trung',
+          durationSeconds: 48,
+          items: viHomepageMarquee,
+        },
         meta: { metaTitle: 'Về tác giả', metaDescription: 'Tìm hiểu về tác giả GTKBlog' },
       },
     })
@@ -267,6 +283,8 @@ async function seed() {
     const meEditorial = (currentViGlobal.meEditorial as Record<string, unknown> | undefined) ?? {}
     const principleIds = (meEditorial.principles as ArrayItemWithId[] | undefined)?.map((item) => item.id) ?? []
     const selectedWritingIds = (meEditorial.selectedWriting as ArrayItemWithId[] | undefined)?.map((item) => item.id) ?? []
+    const homepageMarquee = (currentViGlobal.homepageMarquee as Record<string, unknown> | undefined) ?? {}
+    const homepageMarqueeItemIds = (homepageMarquee.items as ArrayItemWithId[] | undefined)?.map((item) => item.id) ?? []
 
     // Step 3 — write en locale, reusing the IDs from step 2 so each item keeps
     // both locales. Non-localized fields (year, type, post) are re-sent so
@@ -302,6 +320,15 @@ async function seed() {
           })),
           timelineContext: 'A few milestones that explain why I build products this way today.',
           contactCtaText: 'If you want to discuss AI workflows, digital products, or technical collaboration, send me a message.',
+        },
+        homepageMarquee: {
+          enabled: true,
+          eyebrow: 'Now exploring',
+          durationSeconds: 48,
+          items: viHomepageMarquee.map((item, i) => ({
+            ...(homepageMarqueeItemIds[i] != null ? { id: homepageMarqueeItemIds[i] } : {}),
+            label: enHomepageMarqueeLabels[i] ?? item.label,
+          })),
         },
         meta: { metaTitle: 'About Me', metaDescription: 'Learn about the author of GTKBlog' },
       },

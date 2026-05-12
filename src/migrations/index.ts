@@ -1,6 +1,7 @@
 import * as migration_20260406_073308 from './20260406_073308';
 import * as migration_20260408_155700_ensure_pages_content_jsonb from './20260408_155700_ensure_pages_content_jsonb';
 import * as migration_20260429_165200_add_translations_locked_docs from './20260429_165200_add_translations_locked_docs';
+import * as migration_20260512_135600_add_author_profile_homepage_marquee from './20260512_135600_add_author_profile_homepage_marquee';
 
 export const migrations = [
   {
@@ -17,5 +18,10 @@ export const migrations = [
     up: migration_20260429_165200_add_translations_locked_docs.up,
     down: migration_20260429_165200_add_translations_locked_docs.down,
     name: '20260429_165200_add_translations_locked_docs'
+  },
+  {
+    up: migration_20260512_135600_add_author_profile_homepage_marquee.up,
+    down: migration_20260512_135600_add_author_profile_homepage_marquee.down,
+    name: '20260512_135600_add_author_profile_homepage_marquee'
   },
 ];
