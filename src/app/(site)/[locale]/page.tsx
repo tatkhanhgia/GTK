@@ -14,6 +14,7 @@ import {
   HeroIntelligenceBackground,
   HeroInteractionFrame,
 } from '@/components/sections/hero-intelligence-background'
+import { getHomepageMarquee } from '@/lib/author/get-homepage-marquee'
 import { getBlogStats } from '@/lib/author/get-blog-stats'
 import type { Locale } from '@/i18n/config'
 
@@ -50,6 +51,7 @@ export default async function HomePage({ params }: Props) {
     ])
   const heroTagline = getLocalizedText(authorProfile?.philosophy?.heroTagline, loc)
   const story = authorProfile?.philosophy?.story as { root: { children: unknown[] } } | undefined
+  const marquee = getHomepageMarquee(authorProfile, loc)
 
 
   const principlesRaw = Array.isArray(authorProfile?.philosophy?.workingPrinciples)
@@ -116,15 +118,13 @@ export default async function HomePage({ params }: Props) {
         />
       </div>
 
-      <TopicMarquee
-        eyebrow={loc === 'vi' ? 'Dang tap trung' : 'Now exploring'}
-        items={[
-          ...blogStats.map((item) => item.label),
-          loc === 'vi' ? 'AI thuc chien' : 'Practical AI',
-          loc === 'vi' ? 'Next.js va Payload' : 'Next.js and Payload',
-          loc === 'vi' ? 'San pham so' : 'Digital products',
-        ]}
-      />
+      {marquee && (
+        <TopicMarquee
+          eyebrow={marquee.eyebrow}
+          items={marquee.items}
+          durationSeconds={marquee.durationSeconds}
+        />
+      )}
 
       {/* Featured Posts */}
       {postsResult.docs.length > 0 && (

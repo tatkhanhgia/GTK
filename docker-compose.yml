@@ -12,6 +12,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - media_data:/app/public/media
     restart: unless-stopped
 
   postgres:
@@ -31,3 +33,4 @@ services:
 
 volumes:
   postgres_data:
+  media_data:

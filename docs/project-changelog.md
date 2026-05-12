@@ -5,6 +5,10 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **Admin Editable Homepage Marquee:** Moved homepage topic marquee content into the Payload `author-profile` global so admins can edit localized eyebrow text, ordered topic labels, enable/disable state, and animation speed.
+  - Added `homepageMarquee` fields and a production migration for the new global columns/tables
+  - Homepage now reads marquee data from `authorProfile`, filters empty labels, clamps speed to 12-180 seconds, and falls back to static vi/en defaults when admin content is missing
+  - Removed blog statistics labels from the marquee; live counts remain in the Achievements section
 - **Homepage Intelligence Background:** Added a professional AI/tech ambient effect behind the homepage hero using lightweight CSS/SVG-style layers, signal lines, pointer-reactive spotlight, warm brand glows, and reduced-motion fallback.
 - **Editorial Scroll Reveal Polish:** Added Anthropic-style reveal presets for sections, headings, and cards, then applied them to homepage content so below-fold elements enter with clearer hierarchy and subtler card settling.
 - **Anthropic-inspired footer refresh:** Reworked public footer into a warm dark block with stronger contrast, clearer link hierarchy, accessible focus states, and larger social touch targets.
@@ -58,6 +62,7 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **Payload media upload permissions in Docker:** Runtime image now creates `/app/public/media`, assigns it to the non-root `nextjs` user, and Compose persists uploads in a `media_data` volume so saving Media no longer fails with `EACCES: permission denied, mkdir 'public/media'`.
 - **Production deploy disk exhaustion:** Scoped VPS Docker cleanup to old `ghcr.io/*/gtkblog` images before/after pull, pruned build cache, and added default 14-day database backup retention.
 - **Locale-aware logo home navigation:** Header logo now links to the active locale home path (`/vi` or `/en`) instead of `/`, preventing English sessions from falling back to Vietnamese.
 - **PR CI typecheck for DB guard tests:** Imported Vitest test APIs explicitly in `database-url.test.ts` so `npx tsc --noEmit` can typecheck the test file without relying on global test runner types.

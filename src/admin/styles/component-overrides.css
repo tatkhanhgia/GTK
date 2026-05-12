@@ -6204,3 +6204,358 @@ li.payload-toast-item button[aria-label]:hover {
   overflow-wrap: normal !important;
   hyphens: none !important;
 }
+
+/* ============================================================
+   UPLOAD COLLECTION FILE FIELD (Media create/edit)
+   Payload renders upload collections with `.file-field`, not
+   `.field-type.upload`, so relationship-upload rules above do not
+   reach /admin/collections/media/create.
+   ============================================================ */
+.template-default .file-field,
+.drawer__content-children .file-field {
+  background: transparent !important;
+  border-radius: 0 !important;
+  margin-bottom: 1.25rem !important;
+}
+
+.template-default .file-field__upload,
+.drawer__content-children .file-field__upload {
+  align-items: stretch !important;
+  gap: 0 !important;
+  overflow: hidden;
+  background: #faf5ec !important;
+  border: 1px dashed #e0d3bf !important;
+  border-radius: var(--admin-radius-lg) !important;
+  box-shadow: inset 0 1px 2px rgba(24, 21, 18, 0.03) !important;
+  transition:
+    background-color var(--admin-transition-fast),
+    border-color var(--admin-transition-fast),
+    box-shadow var(--admin-transition-fast);
+}
+
+.template-default .file-field__upload:hover,
+.template-default .file-field__upload:focus-within,
+.template-default .file-field__upload:has(.dropzone.dragging),
+.drawer__content-children .file-field__upload:hover,
+.drawer__content-children .file-field__upload:focus-within,
+.drawer__content-children .file-field__upload:has(.dropzone.dragging) {
+  background: #fff9ee !important;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px var(--admin-accent-light) !important;
+}
+
+.template-default .file-field .dropzone,
+.drawer__content-children .file-field .dropzone {
+  width: 100%;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 22px 24px !important;
+}
+
+.template-default .file-field__dropzoneContent,
+.drawer__content-children .file-field__dropzoneContent {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.template-default .file-field__dropzoneButtons,
+.drawer__content-children .file-field__dropzoneButtons,
+.template-default .file-field__upload-actions,
+.drawer__content-children .file-field__upload-actions,
+.template-default .file-field__add-file-wrap,
+.drawer__content-children .file-field__add-file-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.template-default .file-field__dropzoneButtons .btn,
+.template-default .file-field__upload-actions .btn,
+.template-default .file-field__add-file,
+.drawer__content-children .file-field__dropzoneButtons .btn,
+.drawer__content-children .file-field__upload-actions .btn,
+.drawer__content-children .file-field__add-file {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  min-width: 0 !important;
+  padding: 0 16px !important;
+  margin: 0 !important;
+  border-radius: var(--admin-radius-md) !important;
+  border: 1px solid #e5dccb !important;
+  background: #ffffff !important;
+  color: var(--admin-text-primary) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(24, 21, 18, 0.04) !important;
+  cursor: pointer !important;
+  transition:
+    background-color var(--admin-transition-fast),
+    border-color var(--admin-transition-fast),
+    color var(--admin-transition-fast),
+    transform var(--admin-transition-fast),
+    box-shadow var(--admin-transition-fast) !important;
+}
+
+.template-default .file-field__dropzoneButtons .btn:first-of-type,
+.template-default .file-field__add-file,
+.drawer__content-children .file-field__dropzoneButtons .btn:first-of-type,
+.drawer__content-children .file-field__add-file {
+  background: var(--admin-accent) !important;
+  border-color: var(--admin-accent) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(217, 119, 87, 0.22) !important;
+}
+
+.template-default .file-field__dropzoneButtons .btn:hover,
+.template-default .file-field__upload-actions .btn:hover,
+.template-default .file-field__add-file:hover,
+.drawer__content-children .file-field__dropzoneButtons .btn:hover,
+.drawer__content-children .file-field__upload-actions .btn:hover,
+.drawer__content-children .file-field__add-file:hover {
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+  transform: translateY(-1px);
+}
+
+.template-default .file-field__dropzoneButtons .btn:first-of-type:hover,
+.template-default .file-field__add-file:hover,
+.drawer__content-children .file-field__dropzoneButtons .btn:first-of-type:hover,
+.drawer__content-children .file-field__add-file:hover {
+  background: var(--admin-accent-hover) !important;
+  border-color: var(--admin-accent-hover) !important;
+  color: #ffffff !important;
+}
+
+.template-default .file-field .btn__content,
+.template-default .file-field .btn__label,
+.drawer__content-children .file-field .btn__content,
+.drawer__content-children .file-field .btn__label {
+  color: inherit !important;
+  font: inherit !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.template-default .file-field__orText,
+.template-default .file-field__dragAndDropText,
+.drawer__content-children .file-field__orText,
+.drawer__content-children .file-field__dragAndDropText {
+  color: var(--admin-text-tertiary) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  text-transform: lowercase;
+}
+
+.template-default .file-field__file-selected,
+.drawer__content-children .file-field__file-selected {
+  overflow: hidden;
+  background: #faf5ec !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: var(--admin-radius-lg) !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.04) !important;
+}
+
+.template-default .file-field__thumbnail-wrap,
+.drawer__content-children .file-field__thumbnail-wrap {
+  width: 180px !important;
+  min-height: 132px;
+  background: #f1e9d8;
+  border-right: 1px solid #e5dccb;
+}
+
+.template-default .file-field__file-adjustments,
+.template-default .file-field__remote-file-wrap,
+.drawer__content-children .file-field__file-adjustments,
+.drawer__content-children .file-field__remote-file-wrap {
+  padding: 18px !important;
+}
+
+.template-default .file-field__filename,
+.template-default .file-field__remote-file,
+.drawer__content-children .file-field__filename,
+.drawer__content-children .file-field__remote-file {
+  background: #ffffff !important;
+  border: 1px solid #e5dccb !important;
+  border-radius: var(--admin-radius-md) !important;
+  color: var(--admin-text-primary) !important;
+  font-size: 14px !important;
+  min-height: 42px !important;
+  padding: 10px 14px !important;
+}
+
+.template-default .file-field__remove,
+.drawer__content-children .file-field__remove {
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  margin: 14px 14px 0 0 !important;
+  border-radius: var(--admin-radius-md) !important;
+  background: #ffffff !important;
+  border: 1px solid #e5dccb !important;
+  color: var(--admin-text-secondary) !important;
+}
+
+.template-default .file-field__remove:hover,
+.drawer__content-children .file-field__remove:hover {
+  border-color: var(--admin-error) !important;
+  color: var(--admin-error) !important;
+  background: rgba(217, 79, 79, 0.08) !important;
+}
+
+html.dark .template-default .file-field__upload,
+html.dark .drawer__content-children .file-field__upload,
+html.dark .template-default .file-field__file-selected,
+html.dark .drawer__content-children .file-field__file-selected,
+html.admin-dark .template-default .file-field__upload,
+html.admin-dark .drawer__content-children .file-field__upload,
+html.admin-dark .template-default .file-field__file-selected,
+html.admin-dark .drawer__content-children .file-field__file-selected {
+  background: #14120f !important;
+  border-color: rgba(245, 240, 232, 0.18) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .template-default .file-field__upload:hover,
+html.dark .template-default .file-field__upload:focus-within,
+html.dark .template-default .file-field__upload:has(.dropzone.dragging),
+html.dark .drawer__content-children .file-field__upload:hover,
+html.dark .drawer__content-children .file-field__upload:focus-within,
+html.dark .drawer__content-children .file-field__upload:has(.dropzone.dragging),
+html.admin-dark .template-default .file-field__upload:hover,
+html.admin-dark .template-default .file-field__upload:focus-within,
+html.admin-dark .template-default .file-field__upload:has(.dropzone.dragging),
+html.admin-dark .drawer__content-children .file-field__upload:hover,
+html.admin-dark .drawer__content-children .file-field__upload:focus-within,
+html.admin-dark .drawer__content-children .file-field__upload:has(.dropzone.dragging) {
+  background: #1d1a16 !important;
+  border-color: var(--admin-accent) !important;
+}
+
+html.dark .template-default .file-field__dropzoneButtons .btn,
+html.dark .template-default .file-field__upload-actions .btn,
+html.dark .template-default .file-field__remove,
+html.dark .template-default .file-field__add-file,
+html.dark .drawer__content-children .file-field__dropzoneButtons .btn,
+html.dark .drawer__content-children .file-field__upload-actions .btn,
+html.dark .drawer__content-children .file-field__remove,
+html.dark .drawer__content-children .file-field__add-file,
+html.admin-dark .template-default .file-field__dropzoneButtons .btn,
+html.admin-dark .template-default .file-field__upload-actions .btn,
+html.admin-dark .template-default .file-field__remove,
+html.admin-dark .template-default .file-field__add-file,
+html.admin-dark .drawer__content-children .file-field__dropzoneButtons .btn,
+html.admin-dark .drawer__content-children .file-field__upload-actions .btn,
+html.admin-dark .drawer__content-children .file-field__remove,
+html.admin-dark .drawer__content-children .file-field__add-file {
+  background: #201d1a !important;
+  border-color: rgba(245, 240, 232, 0.16) !important;
+  color: var(--admin-text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+html.dark .template-default .file-field__dropzoneButtons .btn:first-of-type,
+html.dark .template-default .file-field__add-file,
+html.dark .drawer__content-children .file-field__dropzoneButtons .btn:first-of-type,
+html.dark .drawer__content-children .file-field__add-file,
+html.admin-dark .template-default .file-field__dropzoneButtons .btn:first-of-type,
+html.admin-dark .template-default .file-field__add-file,
+html.admin-dark .drawer__content-children .file-field__dropzoneButtons .btn:first-of-type,
+html.admin-dark .drawer__content-children .file-field__add-file {
+  background: var(--admin-accent) !important;
+  border-color: var(--admin-accent) !important;
+  color: #1a1310 !important;
+}
+
+html.dark .template-default .file-field__dropzoneButtons .btn:hover,
+html.dark .template-default .file-field__upload-actions .btn:hover,
+html.dark .template-default .file-field__add-file:hover,
+html.dark .drawer__content-children .file-field__dropzoneButtons .btn:hover,
+html.dark .drawer__content-children .file-field__upload-actions .btn:hover,
+html.dark .drawer__content-children .file-field__add-file:hover,
+html.admin-dark .template-default .file-field__dropzoneButtons .btn:hover,
+html.admin-dark .template-default .file-field__upload-actions .btn:hover,
+html.admin-dark .template-default .file-field__add-file:hover,
+html.admin-dark .drawer__content-children .file-field__dropzoneButtons .btn:hover,
+html.admin-dark .drawer__content-children .file-field__upload-actions .btn:hover,
+html.admin-dark .drawer__content-children .file-field__add-file:hover {
+  background: #2a2622 !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+html.dark .template-default .file-field__dropzoneButtons .btn:first-of-type:hover,
+html.dark .template-default .file-field__add-file:hover,
+html.dark .drawer__content-children .file-field__dropzoneButtons .btn:first-of-type:hover,
+html.dark .drawer__content-children .file-field__add-file:hover,
+html.admin-dark .template-default .file-field__dropzoneButtons .btn:first-of-type:hover,
+html.admin-dark .template-default .file-field__add-file:hover,
+html.admin-dark .drawer__content-children .file-field__dropzoneButtons .btn:first-of-type:hover,
+html.admin-dark .drawer__content-children .file-field__add-file:hover {
+  background: var(--admin-accent-hover) !important;
+  border-color: var(--admin-accent-hover) !important;
+  color: #1a1310 !important;
+}
+
+html.dark .template-default .file-field__filename,
+html.dark .template-default .file-field__remote-file,
+html.dark .drawer__content-children .file-field__filename,
+html.dark .drawer__content-children .file-field__remote-file,
+html.admin-dark .template-default .file-field__filename,
+html.admin-dark .template-default .file-field__remote-file,
+html.admin-dark .drawer__content-children .file-field__filename,
+html.admin-dark .drawer__content-children .file-field__remote-file {
+  background: #1e1b18 !important;
+  border-color: rgba(245, 240, 232, 0.16) !important;
+  color: var(--admin-text-primary) !important;
+}
+
+html.dark .template-default .file-field__thumbnail-wrap,
+html.dark .drawer__content-children .file-field__thumbnail-wrap,
+html.admin-dark .template-default .file-field__thumbnail-wrap,
+html.admin-dark .drawer__content-children .file-field__thumbnail-wrap {
+  background: #201d1a !important;
+  border-right-color: rgba(245, 240, 232, 0.12) !important;
+}
+
+@media (max-width: 800px) {
+  .template-default .file-field__dropzoneContent,
+  .drawer__content-children .file-field__dropzoneContent {
+    align-items: flex-start !important;
+    flex-direction: column;
+  }
+
+  .template-default .file-field__dragAndDropText,
+  .drawer__content-children .file-field__dragAndDropText {
+    display: none !important;
+  }
+
+  .template-default .file-field__thumbnail-wrap,
+  .drawer__content-children .file-field__thumbnail-wrap {
+    width: 100% !important;
+    border-right: 0;
+    border-bottom: 1px solid #e5dccb;
+  }
+
+  html.dark .template-default .file-field__thumbnail-wrap,
+  html.dark .drawer__content-children .file-field__thumbnail-wrap,
+  html.admin-dark .template-default .file-field__thumbnail-wrap,
+  html.admin-dark .drawer__content-children .file-field__thumbnail-wrap {
+    border-bottom-color: rgba(245, 240, 232, 0.12) !important;
+  }
+}
