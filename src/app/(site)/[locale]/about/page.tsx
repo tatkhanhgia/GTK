@@ -84,6 +84,12 @@ export default async function AboutPage({ params }: Props) {
     authorProfile?.avatar && typeof authorProfile.avatar === 'object'
       ? ((authorProfile.avatar as { url?: string }).url ?? null)
       : null
+  const missionIntro = isVi
+    ? 'Ghi chú thực chiến về kỹ thuật phần mềm, AI agents, tự động hóa và cách xây dựng hệ thống vẫn dễ hiểu khi mở rộng.'
+    : 'Practical notes on engineering, AI agents, automation, and building software systems that stay understandable as they scale.'
+  const missionTopics = isVi
+    ? ['Hệ thống AI agent', 'Kỹ thuật có thể mở rộng', 'Tự động hóa theo tư duy sản phẩm']
+    : ['AI agent systems', 'Scalable engineering', 'Product-minded automation']
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-10 md:py-16">
@@ -125,24 +131,40 @@ export default async function AboutPage({ params }: Props) {
           />
         </ScrollReveal>
 
-        <ScrollReveal as="section" className="grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.9fr)] lg:items-start">
-          <div>
+        <ScrollReveal
+          as="section"
+          className="grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.95fr)] lg:items-start"
+        >
+          <div className="max-w-2xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">
               {isVi ? 'Về blog' : 'About the blog'}
             </p>
-            <h2 className="mt-3 font-heading text-2xl font-semibold md:text-3xl">
+            <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight md:text-5xl">
               {isVi ? 'Sứ mệnh và cách GTKBlog vận hành' : 'The mission and shape of GTKBlog'}
             </h2>
+            <p className="mt-6 max-w-xl text-base leading-8 text-muted-foreground md:text-lg">
+              {missionIntro}
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-x-4 gap-y-3 text-sm font-medium text-muted-foreground md:text-base">
+              {missionTopics.map((topic, index) => (
+                <span key={topic} className="inline-flex items-center gap-x-4">
+                  <span>{topic}</span>
+                  {index < missionTopics.length - 1 ? (
+                    <span className="h-5 w-px bg-primary" aria-hidden="true" />
+                  ) : null}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
+          <div className="rounded-3xl border border-border/70 bg-card/85 p-7 shadow-sm md:p-10">
             {aboutContent ? (
               <div className="prose-custom max-w-none">
                 <RichTextRenderer content={aboutContent.content} />
               </div>
             ) : (
-              <div className="space-y-4 text-sm leading-relaxed text-muted-foreground md:text-base">
-                <p>
+              <div className="space-y-5 text-lg leading-9 text-muted-foreground md:text-2xl md:leading-[1.75]">
+                <p className="font-semibold text-foreground">
                   {isVi
                     ? 'GTKBlog là nơi mình ghi lại kiến thức về lập trình, AI, tự động hóa và cách xây dựng sản phẩm số theo hướng thực tế, dễ áp dụng.'
                     : 'GTKBlog is where I document practical knowledge about programming, AI, automation, and building digital products.'}

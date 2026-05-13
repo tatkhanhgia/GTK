@@ -5,6 +5,7 @@ All significant changes to the GTK Blog project are documented here.
 ## [Unreleased]
 
 ### Added
+- **About Mission Section Polish:** Balanced the `/about` mission section with supporting intro copy, subtle topic labels, stronger heading scale, and a more editorial quote card treatment across desktop and mobile.
 - **Admin Editable Homepage Marquee:** Moved homepage topic marquee content into the Payload `author-profile` global so admins can edit localized eyebrow text, ordered topic labels, enable/disable state, and animation speed.
   - Added `homepageMarquee` fields and a production migration for the new global columns/tables
   - Homepage now reads marquee data from `authorProfile`, filters empty labels, clamps speed to 12-180 seconds, and falls back to static vi/en defaults when admin content is missing
