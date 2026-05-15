@@ -49,9 +49,10 @@ SEPAY_API_KEY=your-sepay-api-key
 SEPAY_WEBHOOK_SECRET=your-sepay-webhook-secret
 SEPAY_BANK_ACCOUNT=account-number-for-qr-generation
 
-# Email - Resend
+# Email - provider-neutral settings, Resend implemented
 RESEND_API_KEY=re_... (from Resend Dashboard)
 RESEND_FROM_EMAIL=noreply@yourdomain.com
+EMAIL_SETTINGS_ENCRYPTION_KEY=32-byte-or-longer-random-secret
 
 # App Configuration
 NEXT_PUBLIC_APP_URL=https://yourdomain.com
@@ -701,6 +702,9 @@ curl -H "Authorization: Bearer $RESEND_API_KEY" https://api.resend.com/emails
 # Check if email is in allowed domain (for Resend trial)
 # On production: use verified domain
 
+# Check selected provider in Payload admin
+# /admin/globals/email-settings should use provider: Resend
+
 # Review email logs in app
 pm2 logs gtkblog | grep -i email
 ```
@@ -789,7 +793,7 @@ location ~* \.(js|css|svg|woff2)$ {
    - Use test card: `4242 4242 4242 4242`
    - Any future date, any CVC
 
-4. **Test Email (Resend Test)**
+4. **Test Email (Resend Provider Test)**
    - Check email logs in PM2
 
 5. **Test Download Token**

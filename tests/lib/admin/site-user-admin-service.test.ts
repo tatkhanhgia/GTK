@@ -59,10 +59,22 @@ describe('site-user-admin-service', () => {
       'src/migrations/20260514_003500_member_email_settings_site_users.ts',
       'utf8',
     )
+    const providerMigration = readFileSync(
+      'src/migrations/20260515_140500_add_email_settings_provider.ts',
+      'utf8',
+    )
+    const migrationIndex = readFileSync('src/migrations/index.ts', 'utf8')
 
     expect(migration).toContain('CREATE TABLE IF NOT EXISTS "email_settings"')
     expect(migration).toContain('"resend_api_key_encrypted"')
     expect(migration).toContain('DROP TABLE IF EXISTS "email_settings"')
+    expect(providerMigration).toContain('ADD COLUMN IF NOT EXISTS "provider"')
+    expect(providerMigration).toContain("DEFAULT 'resend' NOT NULL")
+    expect(providerMigration).toContain('export async function up')
+    expect(providerMigration).toContain('export async function down')
+    expect(migrationIndex).toContain('20260515_140500_add_email_settings_provider')
+    expect(migrationIndex).toContain('up: migration_20260515_140500_add_email_settings_provider.up')
+    expect(migrationIndex).toContain('down: migration_20260515_140500_add_email_settings_provider.down')
   })
 
   it('keeps site member row edit forms valid for table markup', () => {

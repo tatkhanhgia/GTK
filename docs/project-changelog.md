@@ -2,9 +2,13 @@
 
 All significant changes to the GTK Blog project are documented here.
 
-## [0.1.6] - 2026-05-15
+## [0.1.7] - 2026-05-15
 
 ### Added
+- **Provider-neutral email delivery settings:** Added a provider selector to the Payload `email-settings` global, introduced an internal email provider adapter boundary, kept Resend as the only selectable implemented provider, and added an additive migration for `email_settings.provider`.
+  - Existing Resend env fallback remains supported through `RESEND_API_KEY` and `RESEND_FROM_EMAIL`
+  - Unsupported provider values fail closed before sending instead of silently falling back
+  - Added resolver, provider-selection, secret masking, and migration coverage
 - **Member registration, account settings, and admin mail controls:** Added a Payload-managed `email-settings` global with encrypted Resend key storage, env fallback, configurable welcome email copy, and signup welcome email sending through Better Auth user-create hooks.
   - Profile settings now preload saved user data, sync display name back to `ba_users.name`, keep email read-only, and wire password change through Better Auth client flow
   - Added `/admin/site-users` for Payload admins to list, filter, edit, deactivate/reactivate, and generate reset links for Better Auth site members without mixing them with CMS admin users
