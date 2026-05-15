@@ -183,37 +183,55 @@ jobs:
       - name: Health check
         shell: bash
         run: |
-          ssh -i ~/.ssh/deploy_key "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<'EOF'
-            set -euo pipefail
+          for ssh_attempt in {1..5}; do
+            if ssh -o ConnectTimeout=20 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<'EOF'
+              set -euo pipefail
 
-            cd "${{ secrets.VPS_PROJECT_PATH }}"
+              cd "${{ secrets.VPS_PROJECT_PATH }}"
 
-            for attempt in {1..30}; do
-              if docker compose exec -T app node -e '
-                const expected = process.argv[1]
-                fetch("http://127.0.0.1:3000/api/health")
-                  .then((response) => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
-                  .then((health) => {
-                    if (health.ok === true && health.database === "ok" && health.version === expected) process.exit(0)
-                    console.error(JSON.stringify(health))
-                    process.exit(1)
-                  })
-                  .catch((error) => {
-                    console.error(error.message)
-                    process.exit(1)
-                  })
-              ' "${{ github.sha }}" < /dev/null; then
-                printf 'Health check passed on attempt %s\n' "${attempt}"
-                exit 0
-              fi
-              sleep 5
-            done
+              for attempt in {1..30}; do
+                if docker compose exec -T app node -e '
+                  const expected = process.argv[1]
+                  fetch("http://127.0.0.1:3000/api/health")
+                    .then((response) => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+                    .then((health) => {
+                      if (health.ok === true && health.database === "ok" && health.version === expected) process.exit(0)
+                      console.error(JSON.stringify(health))
+                      process.exit(1)
+                    })
+                    .catch((error) => {
+                      console.error(error.message)
+                      process.exit(1)
+                    })
+                ' "${{ github.sha }}" < /dev/null; then
+                  printf 'Health check passed on attempt %s\n' "${attempt}"
+                  exit 0
+                fi
+                sleep 5
+              done
 
-            printf 'Health check failed after retries\n' >&2
-            docker compose ps >&2 || true
-            docker compose logs --tail=200 app >&2 || true
-            exit 1
+              printf 'Health check failed after retries\n' >&2
+              docker compose ps >&2 || true
+              docker compose logs --tail=200 app >&2 || true
+              exit 1
           EOF
+            then
+              exit 0
+            fi
+
+            ssh_exit=$?
+            if [ "${ssh_exit}" -ne 255 ]; then
+              exit "${ssh_exit}"
+            fi
+
+            if [ "${ssh_attempt}" -lt 5 ]; then
+              printf 'Health check SSH attempt %s failed; retrying...\n' "${ssh_attempt}" >&2
+              sleep 10
+            else
+              printf 'Health check SSH failed after %s attempts\n' "${ssh_attempt}" >&2
+              exit 1
+            fi
+          done
 
       - name: Smoke test critical routes
         shell: bash
