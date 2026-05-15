@@ -18,6 +18,9 @@ GTKBlog domains and should become more granular as story packets are created.
 | Story | Contract | Unit | Integration | E2E | Platform | Status | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Current auth helpers | Better Auth session helpers and route protection | yes | partial | no | no | implemented | `tests/lib/auth/auth-helpers.test.ts`, middleware docs |
+| Member account settings | Members can view saved settings, update display name/bio, and change password | partial | no | no | no | implemented | `npx tsc --noEmit`, `npm run test`; service-specific tests still needed |
+| Admin site members | Payload admins can manage Better Auth site members separately from CMS users | no | no | no | no | in_progress | Manual QA required for `/admin/site-users`; DB-backed build blocked locally |
+| Admin email settings | Payload global stores mail config and encrypted Resend secret with env fallback | no | no | no | no | in_progress | `npx tsc --noEmit`; encryption/resolver tests still needed |
 | Current payment downloads | Paid orders receive secure short-lived download tokens | yes | partial | no | no | implemented | `tests/lib/payment/download-token.test.ts`, webhook tests |
 | Current webhooks | Stripe and SePay webhook handlers validate provider input | yes | partial | no | no | implemented | `tests/api/webhooks/*` |
 | Current i18n | Public site uses vi/en routing with DB-backed translations | partial | partial | no | no | implemented | `src/i18n/request.ts`, admin translation tests/docs |

@@ -257,6 +257,12 @@ Configuration Files
 
 ## Key Architecture Decisions
 
+### 0. **Member and Email Settings**
+- Payload `email-settings` global stores Resend sender settings, encrypted provider secret, and localized welcome email copy.
+- Better Auth signup triggers a non-blocking welcome email through `databaseHooks.user.create.after`.
+- `/[locale]/profile/settings` now preloads user settings server-side and syncs display name changes to both `ba_users` and `user_profiles`.
+- `/admin/site-users` gives Payload admins a separate management surface for Better Auth site members, including role/status/email edits and password reset link generation.
+
 ### 1. **Embedded Payload CMS**
 - Payload runs within Next.js server (no separate CMS server)
 - Single PostgreSQL database for both Payload and custom tables

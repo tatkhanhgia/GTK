@@ -18,7 +18,7 @@ export async function getSession() {
 export async function requireAuth(locale: string = 'vi') {
   const session = await getSession()
   if (!session) {
-    redirect(`/${locale}/login`)
+    redirect(`/login?callbackUrl=/${locale}/profile`)
   }
   return session
 }

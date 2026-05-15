@@ -6,10 +6,12 @@ import { usePathname } from 'next/navigation';
 import {
   ArrowUpLeft,
   FileImage,
+  FileStack,
   FileText,
   LayoutGrid,
   Newspaper,
   Package,
+  Settings,
   UserCircle2,
   Users,
   X,
@@ -21,7 +23,7 @@ import { useAdminTranslation } from '../../i18n/use-admin-translation';
 interface NavItem {
   href: string;
   icon: LucideIcon;
-  labelKey: 'dashboard' | 'posts' | 'products' | 'media' | 'pages' | 'users' | 'author';
+  labelKey: 'dashboard' | 'posts' | 'products' | 'downloads' | 'media' | 'pages' | 'users' | 'siteUsers' | 'emailSettings' | 'author';
 }
 
 // Labels are resolved at render time via `t()` so the sidebar reacts to the
@@ -31,9 +33,12 @@ const navItems: NavItem[] = [
   { labelKey: 'dashboard', href: '/admin', icon: LayoutGrid },
   { labelKey: 'posts', href: '/admin/collections/posts', icon: Newspaper },
   { labelKey: 'products', href: '/admin/collections/products', icon: Package },
+  { labelKey: 'downloads', href: '/admin/collections/digital-downloads', icon: FileStack },
   { labelKey: 'media', href: '/admin/collections/media', icon: FileImage },
   { labelKey: 'pages', href: '/admin/collections/pages', icon: FileText },
   { labelKey: 'users', href: '/admin/collections/users', icon: Users },
+  { labelKey: 'siteUsers', href: '/admin/site-users', icon: Users },
+  { labelKey: 'emailSettings', href: '/admin/globals/email-settings', icon: Settings },
   { labelKey: 'author', href: '/admin/globals/author-profile', icon: UserCircle2 },
 ];
 

@@ -8,12 +8,14 @@ import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import { Users } from './src/collections/users'
 import { Categories } from './src/collections/categories'
+import { DigitalDownloads } from './src/collections/digital-downloads'
 import { Media } from './src/collections/media'
 import { Posts } from './src/collections/posts'
 import { Products } from './src/collections/products'
 import { Pages } from './src/collections/pages'
 import { Translations } from './src/collections/translations'
 import { AuthorProfile } from './src/globals/author-profile'
+import { EmailSettings } from './src/globals/email-settings'
 import { generatedTranslations } from './src/admin/i18n/generated-translations'
 import { migrations } from './src/migrations'
 
@@ -66,8 +68,8 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Categories, Media, Posts, Products, Pages, Translations],
-  globals: [AuthorProfile],
+  collections: [Users, Categories, DigitalDownloads, Media, Posts, Products, Pages, Translations],
+  globals: [AuthorProfile, EmailSettings],
   routes: {
     admin: '/admin',
     api: '/api',

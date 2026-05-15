@@ -1,14 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from '@/lib/auth/auth-client'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginCardShell />}>
+      <LoginContent />
+    </Suspense>
+  )
+}
+
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -23,7 +33,7 @@ export default function LoginPage() {
       if (result.error) {
         setError(result.error.message || 'Đăng nhập thất bại')
       } else {
-        router.push('/vi')
+        router.push(callbackUrl)
         router.refresh()
       }
     } catch {
@@ -34,11 +44,11 @@ export default function LoginPage() {
   }
 
   async function handleGoogleLogin() {
-    await signIn.social({ provider: 'google', callbackURL: '/vi' })
+    await signIn.social({ provider: 'google', callbackURL: callbackUrl })
   }
 
   async function handleGithubLogin() {
-    await signIn.social({ provider: 'github', callbackURL: '/vi' })
+    await signIn.social({ provider: 'github', callbackURL: callbackUrl })
   }
 
   return (
@@ -135,6 +145,21 @@ export default function LoginPage() {
           Đăng ký
         </Link>
       </p>
+    </div>
+  )
+}
+
+function getSafeCallbackUrl(value: string | null) {
+  if (!value) return '/vi'
+  if (!value.startsWith('/') || value.startsWith('//')) return '/vi'
+  if (value.startsWith('/login') || value.startsWith('/register')) return '/vi'
+  return value
+}
+
+function LoginCardShell() {
+  return (
+    <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground shadow-sm">
+      Dang tai...
     </div>
   )
 }

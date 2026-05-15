@@ -6,25 +6,25 @@
 
 ```
 Client (Browser)
-    ↓
+    â†“
 Cloudflare CDN (static assets)
-    ↓
+    â†“
 Next.js Server (Node.js 22)
-    ├─ Middleware (auth + i18n)
-    ├─ App Router (pages & routes)
-    ├─ Payload Admin & API
-    └─ Better Auth (session management)
-    ↓
+    â”œâ”€ Middleware (auth + i18n)
+    â”œâ”€ App Router (pages & routes)
+    â”œâ”€ Payload Admin & API
+    â””â”€ Better Auth (session management)
+    â†“
 PostgreSQL Database
-    ├─ Payload tables (posts, products, categories, users)
-    ├─ Better Auth tables (ba_users, ba_sessions, etc.)
-    └─ Custom tables (orders, comments, newsletter, download_tokens)
-    ↓
+    â”œâ”€ Payload tables (posts, products, categories, users)
+    â”œâ”€ Better Auth tables (ba_users, ba_sessions, etc.)
+    â””â”€ Custom tables (orders, comments, newsletter, download_tokens)
+    â†“
 External Services
-    ├─ Stripe (payment processing)
-    ├─ SePay (VietQR, bank transfers)
-    ├─ Resend (transactional email)
-    └─ Google/GitHub OAuth
+    â”œâ”€ Stripe (payment processing)
+    â”œâ”€ SePay (VietQR, bank transfers)
+    â”œâ”€ Resend (transactional email)
+    â””â”€ Google/GitHub OAuth
 ```
 
 ## Payload Admin Customizations
@@ -36,17 +36,25 @@ External Services
 
 ## Authentication & Authorization
 
+### Site Member Administration
+
+- Payload `users` remains CMS admin accounts only.
+- Better Auth `ba_users` remains source of truth for site members.
+- Custom admin route `/admin/site-users` is guarded by Payload admin auth and edits Better Auth users through `site-user-admin-service`.
+- Deactivation writes both custom `status = deactivated` and Better Auth admin plugin fields (`banned`, `ban_reason`, `ban_expires`) and revokes sessions.
+- Admin member email edits normalize lowercase and enforce uniqueness before update.
+
 ### Better Auth Flow
 
 ```
 POST /api/auth/register
-    ↓
+    â†“
 Better Auth validates credentials
-    ↓
+    â†“
 Hash password (Argon2), create ba_users record
-    ↓
+    â†“
 Generate session, set gtkblog.session_token cookie
-    ↓
+    â†“
 Redirect to profile or checkout
 ```
 
@@ -62,11 +70,11 @@ Redirect to profile or checkout
 ### Protected Routes
 
 ```
-/[locale]/profile/*          → Requires session
-/[locale]/checkout/*         → Requires session
-/[locale]/downloads/*        → Requires session
-/api/auth/change-password    → Requires session
-/api/newsletter/unsubscribe  → Requires email (from query param)
+/[locale]/profile/*          â†’ Requires session
+/[locale]/checkout/*         â†’ Requires session
+/[locale]/downloads/*        â†’ Requires session
+/api/auth/change-password    â†’ Requires session
+/api/newsletter/unsubscribe  â†’ Requires email (from query param)
 ```
 
 **Route Protection Pattern:**
@@ -85,108 +93,114 @@ if (isProtected && !sessionCookie?.value) {
 Managed internally by Payload; accessed via Payload SDK:
 ```
 users (CMS admins only)
-├─ id, email, password_hash, role, created_at
-├─ Keys: PK(id), UNIQUE(email)
+â”œâ”€ id, email, password_hash, role, created_at
+â”œâ”€ Keys: PK(id), UNIQUE(email)
 
 author-profile (singleton global)
-├─ bio, avatar_url, email, skills (array), social_links (array)
-├─ timeline (array: year, title, description)
-├─ Keys: PK(id), single record
+â”œâ”€ bio, avatar_url, email, skills (array), social_links (array)
+â”œâ”€ timeline (array: year, title, description)
+â”œâ”€ Keys: PK(id), single record
 
 posts
-├─ id, title, slug, content (Lexical), excerpt
-├─ published, published_at, updated_at
-├─ category_id (FK → categories.id)
-├─ author_id (FK → users.id)
-├─ meta_description, canonical_url
-├─ Keys: PK(id), UNIQUE(slug), INDEX(published_at, category_id)
+â”œâ”€ id, title, slug, content (Lexical), excerpt
+â”œâ”€ published, published_at, updated_at
+â”œâ”€ category_id (FK â†’ categories.id)
+â”œâ”€ author_id (FK â†’ users.id)
+â”œâ”€ meta_description, canonical_url
+â”œâ”€ Keys: PK(id), UNIQUE(slug), INDEX(published_at, category_id)
 
 products
-├─ id, title, slug, description, price_usd, price_vnd
-├─ stripe_product_id, featured, active
-├─ downloads (media array reference)
-├─ Keys: PK(id), UNIQUE(slug), INDEX(stripe_product_id)
+â”œâ”€ id, title, slug, description, price_usd, price_vnd
+â”œâ”€ stripe_product_id, featured, active
+â”œâ”€ download_file_id (FK -> digital_downloads.id)
+â”œâ”€ Keys: PK(id), UNIQUE(slug), INDEX(stripe_product_id)
 
 categories
-├─ id, name, slug, description
-├─ Keys: PK(id), UNIQUE(slug)
+â”œâ”€ id, name, slug, description
+â”œâ”€ Keys: PK(id), UNIQUE(slug)
 
 media (uploaded files)
-├─ id, filename, url, size, mime_type
-├─ created_at, updated_at
-├─ Keys: PK(id)
+â”œâ”€ id, filename, url, size, mime_type
+â”œâ”€ created_at, updated_at
+â”œâ”€ Keys: PK(id)
+
+digital_downloads (paid product files)
+- id, title, description, version
+- filename, mime_type, filesize, created_at, updated_at
+- Stored on private disk under /app/digital-downloads
+- Keys: PK(id)
 
 pages (custom static pages)
-├─ id, title, slug, content, published
-├─ Keys: PK(id), UNIQUE(slug)
+â”œâ”€ id, title, slug, content, published
+â”œâ”€ Keys: PK(id), UNIQUE(slug)
 ```
 
 #### Better Auth Tables
 Managed by Better Auth plugin; separate from Payload:
 ```
 ba_users
-├─ id, email, name, emailVerified, image, role
-├─ created_at, updated_at
-├─ Keys: PK(id), UNIQUE(email)
+â”œâ”€ id, email, name, emailVerified, image, role
+â”œâ”€ created_at, updated_at
+â”œâ”€ Keys: PK(id), UNIQUE(email)
 
 ba_sessions
-├─ id, userId (FK → ba_users.id), token, expiresAt
-├─ Keys: PK(id), FK(userId), INDEX(expiresAt)
+â”œâ”€ id, userId (FK â†’ ba_users.id), token, expiresAt
+â”œâ”€ Keys: PK(id), FK(userId), INDEX(expiresAt)
 
 ba_accounts (OAuth)
-├─ id, userId (FK → ba_users.id), provider, providerAccountId
-├─ Keys: PK(id), FK(userId), UNIQUE(provider, providerAccountId)
+â”œâ”€ id, userId (FK â†’ ba_users.id), provider, providerAccountId
+â”œâ”€ Keys: PK(id), FK(userId), UNIQUE(provider, providerAccountId)
 
 ba_verifications
-├─ id, identifier, value, expiresAt
-├─ Keys: PK(id)
+â”œâ”€ id, identifier, value, expiresAt
+â”œâ”€ Keys: PK(id)
 ```
 
 #### Custom Tables (Drizzle)
 Direct queries via `src/db/index.ts`:
 ```
 user_profiles (extended user data)
-├─ id (FK → ba_users.id)
-├─ bio, avatar_url, locale (vi|en), theme (light|dark)
-├─ stripe_customer_id, newsletter_subscribed
-├─ created_at, updated_at
-├─ Keys: PK(id), UNIQUE(stripe_customer_id)
+â”œâ”€ id (FK â†’ ba_users.id)
+â”œâ”€ bio, avatar_url, locale (vi|en), theme (light|dark)
+â”œâ”€ stripe_customer_id, newsletter_subscribed
+â”œâ”€ created_at, updated_at
+â”œâ”€ Keys: PK(id), UNIQUE(stripe_customer_id)
 
 orders
-├─ id, user_id (FK → ba_users.id)
-├─ total_usd, total_vnd, currency (usd|vnd)
-├─ payment_method (stripe|sepay), status (pending|completed|failed)
-├─ stripe_payment_intent_id, sepay_transaction_id
-├─ created_at, completed_at
-├─ Keys: PK(id), FK(user_id), INDEX(user_id, created_at), UNIQUE(stripe_payment_intent_id)
+â”œâ”€ id, user_id (FK â†’ ba_users.id)
+â”œâ”€ total_usd, total_vnd, currency (usd|vnd)
+â”œâ”€ payment_method (stripe|sepay), status (pending|completed|failed)
+â”œâ”€ stripe_payment_intent_id, sepay_transaction_id
+â”œâ”€ created_at, completed_at
+â”œâ”€ Keys: PK(id), FK(user_id), INDEX(user_id, created_at), UNIQUE(stripe_payment_intent_id)
 
 order_items
-├─ id, order_id (FK → orders.id), product_id (FK → products.id)
-├─ quantity, price_usd, price_vnd
-├─ Keys: PK(id), FK(order_id, product_id)
+â”œâ”€ id, order_id (FK â†’ orders.id), product_id (FK â†’ products.id)
+â”œâ”€ quantity, price_usd, price_vnd
+â”œâ”€ Keys: PK(id), FK(order_id, product_id)
 
 comments
-├─ id, post_id (FK → posts.id), user_id (FK → ba_users.id)
-├─ content, approved, created_at, updated_at
-├─ Keys: PK(id), FK(post_id, user_id), INDEX(post_id, approved)
+â”œâ”€ id, post_id (FK â†’ posts.id), user_id (FK â†’ ba_users.id)
+â”œâ”€ content, approved, created_at, updated_at
+â”œâ”€ Keys: PK(id), FK(post_id, user_id), INDEX(post_id, approved)
 
 download_tokens
-├─ id (nanoid), user_id (FK → ba_users.id), product_id (FK → products.id)
-├─ token (crypto-secure), created_at, expires_at
-├─ downloaded_at (nullable)
-├─ Keys: PK(id), FK(user_id), UNIQUE(token), INDEX(expires_at)
+â”œâ”€ id (nanoid), user_id (FK â†’ ba_users.id), product_id (FK â†’ products.id)
+â”œâ”€ token (crypto-secure), created_at, expires_at
+â”œâ”€ downloaded_at (nullable)
+â”œâ”€ Keys: PK(id), FK(user_id), UNIQUE(token), INDEX(expires_at)
 
 newsletter
-├─ id, email, subscribed_at, unsubscribed_at, confirmed_at
-├─ locale (vi|en), created_at, updated_at
-├─ Keys: PK(id), UNIQUE(email), INDEX(subscribed_at)
+â”œâ”€ id, email, subscribed_at, unsubscribed_at, confirmed_at
+â”œâ”€ locale (vi|en), created_at, updated_at
+â”œâ”€ Keys: PK(id), UNIQUE(email), INDEX(subscribed_at)
 ```
 
 ### Data Access Patterns
 
 | Layer | Method | Usage |
 |-------|--------|-------|
-| **Payload Collections** | Payload SDK in server components | Blog posts, products, categories, media, about-page content |
+| **Payload Collections** | Payload SDK in server components | Blog posts, products, categories, media, digital-downloads, about-page content |
 | **Payload Global** | `getAuthorProfile(locale)` helper | Localized author identity reused across `/me`, `/about`, and `/blog` |
 | **Custom Tables** | Drizzle ORM in server actions/functions | Orders, comments, profiles, tokens |
 | **Direct SQL** | `db.execute()` for complex queries | Aggregations (post counts, order totals) |
@@ -196,23 +210,23 @@ newsletter
 ### Locale-Aware Routing
 
 ```
-/              → Detect browser locale → Redirect to /vi or /en
-/vi/blog       → Vietnamese editorial blog hub (?category=slug, featured hero, newsletter CTA)
-/en/blog       → English editorial blog hub
-/vi/blog/category/[slug] → Legacy category URL, redirected to /vi/blog?category={slug}
-/en/blog/category/[slug] → Legacy category URL, redirected to /en/blog?category={slug}
-/vi/about      → About page with editorial sections, CMS rich text, and author CTA
-/en/about      → About page (English)
-/vi/products   → Vietnamese products
-/vi/me         → Author profile (bio, skills, timeline, contact)
-/en/me         → Author profile (English)
-/admin         → Payload admin (no locale)
-/api/auth      → Better Auth (no locale)
+/              â†’ Detect browser locale â†’ Redirect to /vi or /en
+/vi/blog       â†’ Vietnamese editorial blog hub (?category=slug, featured hero, newsletter CTA)
+/en/blog       â†’ English editorial blog hub
+/vi/blog/category/[slug] â†’ Legacy category URL, redirected to /vi/blog?category={slug}
+/en/blog/category/[slug] â†’ Legacy category URL, redirected to /en/blog?category={slug}
+/vi/about      â†’ About page with editorial sections, CMS rich text, and author CTA
+/en/about      â†’ About page (English)
+/vi/products   â†’ Vietnamese products
+/vi/me         â†’ Author profile (bio, skills, timeline, contact)
+/en/me         â†’ Author profile (English)
+/admin         â†’ Payload admin (no locale)
+/api/auth      â†’ Better Auth (no locale)
 ```
 
 **Middleware Flow:**
 ```typescript
-1. Request arrives → middleware.ts
+1. Request arrives â†’ middleware.ts
 2. Check if route needs auth protection
 3. If protected, verify gtkblog.session_token
 4. Pass to next-intl middleware for locale routing
@@ -241,22 +255,22 @@ newsletter
 
 ```
 User clicks "Buy with Stripe"
-    ↓
+    â†“
 Server creates Stripe session
-    ├─ product_id, user_id, locale
-    ├─ success_url: /[locale]/products/checkout/success
-    ├─ cancel_url: /[locale]/products/[slug]
-    ↓
+    â”œâ”€ product_id, user_id, locale
+    â”œâ”€ success_url: /[locale]/products/checkout/success
+    â”œâ”€ cancel_url: /[locale]/products/[slug]
+    â†“
 Redirect to Stripe Hosted Checkout
-    ↓
+    â†“
 User completes payment
-    ↓
-Stripe sends webhook → /api/webhooks/stripe
-    ├─ Verify signature (STRIPE_WEBHOOK_SECRET)
-    ├─ Create order in orders table
-    ├─ Generate download_token with 48h expiry
-    ├─ Send order confirmation email (localized)
-    ↓
+    â†“
+Stripe sends webhook â†’ /api/webhooks/stripe
+    â”œâ”€ Verify signature (STRIPE_WEBHOOK_SECRET)
+    â”œâ”€ Create order in orders table
+    â”œâ”€ Generate download_token with 48h expiry
+    â”œâ”€ Send order confirmation email (localized)
+    â†“
 User sees success page, can download immediately
 ```
 
@@ -264,31 +278,39 @@ User sees success page, can download immediately
 
 ```
 User selects "VietQR / Bank Transfer"
-    ↓
+    â†“
 Modal shows SePay-generated QR code
-    ├─ Account: SEPAY_BANK_ACCOUNT
-    ├─ Amount: product price in VND
-    ├─ Message: "Order {orderId}"
-    ↓
+    â”œâ”€ Account: SEPAY_BANK_ACCOUNT
+    â”œâ”€ Amount: product price in VND
+    â”œâ”€ Message: "Order {orderId}"
+    â†“
 User scans with banking app
-    ↓
-Webhook → /api/webhooks/sepay
-    ├─ Verify signature (SEPAY_WEBHOOK_SECRET)
-    ├─ Update order status to completed
-    ├─ Generate download_token
-    ├─ Send email
-    ↓
+    â†“
+Webhook â†’ /api/webhooks/sepay
+    â”œâ”€ Verify signature (SEPAY_WEBHOOK_SECRET)
+    â”œâ”€ Update order status to completed
+    â”œâ”€ Generate download_token
+    â”œâ”€ Send email
+    â†“
 Polling endpoint /api/payment/status
-    └─ Client checks every 5s if payment received
+    â””â”€ Client checks every 5s if payment received
 ```
 
 **Payment Status Flow:**
 ```
-pending → [webhook received] → completed → [token valid until 48h]
-        → [webhook not received] → expires (7-day default)
+pending â†’ [webhook received] â†’ completed â†’ [token valid until 48h]
+        â†’ [webhook not received] â†’ expires (7-day default)
 ```
 
 ## Email Architecture
+
+### Admin-managed Email Settings
+
+- Payload global: `email-settings`.
+- Provider scope: Resend.
+- Secret storage: `resendApiKeyEncrypted` encrypted server-side with `EMAIL_SETTINGS_ENCRYPTION_KEY`; admin reads show only a mask.
+- Fallback path: if no Payload settings exist, `send-email.ts` uses `RESEND_API_KEY` and `RESEND_FROM_EMAIL`.
+- Welcome email: Better Auth `databaseHooks.user.create.after` calls `sendWelcomeEmailForUser`; failures are logged and do not block signup.
 
 ### Templates (React Email)
 
@@ -312,13 +334,13 @@ pending → [webhook received] → completed → [token valid until 48h]
 
 ```
 Server action or webhook
-    ↓
+    â†“
 lib/email/send-email.ts
-    ├─ Load template component
-    ├─ Render to HTML
-    ├─ Call Resend API
-    ├─ Log result
-    ↓
+    â”œâ”€ Load template component
+    â”œâ”€ Render to HTML
+    â”œâ”€ Call Resend API
+    â”œâ”€ Log result
+    â†“
 Resend sends via RESEND_FROM_EMAIL
 ```
 
@@ -338,28 +360,28 @@ fallback: true  // Fall back to vi if en string missing
 ### Routing Strategy
 
 ```
-/vi/*   → Vietnamese
-/en/*   → English
-/       → Detect locale → Redirect to /vi or /en
-        → Fallback to /vi if unrecognized
+/vi/*   â†’ Vietnamese
+/en/*   â†’ English
+/       â†’ Detect locale â†’ Redirect to /vi or /en
+        â†’ Fallback to /vi if unrecognized
 ```
 
 ### Translation File Structure
 
 ```
 messages/
-├── vi.json          # Vietnamese strings (all keys)
-└── en.json          # English strings (can have subset if fallback enabled)
+â”œâ”€â”€ vi.json          # Vietnamese strings (all keys)
+â””â”€â”€ en.json          # English strings (can have subset if fallback enabled)
 ```
 
 **Keys Example:**
 ```json
 {
-  "nav.home": "Trang chủ",
+  "nav.home": "Trang chá»§",
   "nav.blog": "Blog",
-  "blog.no-posts": "Chưa có bài viết",
-  "payment.stripe": "Thanh toán bằng Stripe",
-  "email.welcome-subject": "Chào mừng bạn đến với GTKBlog"
+  "blog.no-posts": "ChÆ°a cÃ³ bÃ i viáº¿t",
+  "payment.stripe": "Thanh toÃ¡n báº±ng Stripe",
+  "email.welcome-subject": "ChÃ o má»«ng báº¡n Ä‘áº¿n vá»›i GTKBlog"
 }
 ```
 
@@ -370,7 +392,7 @@ import { getTranslations } from 'next-intl/server'
 
 export default async function Page() {
   const t = await getTranslations('blog')
-  return <h1>{t('title')}</h1>  // "Danh sách bài viết"
+  return <h1>{t('title')}</h1>  // "Danh sÃ¡ch bÃ i viáº¿t"
 }
 ```
 
@@ -382,7 +404,7 @@ import { useTranslations } from 'next-intl'
 
 export function BlogCard() {
   const t = useTranslations('blog')
-  return <h2>{t('read-more')}</h2>  // "Đọc tiếp"
+  return <h2>{t('read-more')}</h2>  // "Äá»c tiáº¿p"
 }
 ```
 
@@ -392,27 +414,28 @@ export function BlogCard() {
 
 ```
 User completes payment
-    ↓
+    â†“
 Webhook generates nanoid (21 chars)
-    ├─ Stored in download_tokens table
-    ├─ created_at: now
-    ├─ expires_at: now + 48 hours
-    ├─ downloaded_at: null
-    ↓
+    â”œâ”€ Stored in download_tokens table
+    â”œâ”€ created_at: now
+    â”œâ”€ expires_at: now + 48 hours
+    â”œâ”€ downloaded_at: null
+    â†“
 Email sent with link: /api/download/[token]
-    ↓
+    â†“
 GET /api/download/[token]
-    ├─ Verify token exists
-    ├─ Verify not expired (expires_at > now)
-    ├─ Verify user owns product
-    ├─ Set downloaded_at = now
-    ├─ Return file stream
-    ↓
-Token can be used only once (downloaded_at check)
+    â”œâ”€ Verify token exists
+    â”œâ”€ Verify not expired (expires_at > now)
+    â”œâ”€ Load product + digital download metadata server-side
+    â”œâ”€ Resolve private /app/digital-downloads path
+    â”œâ”€ Fallback to legacy public/media path for migrated records when needed
+    - Stream file as attachment with safe headers
+    â†“
+Token is validated on every request; download_count or single-use enforcement remains a future enhancement
 ```
 
 **Security Measures:**
-- Opaque tokens (not JWTs — can't be decoded/forged)
+- Opaque tokens (not JWTs â€” can't be decoded/forged)
 - Crypto-secure random generation
 - Short 48-hour expiry
 - Single-use enforcement
@@ -447,9 +470,9 @@ export const dynamic = 'force-dynamic'
 
 ```
 Cloudflare rules
-├─ Cache static assets forever (images, fonts, CSS, JS)
-├─ Cache HTML pages 1 hour
-├─ Don't cache /api/*, /admin/*, /[locale]/profile/*
+â”œâ”€ Cache static assets forever (images, fonts, CSS, JS)
+â”œâ”€ Cache HTML pages 1 hour
+â”œâ”€ Don't cache /api/*, /admin/*, /[locale]/profile/*
 ```
 
 ## Security Considerations
@@ -471,11 +494,11 @@ Cloudflare rules
 
 ```typescript
 // Upstash Redis-backed limits
-POST /api/auth/register       → 5 per day per IP
-POST /api/auth/login          → 10 per hour per IP
-POST /api/newsletter/subscribe → 100 per day per IP
-POST /api/payment/create-*    → 50 per hour per user
-POST /api/contact             → 3 per 60 seconds per IP
+POST /api/auth/register       â†’ 5 per day per IP
+POST /api/auth/login          â†’ 10 per hour per IP
+POST /api/newsletter/subscribe â†’ 100 per day per IP
+POST /api/payment/create-*    â†’ 50 per hour per user
+POST /api/contact             â†’ 3 per 60 seconds per IP
 ```
 
 ### Password Security
@@ -539,27 +562,27 @@ toast.success('Download started')
 See `deployment-guide.md` for detailed setup, but here's the architecture:
 
 ```
-┌─ DNS (Cloudflare)
-│  └─ CNAME → Load Balancer (or direct IP)
-│
-├─ Load Balancer (optional)
-│  ├─ Health check: GET /
-│  └─ Route to PM2 instances
-│
-├─ PM2 Cluster (2 instances)
-│  ├─ Instance 1: Node.js 22 Alpine
-│  │  └─ `next start` (port 3000, internal)
-│  └─ Instance 2: Node.js 22 Alpine
-│     └─ `next start` (port 3000, internal)
-│
-├─ Reverse Proxy (Nginx or similar)
-│  └─ Port 80/443 → PM2 instances (localhost:3000)
-│
-├─ PostgreSQL (AWS RDS / DigitalOcean / Self-hosted)
-│  └─ Connection pooling (optional: pgBouncer)
-│
-└─ CDN (Cloudflare)
-   └─ Cache static assets
+â”Œâ”€ DNS (Cloudflare)
+â”‚  â””â”€ CNAME â†’ Load Balancer (or direct IP)
+â”‚
+â”œâ”€ Load Balancer (optional)
+â”‚  â”œâ”€ Health check: GET /
+â”‚  â””â”€ Route to PM2 instances
+â”‚
+â”œâ”€ PM2 Cluster (2 instances)
+â”‚  â”œâ”€ Instance 1: Node.js 22 Alpine
+â”‚  â”‚  â””â”€ `next start` (port 3000, internal)
+â”‚  â””â”€ Instance 2: Node.js 22 Alpine
+â”‚     â””â”€ `next start` (port 3000, internal)
+â”‚
+â”œâ”€ Reverse Proxy (Nginx or similar)
+â”‚  â””â”€ Port 80/443 â†’ PM2 instances (localhost:3000)
+â”‚
+â”œâ”€ PostgreSQL (AWS RDS / DigitalOcean / Self-hosted)
+â”‚  â””â”€ Connection pooling (optional: pgBouncer)
+â”‚
+â””â”€ CDN (Cloudflare)
+   â””â”€ Cache static assets
 ```
 
 **Container Deployment (Docker):**
@@ -616,4 +639,3 @@ pm2 monit               # Real-time dashboard
 | **Resend + React Email** | Type-safe email templates, preview mode, full localization |
 | **Tailwind + shadcn/ui** | Composable components, accessible, consistent design system |
 | **Vitest** | Fast, ESM-native, lower overhead than Jest, good TypeScript support |
-

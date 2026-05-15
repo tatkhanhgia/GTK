@@ -3,6 +3,7 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { userProfiles } from '@/db/schema/user-profiles'
+import { user } from '@/db/schema/auth'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth/auth-helpers'
 import { nanoid } from 'nanoid'
@@ -30,6 +31,16 @@ export async function updateProfile(input: UpdateProfileInput) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = payload.db.drizzle as any
 
+  const displayName = input.displayName?.trim().slice(0, 80) || null
+  const bio = input.bio?.trim().slice(0, 300) || null
+
+  if (displayName) {
+    await db
+      .update(user)
+      .set({ name: displayName, updatedAt: new Date() })
+      .where(eq(user.id, session.user.id))
+  }
+
   // Check if profile row already exists for this user
   const existing: Array<typeof userProfiles.$inferSelect> = await db
     .select()
@@ -41,8 +52,8 @@ export async function updateProfile(input: UpdateProfileInput) {
     await db
       .update(userProfiles)
       .set({
-        displayName: input.displayName ?? existing[0].displayName,
-        bio: input.bio ?? existing[0].bio,
+        displayName: displayName ?? existing[0].displayName,
+        bio: bio ?? existing[0].bio,
         localePreference: input.localePreference ?? existing[0].localePreference,
         updatedAt: new Date(),
       })
@@ -51,8 +62,8 @@ export async function updateProfile(input: UpdateProfileInput) {
     await db.insert(userProfiles).values({
       id: nanoid(),
       userId: session.user.id,
-      displayName: input.displayName ?? null,
-      bio: input.bio ?? null,
+      displayName,
+      bio,
       localePreference: input.localePreference ?? 'vi',
       createdAt: new Date(),
       updatedAt: new Date(),

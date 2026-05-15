@@ -25,9 +25,12 @@ type CustomTranslationsShape = {
     dashboard: string;
     posts: string;
     products: string;
+    downloads: string;
     pages: string;
     categories: string;
     users: string;
+    siteUsers: string;
+    emailSettings: string;
     media: string;
     author: string;
     backToSite: string;
@@ -48,6 +51,7 @@ type CustomTranslationsShape = {
     searchMobileLabel: string;
     targetPosts: string;
     targetProducts: string;
+    targetDownloads: string;
     targetPages: string;
     targetCategories: string;
     targetUsers: string;
@@ -132,9 +136,12 @@ export const customTranslationsVi: CustomTranslationsShape = {
     dashboard: 'Bảng điều khiển',
     posts: 'Bài viết',
     products: 'Sản phẩm',
+    downloads: 'Tệp tải xuống',
     pages: 'Trang',
     categories: 'Danh mục',
     users: 'Người dùng',
+    siteUsers: 'Thanh vien site',
+    emailSettings: 'Cai dat email',
     media: 'Media',
     author: 'Tác giả',
     backToSite: 'Về trang chủ',
@@ -155,6 +162,7 @@ export const customTranslationsVi: CustomTranslationsShape = {
     searchMobileLabel: 'Tìm kiếm',
     targetPosts: 'bài viết',
     targetProducts: 'sản phẩm',
+    targetDownloads: 'tệp tải xuống',
     targetPages: 'trang',
     targetCategories: 'danh mục',
     targetUsers: 'người dùng',
@@ -241,9 +249,12 @@ export const customTranslationsEn: CustomTranslationsShape = {
     dashboard: 'Dashboard',
     posts: 'Posts',
     products: 'Products',
+    downloads: 'Downloads',
     pages: 'Pages',
     categories: 'Categories',
     users: 'Users',
+    siteUsers: 'Site members',
+    emailSettings: 'Email settings',
     media: 'Media',
     author: 'Author',
     backToSite: 'Back to site',
@@ -264,6 +275,7 @@ export const customTranslationsEn: CustomTranslationsShape = {
     searchMobileLabel: 'Search',
     targetPosts: 'posts',
     targetProducts: 'products',
+    targetDownloads: 'downloads',
     targetPages: 'pages',
     targetCategories: 'categories',
     targetUsers: 'users',

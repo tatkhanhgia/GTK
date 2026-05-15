@@ -4,6 +4,12 @@ import { sql } from '@payloadcms/db-postgres'
 import { nanoid } from 'nanoid'
 import { randomBytes } from 'crypto'
 
+interface SqlExecutor {
+  // Payload and app dependencies include separate Drizzle SQL types.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  execute: (query: any) => Promise<unknown> | unknown
+}
+
 interface DownloadTokenRow {
   id: string
   token: string
@@ -26,10 +32,10 @@ export async function generateDownloadToken(
   orderId: string,
   orderItemId: string,
   productId: string,
-  userId: string
+  userId: string,
+  executor?: SqlExecutor
 ): Promise<string> {
-  const payload = await getPayload({ config })
-  const db = payload.db.drizzle
+  const db = executor || (await getPayload({ config })).db.drizzle
 
   const token = randomBytes(32).toString('hex') // 64-char opaque token
   const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()

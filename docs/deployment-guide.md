@@ -257,6 +257,17 @@ remain in `bootstrap-db.js` talking directly to Postgres with `pg`.
 - **Stage 3 (runner):** Minimal runtime image (prod deps + `.next/standalone` + entrypoint scripts)
 - Runtime media uploads are stored in the `media_data` Docker volume mounted at `/app/public/media`.
   The image creates that directory and assigns it to the non-root `nextjs` user so Payload can write uploads.
+- Private digital product files are stored in the `digital_downloads_data` Docker volume mounted at `/app/digital-downloads`.
+  The image creates that directory too, and the secure download route serves files from there after token validation.
+
+#### Digital download storage notes
+
+- `digital-downloads` is the dedicated Payload upload collection for paid deliverables. Keep customer files there, not in public `media`.
+- `docker-compose.yml` mounts both persistent upload paths:
+  - `media_data` -> `/app/public/media`
+  - `digital_downloads_data` -> `/app/digital-downloads`
+- Existing product-linked files copied into the `digital_downloads` table by migration may still physically live in `public/media`. `/api/download/[token]` supports that legacy location until those binaries are moved.
+- Preserve both upload volumes during deploys, rebuilds, and rollbacks. Recreating either volume drops stored files even if Postgres records remain.
 
 ### Option B: Kubernetes (Multi-Machine)
 
