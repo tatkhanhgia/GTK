@@ -80,7 +80,10 @@ export function NewsletterSection({ locale }: NewsletterSectionProps) {
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Input
+            id="newsletter-email"
+            name="email"
             type="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(event) => {

@@ -7,6 +7,10 @@ export const user = pgTable('ba_users', {
   emailVerified: boolean('email_verified').notNull().default(false),
   image: text('image'),
   role: text('role').notNull().default('user'),
+  status: text('status').notNull().default('active'),
+  banned: boolean('banned').notNull().default(false),
+  banReason: text('ban_reason'),
+  banExpires: timestamp('ban_expires', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
@@ -22,6 +26,7 @@ export const session = pgTable('ba_sessions', {
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
   userId: text('user_id').notNull(),
+  impersonatedBy: text('impersonated_by'),
 }, (table) => ({
   tokenUnique: uniqueIndex('ba_sessions_token_unique').on(table.token),
   userIdIndex: index('ba_sessions_user_id_idx').on(table.userId),

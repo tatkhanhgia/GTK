@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import usersModule from '../../src/collections/users.ts'
 import categoriesModule from '../../src/collections/categories.ts'
+import digitalDownloadsModule from '../../src/collections/digital-downloads.ts'
 import mediaModule from '../../src/collections/media.ts'
 import postsModule from '../../src/collections/posts.ts'
 import productsModule from '../../src/collections/products.ts'
@@ -20,6 +21,7 @@ import migrationsModule from '../../src/migrations/index.ts'
 
 const { Users } = usersModule
 const { Categories } = categoriesModule
+const { DigitalDownloads } = digitalDownloadsModule
 const { Media } = mediaModule
 const { Posts } = postsModule
 const { Products } = productsModule
@@ -63,7 +65,7 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Categories, Media, Posts, Products, Pages, Translations],
+  collections: [Users, Categories, DigitalDownloads, Media, Posts, Products, Pages, Translations],
   globals: [AuthorProfile],
   routes: {
     admin: '/admin',

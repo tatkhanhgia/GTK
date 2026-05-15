@@ -2,6 +2,7 @@ import { getPayload } from 'payload'
 import config from '../payload.config'
 import fs from 'fs'
 import path from 'path'
+import { customTranslations } from '../src/admin/i18n/custom-translations'
 
 const ADMIN_KEY_PREFIXES = [
   'customHeader',
@@ -15,12 +16,16 @@ function isAdminKey(key: string) {
   return ADMIN_KEY_PREFIXES.some((prefix) => key === prefix || key.startsWith(`${prefix}.`))
 }
 
-function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>, locale: string) {
-  const tree: Record<string, unknown> = Object.create(null)
+function cloneTranslationTree(tree: Record<string, unknown>) {
+  return JSON.parse(JSON.stringify(tree)) as Record<string, unknown>
+}
+
+function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>, locale: 'vi' | 'en') {
+  const tree: Record<string, unknown> = cloneTranslationTree(customTranslations[locale])
 
   for (const record of records) {
     if (!isAdminKey(record.key)) continue
-    const value = record[locale as 'vi' | 'en']
+    const value = record[locale]
     if (value === undefined || value === null) continue
 
     const parts = record.key.split('.')
@@ -45,6 +50,8 @@ function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>
 }
 
 async function main() {
+  process.env.PAYLOAD_MIGRATING = process.env.PAYLOAD_MIGRATING || 'true'
+
   const outputPath = path.resolve(process.cwd(), 'src/admin/i18n/generated-translations.ts')
 
   if (process.env.SKIP_ADMIN_TRANSLATION_GENERATION === 'true') {

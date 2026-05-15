@@ -14,12 +14,14 @@ vi.mock('@payloadcms/db-postgres', () => ({
   ),
 }))
 
-// Sequence of execute calls: order lookup, update, items lookup, update fulfilled
 const mockExecute = vi.fn()
+const mockTransaction = vi.fn(async (callback: (tx: { execute: typeof mockExecute }) => Promise<void>) =>
+  callback({ execute: mockExecute }),
+)
 
 vi.mock('payload', () => ({
   getPayload: vi.fn().mockResolvedValue({
-    db: { drizzle: { execute: mockExecute } },
+    db: { drizzle: { execute: mockExecute, transaction: mockTransaction } },
   }),
 }))
 
@@ -31,8 +33,10 @@ vi.mock('@/lib/payment/download-token', () => ({
 
 describe('fulfillOrder', () => {
   beforeEach(() => {
+    mockExecute.mockReset()
     vi.clearAllMocks()
     vi.resetModules()
+    mockTransaction.mockImplementation(async (callback) => callback({ execute: mockExecute }))
   })
 
   it('skips fulfillment if order already fulfilled', async () => {
@@ -45,6 +49,7 @@ describe('fulfillOrder', () => {
     await fulfillOrder('order-1', 'payment-1')
 
     // Only one execute call (the lookup) — no UPDATE issued
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
     expect(mockExecute).toHaveBeenCalledTimes(1)
   })
 
@@ -54,6 +59,7 @@ describe('fulfillOrder', () => {
     const { fulfillOrder } = await import('@/lib/payment/fulfill-order')
     await fulfillOrder('missing-order', 'payment-x')
 
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
     expect(mockExecute).toHaveBeenCalledTimes(1)
   })
 
@@ -76,10 +82,16 @@ describe('fulfillOrder', () => {
 
     await fulfillOrder('order-1', 'payment-xyz')
 
-    // 4 execute calls: lookup, paid update, items select, fulfilled update
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
     expect(mockExecute).toHaveBeenCalledTimes(4)
     // generateDownloadToken called once per item
-    expect(generateDownloadToken).toHaveBeenCalledWith('order-1', 'item-1', 'prod-1', 'user-1')
+    expect(generateDownloadToken).toHaveBeenCalledWith(
+      'order-1',
+      'item-1',
+      'prod-1',
+      'user-1',
+      { execute: mockExecute },
+    )
   })
 
   it('fulfills order with no items (no download tokens generated)', async () => {
@@ -96,6 +108,7 @@ describe('fulfillOrder', () => {
     await fulfillOrder('order-2', 'payment-yyy')
 
     expect(generateDownloadToken).not.toHaveBeenCalled()
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
     expect(mockExecute).toHaveBeenCalledTimes(4)
   })
 })

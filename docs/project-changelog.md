@@ -2,9 +2,18 @@
 
 All significant changes to the GTK Blog project are documented here.
 
-## [Unreleased]
+## [0.1.6] - 2026-05-15
 
 ### Added
+- **Member registration, account settings, and admin mail controls:** Added a Payload-managed `email-settings` global with encrypted Resend key storage, env fallback, configurable welcome email copy, and signup welcome email sending through Better Auth user-create hooks.
+  - Profile settings now preload saved user data, sync display name back to `ba_users.name`, keep email read-only, and wire password change through Better Auth client flow
+  - Added `/admin/site-users` for Payload admins to list, filter, edit, deactivate/reactivate, and generate reset links for Better Auth site members without mixing them with CMS admin users
+  - Added Better Auth admin-state columns (`status`, `banned`, `ban_reason`, `ban_expires`, `impersonated_by`) and migration `20260514_003500_member_email_settings_site_users`
+- **Dedicated digital download file storage:** Added a separate Payload `digital-downloads` upload collection for paid deliverables with private disk storage and token-gated serving.
+  - Product downloads now resolve through `/api/download/[token]`, which validates the existing opaque token and streams the file as an attachment
+  - New downloads are read from private `/app/digital-downloads`, while legacy product assets can still fall back to `public/media`
+  - Migration `20260513_160500_add_digital_downloads` creates the new table, backfills product-linked media rows, and repoints product/version foreign keys for backward-compatible rollout
+  - Docker Compose now persists private paid files in a dedicated `digital_downloads_data` volume alongside `media_data`
 - **About Mission Section Polish:** Balanced the `/about` mission section with supporting intro copy, subtle topic labels, stronger heading scale, and a more editorial quote card treatment across desktop and mobile.
 - **Admin Editable Homepage Marquee:** Moved homepage topic marquee content into the Payload `author-profile` global so admins can edit localized eyebrow text, ordered topic labels, enable/disable state, and animation speed.
   - Added `homepageMarquee` fields and a production migration for the new global columns/tables
@@ -63,6 +72,12 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **Homepage hydration mismatch and reveal lifecycle:** Rendered static markup for SSR/first hydration, then mounted Motion reveal elements after client mount so `/vi` and `/en` stay hydration-clean while scroll reveal animations still run. Newsletter email input now uses deterministic `newsletter-email` id/name/autocomplete.
+- **Admin translation fallback regression:** Restored committed generated admin translations and updated generation to seed from static custom admin labels before applying DB overrides, preserving localized admin UI copy when `SKIP_ADMIN_TRANSLATION_GENERATION=true`.
+- **Login build and Payload runtime import blockers:** Wrapped `/login` search-param handling in Suspense and changed the runtime-loaded `email-settings` global to use a relative crypto import.
+- **Docker startup and auth callback regressions:** Runtime image now copies the email-settings global's crypto dependency for `tsx` Payload sync startup, and the login page now honors sanitized `callbackUrl` values for email and social sign-in.
+- **Admin member reset and email settings rollout blockers:** Fixed admin-generated Better Auth reset tokens to use Better Auth's expected verification lookup shape, added the missing migration-backed `email_settings` table, and corrected invalid `/admin/site-users` table form markup.
+- **Private download endpoint bypass:** `digital-downloads` now rejects Payload's direct `/api/digital-downloads/file/:filename` serving path, so paid binaries can only be streamed through the token-validated `/api/download/[token]` route.
 - **Payload media upload permissions in Docker:** Runtime image now creates `/app/public/media`, assigns it to the non-root `nextjs` user, and Compose persists uploads in a `media_data` volume so saving Media no longer fails with `EACCES: permission denied, mkdir 'public/media'`.
 - **Production deploy disk exhaustion:** Scoped VPS Docker cleanup to old `ghcr.io/*/gtkblog` images before/after pull, pruned build cache, and added default 14-day database backup retention.
 - **Locale-aware logo home navigation:** Header logo now links to the active locale home path (`/vi` or `/en`) instead of `/`, preventing English sessions from falling back to Vietnamese.

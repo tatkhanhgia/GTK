@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion, type Variants } from 'motion/react'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   createRevealVariants,
   motionDurations,
@@ -56,9 +56,15 @@ export function ScrollReveal({
   viewport,
 }: ScrollRevealProps) {
   const prefersReducedMotion = useReducedMotion()
+  const [hasMounted, setHasMounted] = useState(false)
   const revealPreset = revealPresets[preset]
+  const shouldAnimate = hasMounted && !prefersReducedMotion
 
-  if (prefersReducedMotion) {
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  if (!shouldAnimate) {
     const Tag = as
     return <Tag className={className}>{children}</Tag>
   }

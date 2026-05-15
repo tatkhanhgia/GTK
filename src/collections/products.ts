@@ -128,7 +128,7 @@ export const Products: CollectionConfig = {
     {
       name: 'downloadFile',
       type: 'upload',
-      relationTo: 'media',
+      relationTo: 'digital-downloads',
       label: { vi: 'File tải xuống', en: 'Download file' },
       admin: {
         description: {

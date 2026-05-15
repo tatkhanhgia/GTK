@@ -12,7 +12,7 @@ import type { CustomTranslationKeys } from '../../i18n/custom-translations';
 
 // Collections whose list route the header search can jump to. Anything not
 // listed falls back to `posts`, the primary editorial surface.
-const SEARCHABLE_COLLECTIONS = ['posts', 'products', 'pages', 'users', 'categories', 'media'] as const;
+const SEARCHABLE_COLLECTIONS = ['posts', 'products', 'digital-downloads', 'pages', 'users', 'categories', 'media'] as const;
 type SearchableCollection = (typeof SEARCHABLE_COLLECTIONS)[number];
 const SEARCHABLE_COLLECTION_SET = new Set<string>(SEARCHABLE_COLLECTIONS);
 
@@ -28,6 +28,7 @@ const SEARCH_FIELD_BY_COLLECTION: Partial<Record<SearchableCollection, string>> 
 const TARGET_KEY_BY_COLLECTION: Record<SearchableCollection, CustomTranslationKeys> = {
   posts: 'customHeader:targetPosts',
   products: 'customHeader:targetProducts',
+  'digital-downloads': 'customHeader:targetDownloads',
   pages: 'customHeader:targetPages',
   users: 'customHeader:targetUsers',
   categories: 'customHeader:targetCategories',
@@ -64,6 +65,7 @@ const ROUTE_TITLE_KEYS: Record<string, CustomTranslationKeys> = {
 const COLLECTION_TITLE_KEYS: Record<string, CustomTranslationKeys> = {
   posts: 'customSidebar:posts',
   products: 'customSidebar:products',
+  'digital-downloads': 'customSidebar:downloads',
   pages: 'customSidebar:pages',
   users: 'customSidebar:users',
   categories: 'customSidebar:categories',

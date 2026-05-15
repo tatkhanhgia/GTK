@@ -47,6 +47,7 @@ COPY --from=builder /app/scripts/payload-db-sync.ts ./scripts/payload-db-sync.ts
 COPY --from=builder /app/payload.config.ts ./payload.config.ts
 COPY --from=builder /app/src/collections ./src/collections
 COPY --from=builder /app/src/globals ./src/globals
+COPY --from=builder /app/src/lib/email/email-secret-crypto.ts ./src/lib/email/email-secret-crypto.ts
 COPY --from=builder /app/src/migrations ./src/migrations
 COPY --from=builder /app/src/admin/i18n ./src/admin/i18n
 
@@ -55,9 +56,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Payload stores uploaded media under public/media at runtime.
-# Ensure the non-root app user can create and write that directory.
-RUN mkdir -p public/media && chown -R nextjs:nodejs public
+# Payload stores public media under public/media and private product downloads
+# under /app/digital-downloads at runtime.
+RUN mkdir -p public/media digital-downloads && chown -R nextjs:nodejs public digital-downloads
 
 USER nextjs
 

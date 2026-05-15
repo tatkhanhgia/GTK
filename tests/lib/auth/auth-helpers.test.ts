@@ -53,18 +53,18 @@ describe('auth-helpers', () => {
     expect(session?.user.email).toBe('test@test.com')
   })
 
-  it('requireAuth redirects to /vi/login when not authenticated', async () => {
+  it('requireAuth redirects to shared login with Vietnamese callback when not authenticated', async () => {
     mockGetSession.mockResolvedValueOnce(null)
 
     const { requireAuth } = await import('@/lib/auth/auth-helpers')
-    await expect(requireAuth('vi')).rejects.toThrow('REDIRECT:/vi/login')
+    await expect(requireAuth('vi')).rejects.toThrow('REDIRECT:/login?callbackUrl=/vi/profile')
   })
 
-  it('requireAuth redirects to /en/login for English locale', async () => {
+  it('requireAuth redirects to shared login with English callback', async () => {
     mockGetSession.mockResolvedValueOnce(null)
 
     const { requireAuth } = await import('@/lib/auth/auth-helpers')
-    await expect(requireAuth('en')).rejects.toThrow('REDIRECT:/en/login')
+    await expect(requireAuth('en')).rejects.toThrow('REDIRECT:/login?callbackUrl=/en/profile')
   })
 
   it('requireAuth returns session when authenticated', async () => {

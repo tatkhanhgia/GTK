@@ -24,44 +24,46 @@ export async function fulfillOrder(orderId: string, paymentId: string) {
   const payload = await getPayload({ config })
   const db = payload.db.drizzle
 
-  // Idempotency: fetch current order status
-  const orderResult = await db.execute(
-    sql`SELECT id, user_id, status FROM orders WHERE id = ${orderId} LIMIT 1`
-  )
-  const orderRows = (orderResult as { rows: unknown[] }).rows
-  if (!orderRows || orderRows.length === 0) return
+  await db.transaction(async (tx) => {
+    // Lock the order row so concurrent Stripe/SePay retries cannot both mint tokens.
+    const orderResult = await tx.execute(
+      sql`SELECT id, user_id, status FROM orders WHERE id = ${orderId} LIMIT 1 FOR UPDATE`
+    )
+    const orderRows = (orderResult as { rows: unknown[] }).rows
+    if (!orderRows || orderRows.length === 0) return
 
-  const order = orderRows[0] as OrderRow
-  if (order.status === 'fulfilled') return
+    const order = orderRows[0] as OrderRow
+    if (order.status === 'fulfilled') return
 
-  const now = new Date().toISOString()
+    const now = new Date().toISOString()
 
-  // Mark order as paid
-  await db.execute(
-    sql`
-      UPDATE orders
-      SET status = 'paid', payment_id = ${paymentId}, updated_at = ${now}::timestamptz
-      WHERE id = ${orderId}
-    `
-  )
+    // Mark order as paid
+    await tx.execute(
+      sql`
+        UPDATE orders
+        SET status = 'paid', payment_id = ${paymentId}, updated_at = ${now}::timestamptz
+        WHERE id = ${orderId}
+      `
+    )
 
-  // Fetch all order items
-  const itemsResult = await db.execute(
-    sql`SELECT id, order_id, product_id FROM order_items WHERE order_id = ${orderId}`
-  )
-  const items = (itemsResult as { rows: unknown[] }).rows as OrderItemRow[]
+    // Fetch all order items
+    const itemsResult = await tx.execute(
+      sql`SELECT id, order_id, product_id FROM order_items WHERE order_id = ${orderId}`
+    )
+    const items = (itemsResult as { rows: unknown[] }).rows as OrderItemRow[]
 
-  // Generate download token for each order item
-  for (const item of items) {
-    await generateDownloadToken(orderId, item.id, item.product_id, order.user_id)
-  }
+    // Generate download token for each order item
+    for (const item of items) {
+      await generateDownloadToken(orderId, item.id, item.product_id, order.user_id, tx)
+    }
 
-  // Mark as fully fulfilled
-  await db.execute(
-    sql`
-      UPDATE orders
-      SET status = 'fulfilled', updated_at = ${now}::timestamptz
-      WHERE id = ${orderId}
-    `
-  )
+    // Mark as fully fulfilled
+    await tx.execute(
+      sql`
+        UPDATE orders
+        SET status = 'fulfilled', updated_at = ${now}::timestamptz
+        WHERE id = ${orderId}
+      `
+    )
+  })
 }

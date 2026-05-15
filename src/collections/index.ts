@@ -1,5 +1,6 @@
 export { Users } from './users'
 export { Categories } from './categories'
+export { DigitalDownloads } from './digital-downloads'
 export { Media } from './media'
 export { Posts } from './posts'
 export { Products } from './products'

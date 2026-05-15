@@ -18,6 +18,56 @@
 'use strict'
 
 const { Client } = require('pg')
+const fs = require('fs/promises')
+const path = require('path')
+
+const PRIVATE_DOWNLOAD_DIR = path.resolve(process.cwd(), 'digital-downloads')
+const LEGACY_MEDIA_DIR = path.resolve(process.cwd(), 'public/media')
+
+async function loadLocalEnvIfNeeded() {
+  if (process.env.DATABASE_URL) return
+
+  let content
+  try {
+    content = await fs.readFile(path.resolve(process.cwd(), '.env.local'), 'utf8')
+  } catch {
+    return
+  }
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line || line.startsWith('#')) continue
+
+    const separatorIndex = line.indexOf('=')
+    if (separatorIndex <= 0) continue
+
+    const key = line.slice(0, separatorIndex).trim()
+    let value = line.slice(separatorIndex + 1).trim()
+
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1)
+    }
+
+    process.env[key] = process.env[key] || value
+  }
+}
+
+async function moveFileAcrossVolumes(sourcePath, targetPath) {
+  try {
+    await fs.rename(sourcePath, targetPath)
+    return
+  } catch (err) {
+    if (err && err.code === 'EXDEV') {
+      await fs.copyFile(sourcePath, targetPath)
+      await fs.unlink(sourcePath)
+      return
+    }
+    throw err
+  }
+}
 
 const AUTH_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS ba_users (
@@ -76,6 +126,15 @@ CREATE INDEX IF NOT EXISTS ba_sessions_expires_at_idx ON ba_sessions (expires_at
 CREATE UNIQUE INDEX IF NOT EXISTS ba_accounts_provider_account_unique ON ba_accounts (provider_id, account_id);
 CREATE INDEX IF NOT EXISTS ba_accounts_user_id_idx ON ba_accounts (user_id);
 CREATE INDEX IF NOT EXISTS ba_verifications_identifier_idx ON ba_verifications (identifier);
+
+ALTER TABLE ba_users
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS banned boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS ban_reason text,
+  ADD COLUMN IF NOT EXISTS ban_expires timestamp with time zone;
+
+ALTER TABLE ba_sessions
+  ADD COLUMN IF NOT EXISTS impersonated_by text;
 `;
 
 const CUSTOM_SCHEMA_SQL = `
@@ -196,7 +255,18 @@ const FIXES = [
            )`,
       )
       if (rows.length === 4) {
-        return { status: 'up-to-date' }
+        const { rows: columnRows } = await client.query(
+          `SELECT column_name
+           FROM information_schema.columns
+           WHERE table_schema = 'public'
+             AND (
+               (table_name = 'ba_users' AND column_name IN ('status', 'banned', 'ban_reason', 'ban_expires'))
+               OR (table_name = 'ba_sessions' AND column_name = 'impersonated_by')
+             )`,
+        )
+        if (columnRows.length === 5) {
+          return { status: 'up-to-date' }
+        }
       }
       await client.query(AUTH_SCHEMA_SQL)
       return { status: 'applied' }
@@ -301,6 +371,76 @@ const FIXES = [
       return { status: 'applied' }
     },
   },
+  {
+    name: 'digital download files relocated to private storage',
+    async run(client) {
+      const tableCheck = await client.query(
+        `SELECT 1
+         FROM information_schema.tables
+         WHERE table_schema = 'public'
+           AND table_name = 'digital_downloads'`,
+      )
+      if (tableCheck.rows.length === 0) {
+        return { status: 'skipped', reason: 'digital_downloads table does not exist yet' }
+      }
+
+      const { rows } = await client.query(
+        `SELECT id, filename, url
+         FROM digital_downloads
+         WHERE url LIKE '/media/%'`,
+      )
+
+      if (rows.length === 0) {
+        return { status: 'up-to-date' }
+      }
+
+      await fs.mkdir(PRIVATE_DOWNLOAD_DIR, { recursive: true })
+
+      for (const row of rows) {
+        const sourceFilename = path.basename(row.filename || '')
+        if (!sourceFilename || sourceFilename !== row.filename) {
+          return {
+            status: 'error',
+            reason: `unsafe legacy filename for digital_downloads.id=${row.id}`,
+          }
+        }
+
+        const sourcePath = path.resolve(LEGACY_MEDIA_DIR, sourceFilename)
+        const targetFilename = `${row.id}-${sourceFilename}`
+        const targetPath = path.resolve(PRIVATE_DOWNLOAD_DIR, targetFilename)
+
+        try {
+          await fs.access(targetPath)
+        } catch {
+          try {
+            await moveFileAcrossVolumes(sourcePath, targetPath)
+          } catch (err) {
+            if (err && err.code !== 'ENOENT') {
+              throw err
+            }
+            try {
+              await fs.access(targetPath)
+            } catch {
+              console.error(
+                `[bootstrap-db] missing legacy source file for digital_downloads.id=${row.id}; leaving row unchanged`,
+              )
+              continue
+            }
+          }
+        }
+
+        await client.query(
+          `UPDATE digital_downloads
+           SET filename = $1,
+               url = $2
+           WHERE id = $3`,
+          [targetFilename, `/digital-downloads/${targetFilename}`, row.id],
+        )
+      }
+
+      return { status: 'applied' }
+    },
+  },
   // Add new fixes here. Template:
   // {
   //   name: 'short description',
@@ -313,6 +453,8 @@ const FIXES = [
 ]
 
 async function main() {
+  await loadLocalEnvIfNeeded()
+
   if (process.env.SKIP_BOOTSTRAP === 'true') {
     console.log('[bootstrap-db] SKIP_BOOTSTRAP=true, skipping all fixes')
     return 0

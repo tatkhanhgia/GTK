@@ -51,8 +51,10 @@ async function main() {
     process.exit(2)
   }
 
+  process.env.PAYLOAD_MIGRATING = 'true'
+
   log('Checking migration state...')
-  const { hasMigrationTable, hasDevMigration } = await checkDevMigrationState()
+  const { hasDevMigration } = await checkDevMigrationState()
 
   if (hasDevMigration) {
     warn('Dev-mode migration detected (batch: -1). Skipping Payload migrations.')

@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { motion, useReducedMotion, type Variants } from 'motion/react'
+import { useEffect, useState, type ElementType } from 'react'
 import { AnimatedCounter } from '@/components/ui/animated-counter'
 import {
   createRevealVariants,
@@ -22,8 +23,6 @@ import {
   revealPresets,
 } from '@/lib/motion/motion-presets'
 
-// Type definitions live next to the sole consumer component so data-fetching
-// helpers can depend on them without pulling in extra modules.
 export type AchievementIcon =
   | 'award'
   | 'calendar'
@@ -65,11 +64,6 @@ const ICON_MAP: Record<AchievementIcon, LucideIcon> = {
   zap: Zap,
 }
 
-/**
- * AchievementsSection - portfolio-style stats block with staggered scroll
- * reveal and per-item count-up animation. Designed to sit between hero and
- * content sections on the homepage + About page.
- */
 export function AchievementsSection({
   achievements,
   title,
@@ -78,6 +72,12 @@ export function AchievementsSection({
   variant = 'plain',
 }: AchievementsSectionProps) {
   const prefersReducedMotion = useReducedMotion()
+  const [hasMounted, setHasMounted] = useState(false)
+  const shouldAnimate = hasMounted && !prefersReducedMotion
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   if (achievements.length === 0) return null
 
@@ -96,7 +96,6 @@ export function AchievementsSection({
       ? 'relative overflow-hidden rounded-3xl border border-border/60 bg-card/40 px-6 py-14 md:px-10 md:py-16'
       : 'px-6 py-16 md:py-20'
 
-  // Dynamic grid columns: 1 on mobile, 2 on small, N on medium where N = min(items, 4).
   const mdCols =
     achievements.length >= 4
       ? 'md:grid-cols-4'
@@ -104,58 +103,78 @@ export function AchievementsSection({
         ? 'md:grid-cols-3'
         : 'md:grid-cols-2'
 
+  const HeadingGroup = (shouldAnimate ? motion.div : 'div') as ElementType
+  const Eyebrow = (shouldAnimate ? motion.p : 'p') as ElementType
+  const Title = (shouldAnimate ? motion.h2 : 'h2') as ElementType
+  const Subtitle = (shouldAnimate ? motion.p : 'p') as ElementType
+  const List = (shouldAnimate ? motion.ul : 'ul') as ElementType
+  const ListItem = (shouldAnimate ? motion.li : 'li') as ElementType
+
+  const headingGroupMotionProps = shouldAnimate
+    ? {
+        initial: 'hidden',
+        whileInView: 'visible',
+        viewport: motionViewport.editorialHeading,
+        variants: containerVariants,
+      }
+    : {}
+  const listMotionProps = shouldAnimate
+    ? {
+        initial: 'hidden',
+        whileInView: 'visible',
+        viewport: motionViewport.editorialCard,
+        variants: containerVariants,
+      }
+    : {}
+  const itemMotionProps = shouldAnimate ? { variants: itemVariants } : {}
+  const listItemMotionProps = shouldAnimate
+    ? {
+        variants: itemVariants,
+        whileHover: { y: -4 },
+        transition: { type: 'spring', stiffness: 260, damping: 22 },
+      }
+    : {}
+
   return (
     <section className={wrapperClass}>
       <div className="mx-auto max-w-6xl">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={motionViewport.editorialHeading}
-          variants={containerVariants}
-          className="mb-10 text-center md:mb-14"
-        >
+        <HeadingGroup {...headingGroupMotionProps} className="mb-10 text-center md:mb-14">
           {eyebrow ? (
-            <motion.p
-              variants={itemVariants}
+            <Eyebrow
+              {...itemMotionProps}
               className="text-xs font-medium uppercase tracking-[0.22em] text-primary md:text-sm"
             >
               {eyebrow}
-            </motion.p>
+            </Eyebrow>
           ) : null}
-          <motion.h2
-            variants={itemVariants}
+          <Title
+            {...itemMotionProps}
             className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-4xl"
           >
             {title}
-          </motion.h2>
+          </Title>
           {subtitle ? (
-            <motion.p
-              variants={itemVariants}
+            <Subtitle
+              {...itemMotionProps}
               className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base"
             >
               {subtitle}
-            </motion.p>
+            </Subtitle>
           ) : null}
-        </motion.div>
+        </HeadingGroup>
 
-        <motion.ul
-          initial="hidden"
-          whileInView="visible"
-          viewport={motionViewport.editorialCard}
-          variants={containerVariants}
+        <List
+          {...listMotionProps}
           className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${mdCols} md:gap-6`}
         >
           {achievements.map((item, index) => {
             const Icon = ICON_MAP[item.icon] ?? Award
             return (
-              <motion.li
+              <ListItem
                 key={`${item.label}-${index}`}
-                variants={itemVariants}
-                whileHover={prefersReducedMotion ? undefined : { y: -4 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                {...listItemMotionProps}
                 className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-6 text-center backdrop-blur-sm md:p-8"
               >
-                {/* Subtle gradient glow on hover */}
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-primary/0 via-primary/0 to-accent/0 opacity-0 transition-opacity duration-300 ease-enter group-hover:from-primary/10 group-hover:to-accent/10 group-hover:opacity-100"
@@ -169,10 +188,10 @@ export function AchievementsSection({
                 <div className="mt-2 text-sm text-muted-foreground md:text-base">
                   {item.label}
                 </div>
-              </motion.li>
+              </ListItem>
             )
           })}
-        </motion.ul>
+        </List>
       </div>
     </section>
   )
