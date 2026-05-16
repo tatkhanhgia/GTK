@@ -3,11 +3,18 @@ import config from '@payload-config'
 import { decryptEmailSecret } from './email-secret-crypto'
 
 export type EmailLocale = 'vi' | 'en'
+export type EmailProviderName = 'resend'
+
+export type EmailDeliverySettings = {
+  provider: 'resend'
+  apiKey: string | null
+}
 
 export interface ResolvedEmailSettings {
   enabled: boolean
   welcomeEmailEnabled: boolean
-  apiKey: string | null
+  provider: EmailProviderName
+  delivery: EmailDeliverySettings
   fromEmail: string
   fromName: string
   from: string
@@ -30,28 +37,24 @@ function formatFrom(name: string, email: string) {
   return name ? `${name} <${email}>` : email
 }
 
-export async function resolveEmailSettings(): Promise<ResolvedEmailSettings> {
-  let doc: Record<string, unknown> | null = null
+function resolveProvider(value: unknown): EmailProviderName {
+  if (!value) return 'resend'
+  if (value === 'resend') return 'resend'
+  throw new Error(`Unsupported email provider: ${String(value)}`)
+}
 
-  try {
-    const payload = await getPayload({ config })
-    doc = await payload.findGlobal({
-      slug: 'email-settings',
-      overrideAccess: true,
-      context: { includeEmailSecret: true },
-    }) as Record<string, unknown>
-  } catch {
-    doc = null
-  }
-
+function buildResolvedEmailSettings(doc: Record<string, unknown> | null, enabled: boolean): ResolvedEmailSettings {
+  const provider = resolveProvider(doc?.provider)
   const fromEmail = String(doc?.fromEmail || process.env.RESEND_FROM_EMAIL || 'noreply@gtkblog.com')
   const fromName = String(doc?.fromName || 'GTKBlog')
   const encryptedKey = typeof doc?.resendApiKeyEncrypted === 'string' ? doc.resendApiKeyEncrypted : null
+  const resendApiKey = decryptEmailSecret(encryptedKey) || process.env.RESEND_API_KEY || null
 
   return {
-    enabled: doc?.enabled !== false,
-    welcomeEmailEnabled: doc?.welcomeEmailEnabled !== false,
-    apiKey: decryptEmailSecret(encryptedKey) || process.env.RESEND_API_KEY || null,
+    enabled,
+    welcomeEmailEnabled: enabled && doc?.welcomeEmailEnabled !== false,
+    provider,
+    delivery: { provider: 'resend', apiKey: resendApiKey },
     fromEmail,
     fromName,
     from: formatFrom(fromName, fromEmail),
@@ -67,4 +70,22 @@ export async function resolveEmailSettings(): Promise<ResolvedEmailSettings> {
       },
     },
   }
+}
+
+export async function resolveEmailSettings(): Promise<ResolvedEmailSettings> {
+  let doc: Record<string, unknown> | null = null
+
+  try {
+    const payload = await getPayload({ config })
+    doc = await payload.findGlobal({
+      slug: 'email-settings',
+      overrideAccess: true,
+      context: { includeEmailSecret: true },
+    }) as Record<string, unknown>
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown error'
+    throw new Error(`Failed to resolve email settings: ${message}`)
+  }
+
+  return buildResolvedEmailSettings(doc, doc?.enabled !== false)
 }

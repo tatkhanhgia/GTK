@@ -47,7 +47,7 @@
 | **Multi-language** | Full Vietnamese & English support with `next-intl` |
 | **Modern Auth** | Email/password + Google/GitHub OAuth via Better Auth |
 | **Admin Dashboard** | Custom Anthropic-inspired Payload admin theme |
-| **Email System** | Transactional emails with React Email + Resend |
+| **Email System** | Transactional emails with React Email, provider-neutral settings, and Resend |
 | **Newsletter** | Subscribe/unsubscribe with email confirmation |
 | **Dark Mode** | System-aware dark/light theme throughout |
 | **SEO Optimized** | Structured data, sitemap, metadata, and Open Graph |
@@ -74,7 +74,7 @@
 ### Payments & Services
 - **[Stripe](https://stripe.com/)** - International payment processing
 - **[SePay](https://sepay.vn/)** - Vietnamese QR/bank transfer
-- **[Resend](https://resend.com/)** - Transactional email API
+- **[Resend](https://resend.com/)** - Implemented transactional email provider
 - **[React Email](https://react.email/)** - Type-safe email templates
 
 ### Testing & DevOps

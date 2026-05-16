@@ -307,9 +307,11 @@ pending â†’ [webhook received] â†’ completed â†’ [token valid unt
 ### Admin-managed Email Settings
 
 - Payload global: `email-settings`.
-- Provider scope: Resend.
+- Provider scope: provider-neutral settings with `resend` as the only implemented selectable provider.
 - Secret storage: `resendApiKeyEncrypted` encrypted server-side with `EMAIL_SETTINGS_ENCRYPTION_KEY`; admin reads show only a mask.
-- Fallback path: if no Payload settings exist, `send-email.ts` uses `RESEND_API_KEY` and `RESEND_FROM_EMAIL`.
+- Fallback path: if no Payload settings exist, Resend delivery uses `RESEND_API_KEY` and `RESEND_FROM_EMAIL`.
+- Provider boundary: `send-email.ts` resolves settings, selects an email provider adapter, then sends through the adapter. Unsupported provider values fail closed before any external call.
+- Future providers: Zoho and Cloudflare are intentionally deferred until schema, encrypted secrets, adapter, validation, tests, and deployment docs are complete.
 - Welcome email: Better Auth `databaseHooks.user.create.after` calls `sendWelcomeEmailForUser`; failures are logged and do not block signup.
 
 ### Templates (React Email)
@@ -337,11 +339,11 @@ Server action or webhook
     â†“
 lib/email/send-email.ts
     â”œâ”€ Load template component
-    â”œâ”€ Render to HTML
-    â”œâ”€ Call Resend API
-    â”œâ”€ Log result
+    â”œâ”€ Resolve provider settings
+    â”œâ”€ Select email provider adapter
+    â”œâ”€ Call Resend adapter
     â†“
-Resend sends via RESEND_FROM_EMAIL
+Resend sends via configured from address
 ```
 
 **Rate Limiting:** 100 emails/min per IP via Upstash
@@ -636,6 +638,6 @@ pm2 monit               # Real-time dashboard
 | **Better Auth** | Modern auth, fewer dependencies, OAuth + email support, session management |
 | **Drizzle ORM** | Type-safe, lightweight, direct SQL when needed, no N+1 queries |
 | **Stripe + SePay** | Global + local payment options, webhooks, dispute handling |
-| **Resend + React Email** | Type-safe email templates, preview mode, full localization |
+| **Provider-neutral Email + Resend + React Email** | Resend implemented now, adapter boundary for future providers, type-safe templates, full localization |
 | **Tailwind + shadcn/ui** | Composable components, accessible, consistent design system |
 | **Vitest** | Fast, ESM-native, lower overhead than Jest, good TypeScript support |

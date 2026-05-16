@@ -2,9 +2,18 @@
 
 All significant changes to the GTK Blog project are documented here.
 
-## [0.1.6] - 2026-05-15
+## [0.1.8] - 2026-05-16
+
+### Fixed
+- Shipped dependency lockfile sync and high-severity audit remediation for the Next.js security update path so clean `npm ci` installs and Docker builds can run from fresh checkout.
+
+## [0.1.7] - 2026-05-15
 
 ### Added
+- **Provider-neutral email delivery settings:** Added a provider selector to the Payload `email-settings` global, introduced an internal email provider adapter boundary, kept Resend as the only selectable implemented provider, and added an additive migration for `email_settings.provider`.
+  - Existing Resend env fallback remains supported through `RESEND_API_KEY` and `RESEND_FROM_EMAIL`
+  - Unsupported provider values fail closed before sending instead of silently falling back
+  - Added resolver, provider-selection, secret masking, and migration coverage
 - **Member registration, account settings, and admin mail controls:** Added a Payload-managed `email-settings` global with encrypted Resend key storage, env fallback, configurable welcome email copy, and signup welcome email sending through Better Auth user-create hooks.
   - Profile settings now preload saved user data, sync display name back to `ba_users.name`, keep email read-only, and wire password change through Better Auth client flow
   - Added `/admin/site-users` for Payload admins to list, filter, edit, deactivate/reactivate, and generate reset links for Better Auth site members without mixing them with CMS admin users
@@ -72,6 +81,10 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **Next.js security advisory remediation:** Upgraded Next.js to `16.2.6` with compatible Payload CMS `3.84.1`, updated related auth/i18n packages, and added npm overrides for patched transitive dependencies (`postcss`, `uuid`, `fast-uri`, `hono`, `@hono/node-server`, `express-rate-limit`, `ip-address`).
+  - Restricted `next/image` remote hosts from wildcard `https://**` to known hosts used by the app
+  - Added regression coverage for patched Next version and image optimizer host restrictions
+  - Updated ESLint flat config for native `eslint-config-next@16` exports and disabled the new React hooks set-state-in-effect rule to preserve current hydration patterns
 - **Homepage hydration mismatch and reveal lifecycle:** Rendered static markup for SSR/first hydration, then mounted Motion reveal elements after client mount so `/vi` and `/en` stay hydration-clean while scroll reveal animations still run. Newsletter email input now uses deterministic `newsletter-email` id/name/autocomplete.
 - **Admin translation fallback regression:** Restored committed generated admin translations and updated generation to seed from static custom admin labels before applying DB overrides, preserving localized admin UI copy when `SKIP_ADMIN_TRANSLATION_GENERATION=true`.
 - **Login build and Payload runtime import blockers:** Wrapped `/login` search-param handling in Suspense and changed the runtime-loaded `email-settings` global to use a relative crypto import.

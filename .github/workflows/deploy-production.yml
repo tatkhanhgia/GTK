@@ -217,9 +217,10 @@ jobs:
           EOF
             then
               exit 0
+            else
+              ssh_exit=$?
             fi
 
-            ssh_exit=$?
             if [ "${ssh_exit}" -ne 255 ]; then
               exit "${ssh_exit}"
             fi

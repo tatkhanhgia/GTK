@@ -1,20 +1,15 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
 import { defineConfig, globalIgnores } from "eslint/config";
-
-// `eslint-config-next@15.4.x` still ships legacy `.eslintrc`-style configs,
-// so we bridge them into flat config via FlatCompat (the pattern Next.js
-// itself recommends until a native flat-config export lands).
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
 const eslintConfig = defineConfig([
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextVitals,
+  ...nextTypescript,
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
   // CommonJS files (.cjs) legitimately use require(); the default
   // @typescript-eslint rule flags them by design.
   {
