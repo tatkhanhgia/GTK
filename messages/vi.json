@@ -27,22 +27,22 @@
   },
   "home": {
     "hero": {
-      "title": "Khám phá thế giới",
-      "titleHighlight": "Công nghệ & AI",
-      "subtitle": "Blog cá nhân về công nghệ, AI, và các sản phẩm số. Chia sẻ kiến thức, kinh nghiệm và nguồn cảm hứng.",
-      "ctaBlog": "Đọc Blog",
-      "ctaProducts": "Xem sản phẩm"
+      "title": "Ghi chép thực chiến về AI, web app và",
+      "titleHighlight": "sản phẩm số",
+      "subtitle": "Tôi viết lại những gì học được khi xây GTKBlog, thử nghiệm AI workflow và biến các ý tưởng sản phẩm nhỏ thành hệ thống chạy thật.",
+      "ctaBlog": "Đọc ghi chép mới",
+      "ctaProducts": "Xem tôi đang xây gì"
     },
-    "featuredPosts": "Bài viết nổi bật",
-    "featuredProducts": "Sản phẩm số",
+    "featuredPosts": "Bài viết thể hiện cách tôi làm việc",
+    "featuredProducts": "Tài nguyên từ quá trình xây",
     "achievements": {
-      "eyebrow": "Blog qua những con số",
-      "title": "Nơi kiến thức được viết xuống",
-      "subtitle": "Mỗi bài viết, mỗi sản phẩm, mỗi người đăng ký — là một mắt xích trong hành trình chia sẻ của GTKBlog."
+      "eyebrow": "Bắt đầu từ đây",
+      "title": "Ba cách để hiểu GTKBlog nhanh hơn",
+      "subtitle": "Một lối đi ngắn qua bài viết, sản phẩm và nguyên tắc làm việc phía sau trang này."
     },
     "newsletter": {
-      "title": "Đăng ký nhận bài viết mới",
-      "subtitle": "Nhận thông báo khi có bài viết mới nhất về AI và công nghệ.",
+      "title": "Theo dõi ghi chép xây dựng",
+      "subtitle": "Nhận bài viết mới về AI workflow, Next.js, Payload CMS và sản phẩm số thực hành.",
       "placeholder": "Email của bạn",
       "cta": "Đăng ký",
       "success": "Đã đăng ký thành công! Kiểm tra email để xác nhận."

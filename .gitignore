@@ -75,6 +75,8 @@ ck.md
 
 # Generated runtime layout for release/install smoke tests
 /.claude/
+/.agents/
+/.impeccable/
 
 # Local debug artifacts
 .codex

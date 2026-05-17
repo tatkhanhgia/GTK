@@ -6,6 +6,7 @@ import { TableOfContents } from '@/components/blog/table-of-contents'
 import { ShareButtons } from '@/components/blog/share-buttons'
 import { CommentSection } from '@/components/blog/comment-section'
 import { ReadingProgress } from '@/components/ui/reading-progress'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { BlogCard } from '@/components/ui/blog-card'
 import { Sidebar } from '@/components/layout/sidebar'
 import { formatDate, readingTimeLabel } from '@/lib/utils'
@@ -82,6 +83,7 @@ export default async function BlogPostPage({ params }: Props) {
           {/* Main content */}
           <article className="flex-1 min-w-0">
             {/* Header */}
+            <ScrollReveal preset="pageHero">
             <header className="mb-8">
               <h1 className="font-heading font-bold text-3xl md:text-4xl leading-tight mb-4">
                 {title}
@@ -110,11 +112,12 @@ export default async function BlogPostPage({ params }: Props) {
                 )}
               </div>
             </header>
+            </ScrollReveal>
 
             {/* Rich text content */}
-            <div className="prose-custom mb-10">
+            <ScrollReveal preset="compact" className="prose-custom mb-10">
               <RichTextRenderer content={post.content} />
-            </div>
+            </ScrollReveal>
 
             {/* Share buttons */}
             <ShareButtons title={title} locale={loc} />
@@ -126,19 +129,21 @@ export default async function BlogPostPage({ params }: Props) {
           </article>
 
           {/* Sidebar — TOC */}
-          <Sidebar className="hidden xl:block">
-            <TableOfContents content={post.content} locale={loc} />
-          </Sidebar>
+          <ScrollReveal preset="compact" className="hidden xl:block">
+            <Sidebar>
+              <TableOfContents content={post.content} locale={loc} />
+            </Sidebar>
+          </ScrollReveal>
         </div>
 
         {/* Related posts */}
         {relatedPosts.length > 0 && (
-          <section className="mt-16">
+          <ScrollReveal as="section" preset="section" className="mt-16">
             <h2 className="font-heading font-semibold text-xl mb-6">
               {isVi ? 'Bài viết liên quan' : 'Related Posts'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {relatedPosts.map((related) => {
+              {relatedPosts.map((related, index) => {
                 const img =
                   related.featuredImage &&
                   typeof related.featuredImage === 'object'
@@ -160,24 +165,30 @@ export default async function BlogPostPage({ params }: Props) {
                       }
                     : null
                 return (
-                  <BlogCard
+                  <ScrollReveal
                     key={related.id}
-                    title={
-                      typeof related.title === 'string'
-                        ? related.title
-                        : String(related.title)
-                    }
-                    slug={related.slug}
-                    featuredImage={img}
-                    category={cat}
-                    publishedAt={related.publishedAt ?? undefined}
-                    readingTime={related.readingTime != null ? Number(related.readingTime) : undefined}
-                    locale={loc}
-                  />
+                    preset="card"
+                    delay={Math.min(index * 0.04, 0.16)}
+                    viewport="card"
+                  >
+                    <BlogCard
+                      title={
+                        typeof related.title === 'string'
+                          ? related.title
+                          : String(related.title)
+                      }
+                      slug={related.slug}
+                      featuredImage={img}
+                      category={cat}
+                      publishedAt={related.publishedAt ?? undefined}
+                      readingTime={related.readingTime != null ? Number(related.readingTime) : undefined}
+                      locale={loc}
+                    />
+                  </ScrollReveal>
                 )
               })}
             </div>
-          </section>
+          </ScrollReveal>
         )}
       </div>
     </>

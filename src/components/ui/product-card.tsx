@@ -62,8 +62,30 @@ export function ProductCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="gradient-brand absolute inset-0 flex items-center justify-center opacity-60">
-              <span className="font-heading text-lg font-bold text-white">{name[0]}</span>
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 overflow-hidden bg-[linear-gradient(135deg,var(--background)_0%,var(--muted)_54%,color-mix(in_oklab,var(--primary)_16%,var(--background))_100%)]"
+            >
+              <div className="absolute left-5 top-8 h-24 w-24 rotate-[-5deg] rounded-xl border border-border/80 bg-card/80 shadow-sm" />
+              <div className="absolute left-9 top-12 flex h-16 w-16 rotate-[-5deg] items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
+                <span className="font-heading text-xl font-bold text-primary">
+                  {name[0]}
+                </span>
+              </div>
+              <div className="absolute right-5 top-7 w-24 rounded-lg border border-border/70 bg-card/70 p-2 shadow-sm">
+                <span className="mb-2 block h-1.5 w-10 rounded-full bg-primary/35" />
+                <span className="mb-1.5 block h-1.5 rounded-full bg-foreground/14" />
+                <span className="block h-1.5 w-4/5 rounded-full bg-foreground/10" />
+              </div>
+              <div className="absolute bottom-5 left-6 right-6 flex items-end gap-1.5 opacity-75">
+                {[18, 30, 22, 38, 26, 34, 20].map((height, index) => (
+                  <span
+                    key={index}
+                    className="w-full rounded-t-sm bg-primary/20"
+                    style={{ height }}
+                  />
+                ))}
+              </div>
             </div>
           )}
           {/* Type badge */}

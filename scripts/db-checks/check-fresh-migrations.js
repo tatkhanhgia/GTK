@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 const { Client } = require('pg');
 const { getDatabaseName, requireTestDatabaseUrl } = require('./database-url');
 

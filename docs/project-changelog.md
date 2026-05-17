@@ -2,9 +2,23 @@
 
 All significant changes to the GTK Blog project are documented here.
 
-## [0.1.8] - 2026-05-16
+## [0.1.9] - 2026-05-18
+
+### Added
+- Shipped the homepage experience refresh with new start-here and featured-content sections, session-scoped entry loader, refreshed shared cards, localized copy, and supporting seed/script updates.
 
 ### Fixed
+- Validated homepage entry-loader storage fallback and preserved clean lint/test/build verification for the refreshed public UI.
+
+## [0.1.8] - 2026-05-16
+
+### Added
+- Expanded development seed data to make local UI review more representative: 14 published posts, 8 digital products, 10 categories, bilingual copy, and richer topic/product variety.
+- Added a session-scoped homepage entry loader with warm technical notebook art direction, short brand motion, reduced-motion fallback, and automatic handoff to the existing homepage.
+
+### Fixed
+- Guarded the homepage entry loader's session storage access so blocked browser storage no longer crashes the public homepage.
+- Excluded local `.agents` / `.impeccable` tooling from project lint and git tracking, restored `npm run lint -- --max-warnings=0`, and persisted the homepage entry loader after first display per browser session.
 - Shipped dependency lockfile sync and high-severity audit remediation for the Next.js security update path so clean `npm ci` installs and Docker builds can run from fresh checkout.
 
 ## [0.1.7] - 2026-05-15

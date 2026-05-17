@@ -31,17 +31,21 @@ export interface PageSeed {
   en: { title: string; content: string[]; seoTitle: string; seoDescription: string }
 }
 
-// 4 blog categories + 2 product categories
+// 6 blog categories + 4 product categories
 export const categories: CategorySeed[] = [
   { slug: 'ai-news', type: 'blog', vi: { name: 'Tin tuc AI', description: 'Cap nhat tin tuc moi nhat ve tri tue nhan tao' }, en: { name: 'AI News', description: 'Latest artificial intelligence news and updates' } },
   { slug: 'tech', type: 'blog', vi: { name: 'Cong nghe', description: 'Xu huong va danh gia cong nghe' }, en: { name: 'Technology', description: 'Tech trends and reviews' } },
   { slug: 'tutorials', type: 'blog', vi: { name: 'Huong dan', description: 'Huong dan lap trinh va ky thuat' }, en: { name: 'Tutorials', description: 'Programming and technical tutorials' } },
   { slug: 'opinions', type: 'blog', vi: { name: 'Quan diem', description: 'Bai viet quan diem ve cong nghe' }, en: { name: 'Opinions', description: 'Opinion pieces on technology' } },
+  { slug: 'automation', type: 'blog', vi: { name: 'Tu dong hoa', description: 'Workflow, agent va he thong tu dong hoa' }, en: { name: 'Automation', description: 'Workflows, agents, and automation systems' } },
+  { slug: 'devops', type: 'blog', vi: { name: 'DevOps', description: 'Trien khai, ha tang va van hanh ung dung' }, en: { name: 'DevOps', description: 'Deployment, infrastructure, and app operations' } },
   { slug: 'ebook', type: 'product', vi: { name: 'Ebook', description: 'Sach dien tu ve cong nghe' }, en: { name: 'Ebook', description: 'Technology ebooks' } },
   { slug: 'template', type: 'product', vi: { name: 'Template', description: 'Mau du an va giao dien' }, en: { name: 'Template', description: 'Project and UI templates' } },
+  { slug: 'starter-kit', type: 'product', vi: { name: 'Starter Kit', description: 'Bo khoi dong du an san sang tuy bien' }, en: { name: 'Starter Kit', description: 'Customizable project starter kits' } },
+  { slug: 'workflow', type: 'product', vi: { name: 'Workflow', description: 'Tai nguyen automation va quy trinh lam viec' }, en: { name: 'Workflow', description: 'Automation resources and operating workflows' } },
 ]
 
-// 6 posts: 2 per blog category (ai-news, tech, tutorials)
+// 14 posts across blog categories
 export const posts: PostSeed[] = [
   {
     slug: 'gpt-5-va-tuong-lai-ai', categorySlug: 'ai-news', daysAgo: 1,
@@ -73,9 +77,49 @@ export const posts: PostSeed[] = [
     vi: { title: 'Tich hop thanh toan Stripe vao Next.js', excerpt: 'Huong dan tich hop Stripe cho san pham so', content: ['Stripe la nen tang thanh toan pho bien nhat cho cac ung dung web hien dai.', 'Bai viet nay huong dan cach tich hop Stripe Checkout vao ung dung Next.js.', 'Chung ta se xu ly webhook, quan ly don hang va cung cap file download sau thanh toan.'] },
     en: { title: 'Integrating Stripe Payments into Next.js', excerpt: 'A guide to integrating Stripe for digital products', content: ['Stripe is the most popular payment platform for modern web applications.', 'This article guides you through integrating Stripe Checkout into a Next.js application.', 'We will handle webhooks, manage orders, and provide file downloads after payment.'] },
   },
+  {
+    slug: 'thiet-ke-agent-workflow-cho-dev-team', categorySlug: 'automation', daysAgo: 7,
+    vi: { title: 'Thiet ke agent workflow cho dev team', excerpt: 'Cach chia viec cho AI agent ma van giu duoc chat luong code', content: ['Agent workflow hieu qua bat dau tu ranh gioi file ro rang va tieu chi hoan thanh cu the.', 'Moi agent nen co ngu canh vua du, khong nhan ca lich su hoi thoai gay nhieu.', 'Buoc quan trong nhat la tich hop ket qua bang review va test that.'] },
+    en: { title: 'Designing Agent Workflows for Dev Teams', excerpt: 'How to split AI agent work while keeping code quality high', content: ['Effective agent workflows start with clear file ownership and concrete acceptance criteria.', 'Each agent should receive enough context, not the entire conversation history.', 'The most important step is integrating results through real review and testing.'] },
+  },
+  {
+    slug: 'postgres-indexing-cho-blog-va-store', categorySlug: 'devops', daysAgo: 8,
+    vi: { title: 'Postgres indexing cho blog va store', excerpt: 'Nhung index co ich khi blog bat dau co nhieu noi dung', content: ['Index tot giup trang danh sach bai viet va san pham phan hoi on dinh hon khi du lieu tang.', 'Cac cot thuong can index gom slug, status, publishedAt va quan he danh muc.', 'Dung EXPLAIN de kiem tra thay vi them index theo cam tinh.'] },
+    en: { title: 'Postgres Indexing for Blogs and Stores', excerpt: 'Useful indexes when content starts growing', content: ['Good indexes keep post and product listing pages responsive as data grows.', 'Common indexed fields include slug, status, publishedAt, and category relationships.', 'Use EXPLAIN to verify impact instead of adding indexes by instinct.'] },
+  },
+  {
+    slug: 'quan-diem-ve-fullstack-cms', categorySlug: 'opinions', daysAgo: 9,
+    vi: { title: 'Quan diem ve full-stack CMS', excerpt: 'Khi nao nen dung CMS embedded thay vi tach server rieng', content: ['Embedded CMS phu hop khi team muon giam so service phai van hanh.', 'Doi lai, can chu y ranh gioi schema, migration va quyen truy cap.', 'Voi blog va store nho, cach nay giup toc do phat trien nhanh hon dang ke.'] },
+    en: { title: 'A Practical View on Full-stack CMS', excerpt: 'When embedded CMS beats a separate CMS server', content: ['An embedded CMS works well when teams want fewer services to operate.', 'The trade-off is stricter attention to schema boundaries, migrations, and access control.', 'For a small blog and store, this approach can speed up delivery meaningfully.'] },
+  },
+  {
+    slug: 'tailwind-v4-trong-du-an-thuc-te', categorySlug: 'tech', daysAgo: 10,
+    vi: { title: 'Tailwind v4 trong du an thuc te', excerpt: 'Nhung diem can luu y khi styling app san pham bang Tailwind v4', content: ['Tailwind v4 giup pipeline CSS gon hon nhung cung yeu cau cach to chuc token ro rang.', 'Dung component primitive de tranh lap lai pattern UI qua nhieu man hinh.', 'Khi app lon hon, design guideline quan trong khong kem framework.'] },
+    en: { title: 'Tailwind v4 in Real Projects', excerpt: 'What to watch when styling product apps with Tailwind v4', content: ['Tailwind v4 simplifies the CSS pipeline but still needs clear token organization.', 'Use component primitives to avoid repeating UI patterns across screens.', 'As an app grows, design guidelines matter as much as the framework.'] },
+  },
+  {
+    slug: 'xay-dung-newsletter-cho-blog-ca-nhan', categorySlug: 'tutorials', daysAgo: 11,
+    vi: { title: 'Xay dung newsletter cho blog ca nhan', excerpt: 'Tu form dang ky den email xac nhan va unsubscribe', content: ['Newsletter nen bat dau tu flow don gian: dang ky, xac nhan email va huy dang ky.', 'Luu trang thai subscriber ro rang de tranh gui nham cho nguoi da unsubscribe.', 'Email transaction nen co template rieng va log de debug khi can.'] },
+    en: { title: 'Building a Newsletter for a Personal Blog', excerpt: 'From signup form to confirmation and unsubscribe', content: ['A newsletter should start with a simple flow: subscribe, confirm email, and unsubscribe.', 'Store subscriber status clearly to avoid emailing users who opted out.', 'Transactional emails should have templates and logs for debugging.'] },
+  },
+  {
+    slug: 'ai-coding-review-checklist', categorySlug: 'automation', daysAgo: 12,
+    vi: { title: 'Checklist review code do AI viet', excerpt: 'Nhung diem can kiem tra truoc khi merge code do AI tao', content: ['Code do AI tao van can review nhu code cua lap trinh vien trong team.', 'Tap trung vao hop dong API, xu ly loi, bao mat va test that thay vi chi nhin format.', 'Checklist ngan giup review nhanh hon ma khong bo sot loi nghiem trong.'] },
+    en: { title: 'Review Checklist for AI-written Code', excerpt: 'What to check before merging AI-generated code', content: ['AI-written code still needs the same review discipline as teammate code.', 'Focus on API contracts, error handling, security, and real tests instead of formatting alone.', 'A short checklist speeds up review without missing serious issues.'] },
+  },
+  {
+    slug: 'deploy-nextjs-payload-voi-docker', categorySlug: 'devops', daysAgo: 13,
+    vi: { title: 'Deploy Next.js + Payload voi Docker', excerpt: 'Cau truc container gon cho blog va store ca nhan', content: ['Docker giup dong goi Next.js, Payload va cac thu muc upload mot cach nhat quan.', 'Can tach volume cho media va digital downloads de khong mat du lieu khi deploy lai.', 'Healthcheck database giup server chi khoi dong khi Postgres san sang.'] },
+    en: { title: 'Deploying Next.js + Payload with Docker', excerpt: 'A lean container setup for a personal blog and store', content: ['Docker packages Next.js, Payload, and upload folders consistently.', 'Use separate volumes for media and digital downloads so redeploys do not erase files.', 'Database healthchecks help the server start only when Postgres is ready.'] },
+  },
+  {
+    slug: 'co-nen-ban-san-pham-so-tren-blog', categorySlug: 'opinions', daysAgo: 14,
+    vi: { title: 'Co nen ban san pham so tren blog?', excerpt: 'Goc nhin thuc te ve viec bien noi dung thanh san pham', content: ['San pham so tot thuong den tu van de lap lai trong qua trinh viet va lam du an.', 'Blog giup chung minh nang luc va giai thich boi canh cua san pham.', 'Khong nen ban qua som neu chua co loi hua gia tri ro rang.'] },
+    en: { title: 'Should You Sell Digital Products on a Blog?', excerpt: 'A practical take on turning content into products', content: ['Good digital products often come from repeated problems found while writing and building.', 'A blog proves expertise and explains the context behind the product.', 'Do not sell too early without a clear value promise.'] },
+  },
 ]
 
-// 3 products: 1 ebook, 1 template, 1 source code (prices in cents/VND)
+// 8 products: ebooks, templates, source code, and workflow kits
 export const products: ProductSeed[] = [
   {
     slug: 'ai-fundamentals-guide', type: 'ebook', categorySlug: 'ebook', priceUSD: 999, priceVND: 250000,
@@ -91,6 +135,31 @@ export const products: ProductSeed[] = [
     slug: 'payment-integration-kit', type: 'code', priceUSD: 2999, priceVND: 750000,
     vi: { name: 'Bo tich hop thanh toan', excerpt: 'Source code tich hop Stripe va SePay', description: ['Bo source code hoan chinh de tich hop thanh toan Stripe va SePay (VietQR).', 'Bao gom webhook handler, quan ly don hang va email xac nhan.', 'Tuong thich voi Next.js, Payload CMS va PostgreSQL.'] },
     en: { name: 'Payment Integration Kit', excerpt: 'Source code for Stripe and SePay integration', description: ['Complete source code package for integrating Stripe and SePay (VietQR) payments.', 'Includes webhook handlers, order management, and confirmation emails.', 'Compatible with Next.js, Payload CMS, and PostgreSQL.'] },
+  },
+  {
+    slug: 'payload-cms-launch-kit', type: 'template', categorySlug: 'starter-kit', priceUSD: 2499, priceVND: 620000,
+    vi: { name: 'Payload CMS Launch Kit', excerpt: 'Bo khoi dong CMS cho blog, docs va landing page', description: ['Starter kit gom collection mau, routing da ngon ngu va cau hinh admin co san.', 'Phu hop voi team can ra mat nhanh blog san pham hoac trung tam tai lieu.', 'Bao gom checklist migration va goi y deploy Docker.'] },
+    en: { name: 'Payload CMS Launch Kit', excerpt: 'CMS starter for blogs, docs, and landing pages', description: ['A starter kit with sample collections, multilingual routing, and admin configuration.', 'Useful for teams launching a product blog or documentation hub quickly.', 'Includes migration checklist and Docker deployment notes.'] },
+  },
+  {
+    slug: 'ai-agent-workflow-playbook', type: 'ebook', categorySlug: 'workflow', priceUSD: 1499, priceVND: 370000,
+    vi: { name: 'AI Agent Workflow Playbook', excerpt: 'Playbook thiet ke workflow AI agent cho team nho', description: ['Tai lieu huong dan chia task, quan ly context va review ket qua AI agent.', 'Co mau prompt, checklist giao viec va khung danh gia rui ro.', 'Tap trung vao tinh thuc dung cho du an web full-stack.'] },
+    en: { name: 'AI Agent Workflow Playbook', excerpt: 'A playbook for small-team AI agent workflows', description: ['A guide to task splitting, context management, and reviewing agent output.', 'Includes prompt templates, delegation checklists, and risk review frames.', 'Focused on practical full-stack web projects.'] },
+  },
+  {
+    slug: 'nextjs-saas-dashboard-template', type: 'template', categorySlug: 'template', priceUSD: 3499, priceVND: 870000,
+    vi: { name: 'Next.js SaaS Dashboard Template', excerpt: 'Dashboard SaaS gon voi bang, filter va layout quan tri', description: ['Template dashboard cho san pham SaaS gom sidebar, table, empty states va settings.', 'Thiet ke tap trung vao thao tac hang ngay thay vi landing page.', 'De tuy bien cho CRM, analytics hoac admin tool noi bo.'] },
+    en: { name: 'Next.js SaaS Dashboard Template', excerpt: 'A focused SaaS dashboard with tables, filters, and admin layouts', description: ['A dashboard template with sidebar navigation, tables, empty states, and settings screens.', 'Designed for daily product operations instead of marketing pages.', 'Easy to adapt for CRM, analytics, or internal admin tools.'] },
+  },
+  {
+    slug: 'resend-email-template-pack', type: 'code', categorySlug: 'starter-kit', priceUSD: 1299, priceVND: 320000,
+    vi: { name: 'Resend Email Template Pack', excerpt: 'Bo React Email template cho auth, order va newsletter', description: ['Goi template email gom xac nhan tai khoan, hoa don, download va newsletter.', 'Cau truc component ro rang de dung lai trong Next.js va Payload.', 'Co noi dung song ngu Anh Viet de demo nhanh.'] },
+    en: { name: 'Resend Email Template Pack', excerpt: 'React Email templates for auth, orders, and newsletters', description: ['A template pack for account confirmation, receipts, downloads, and newsletters.', 'Clear component structure for reuse in Next.js and Payload projects.', 'Includes bilingual English and Vietnamese sample copy.'] },
+  },
+  {
+    slug: 'postgres-performance-checklist', type: 'ebook', categorySlug: 'ebook', priceUSD: 799, priceVND: 190000,
+    vi: { name: 'Postgres Performance Checklist', excerpt: 'Checklist toi uu Postgres cho ung dung noi dung', description: ['Checklist ngan ve index, query plan, connection pool va backup cho Postgres.', 'Danh cho blog, ecommerce nho va dashboard noi bo.', 'Moi muc co dau hieu can kiem tra va cach xac minh nhanh.'] },
+    en: { name: 'Postgres Performance Checklist', excerpt: 'A performance checklist for content-heavy apps', description: ['A concise checklist for indexes, query plans, connection pools, and Postgres backups.', 'Built for blogs, small ecommerce sites, and internal dashboards.', 'Each item includes symptoms to check and a quick verification method.'] },
   },
 ]
 
