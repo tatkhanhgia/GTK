@@ -234,7 +234,11 @@ export default async function MePage({ params }: Props) {
 
       <div className="space-y-16 md:space-y-20">
         {/* Hero Section */}
-        <ScrollReveal as="section" className="gradient-brand-subtle relative overflow-hidden rounded-3xl border border-border/60 px-6 py-12 md:px-10 md:py-14">
+        <ScrollReveal
+          as="section"
+          preset="pageHero"
+          className="gradient-brand-subtle relative overflow-hidden rounded-3xl border border-border/60 px-6 py-12 md:px-10 md:py-14"
+        >
           <div className="ambient-warm absolute inset-0" />
           <div className="relative z-10">
             <BioSection
@@ -249,7 +253,7 @@ export default async function MePage({ params }: Props) {
         </ScrollReveal>
 
         {/* At a Glance */}
-        <ScrollReveal>
+        <ScrollReveal preset="section">
           <section>
             <div className="mb-8">
               <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -272,7 +276,7 @@ export default async function MePage({ params }: Props) {
 
         {/* Timeline - Moments that matter */}
         {profile.timeline?.length > 0 && (
-          <ScrollReveal>
+          <ScrollReveal preset="section">
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -291,7 +295,7 @@ export default async function MePage({ params }: Props) {
 
         {/* Skills - My Stack */}
         {profile.skills?.length > 0 && (
-          <ScrollReveal>
+          <ScrollReveal preset="section">
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -310,7 +314,7 @@ export default async function MePage({ params }: Props) {
 
         {/* Principles - What I Believe */}
         {(principles.length > 0 || philosophyPrinciples.length > 0 || Boolean(philosophyStory)) && (
-          <ScrollReveal>
+          <ScrollReveal preset="section">
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">
@@ -334,7 +338,7 @@ export default async function MePage({ params }: Props) {
                   {principles.map((principle) => (
                     <article
                       key={principle.title}
-                      className="rounded-2xl border-l-4 border-l-primary border-y border-r border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+                      className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:border-primary/30 hover:shadow-md"
                     >
                       <h3 className="font-heading text-lg font-semibold">{principle.title}</h3>
                       <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
@@ -350,7 +354,7 @@ export default async function MePage({ params }: Props) {
 
         {/* Currently Building */}
         {Boolean(buildingNow) && (
-          <ScrollReveal>
+          <ScrollReveal preset="card">
             <section className="rounded-3xl border border-border/60 bg-card p-6 md:p-8">
               <h2 className="mb-4 font-heading text-2xl font-semibold">{t.buildingNow}</h2>
               <RichTextRenderer content={buildingNow} />
@@ -360,7 +364,7 @@ export default async function MePage({ params }: Props) {
 
         {/* Blog Posts */}
         {writingToRender.length > 0 && (
-          <ScrollReveal>
+          <ScrollReveal preset="section">
             <section>
               <div className="mb-8">
                 <h2 className="font-heading text-3xl font-bold tracking-tight">{t.selectedWriting}</h2>
@@ -369,8 +373,14 @@ export default async function MePage({ params }: Props) {
                 )}
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {writingToRender.map((post) => (
-                  <div key={post.slug} className="group space-y-2">
+                {writingToRender.map((post, index) => (
+                  <ScrollReveal
+                    key={post.slug}
+                    preset="card"
+                    delay={Math.min(index * 0.04, 0.16)}
+                    viewport="card"
+                    className="group space-y-2"
+                  >
                     <div className="transition-transform duration-300 group-hover:-translate-y-1">
                       <BlogCard
                         title={post.title}
@@ -384,7 +394,7 @@ export default async function MePage({ params }: Props) {
                       />
                     </div>
                     {post.note && <p className="px-1 text-sm text-muted-foreground">{post.note}</p>}
-                  </div>
+                  </ScrollReveal>
                 ))}
               </div>
             </section>
@@ -392,7 +402,7 @@ export default async function MePage({ params }: Props) {
         )}
 
         {/* Contact Form */}
-        <ScrollReveal>
+        <ScrollReveal preset="section">
           <ContactForm locale={loc} translations={t} ctaText={contactCtaText} />
         </ScrollReveal>
       </div>

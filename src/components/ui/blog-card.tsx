@@ -45,7 +45,32 @@ export function BlogCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="absolute inset-0 gradient-brand opacity-60" />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 overflow-hidden bg-[linear-gradient(135deg,var(--muted)_0%,var(--background)_48%,color-mix(in_oklab,var(--primary)_18%,var(--background))_100%)]"
+            >
+              <div className="absolute left-5 top-5 right-5 rounded-lg border border-border/80 bg-card/70 p-3 shadow-sm">
+                <div className="mb-3 flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-primary/70" />
+                  <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+                  <span className="h-2 w-2 rounded-full bg-muted-foreground/20" />
+                </div>
+                <div className="space-y-2">
+                  <span className="block h-2 rounded-full bg-foreground/18" />
+                  <span className="block h-2 w-4/5 rounded-full bg-foreground/12" />
+                  <span className="block h-2 w-2/3 rounded-full bg-primary/25" />
+                </div>
+              </div>
+              <div className="absolute bottom-4 left-5 right-9 grid grid-cols-6 gap-1.5 opacity-75">
+                {Array.from({ length: 18 }).map((_, index) => (
+                  <span
+                    key={index}
+                    className="h-1.5 rounded-full bg-foreground/10"
+                  />
+                ))}
+              </div>
+              <div className="absolute -bottom-8 -right-8 h-28 w-28 rounded-full border border-primary/20" />
+            </div>
           )}
         </div>
       </Link>

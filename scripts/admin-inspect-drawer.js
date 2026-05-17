@@ -44,7 +44,6 @@ const { chromium } = require('playwright');
     els
       .filter(el => {
         const rect = el.getBoundingClientRect();
-        const style = window.getComputedStyle(el);
         return rect.width > 100 && rect.width < 400 && rect.height > 200 && rect.left < 300;
       })
       .map(el => ({

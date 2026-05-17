@@ -31,6 +31,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     ".claude/**",
+    ".agents/**",
+    ".impeccable/**",
     ".opencode/**",
     "next-env.d.ts",
   ]),

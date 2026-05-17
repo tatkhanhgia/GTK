@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Menu } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -24,6 +24,7 @@ interface NavbarProps {
 
 export function Navbar({ locale = 'vi' }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   // Use raw Next pathname so locale stripping does not depend on next-intl client state.
   // Example: on /en/me we get "/en/me" — replace segment[0] with otherLocale → "/vi/me".
   const rawPathname = usePathname() ?? `/${locale}`
@@ -36,8 +37,34 @@ export function Navbar({ locale = 'vi' }: NavbarProps) {
   }
   const switchHref = '/' + segments.join('/')
 
+  useEffect(() => {
+    let frame = 0
+
+    function updateScrollState() {
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 12)
+      })
+    }
+
+    updateScrollState()
+    window.addEventListener('scroll', updateScrollState, { passive: true })
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', updateScrollState)
+    }
+  }, [])
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
+    <header
+      className={cn(
+        'motion-surface sticky top-0 z-50 w-full border-b backdrop-blur-lg',
+        isScrolled
+          ? 'border-border/70 bg-background/95 shadow-[0_10px_30px_color-mix(in_oklab,var(--foreground)_6%,transparent)]'
+          : 'border-border/40 bg-background/80'
+      )}
+    >
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
         {/* Logo */}
         <LogoInline showText href={`/${locale}`} />

@@ -4,6 +4,7 @@ import { getProductBySlug } from '@/lib/products/get-product-by-slug'
 import { ProductPaymentSection } from '@/components/products/product-payment-section'
 import { RichTextRenderer } from '@/components/blog/rich-text-renderer'
 import { TechStackBadges } from '@/components/ui/tech-stack-badges'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import type { Locale } from '@/i18n/config'
 import type { Metadata } from 'next'
 import { Check } from 'lucide-react'
@@ -49,7 +50,6 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const typeLabel = typeMap[product.type]?.[isVi ? 'vi' : 'en'] ?? product.type
 
-  // Helper to get localized text
   function getLocalizedText(value: unknown): string | undefined {
     if (typeof value === 'string') return value
     if (value && typeof value === 'object') {
@@ -89,7 +89,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-10">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      <ScrollReveal preset="pageHero" className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         {/* Product image */}
         <div className="aspect-video relative rounded-xl overflow-hidden bg-muted">
           {firstImage?.url ? (
@@ -140,43 +140,43 @@ export default async function ProductDetailPage({ params }: Props) {
             locale={loc}
           />
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* Rich text description */}
       {product.description && (
-        <div className="mt-16">
+        <ScrollReveal preset="section" className="mt-16">
           <h2 className="font-heading font-semibold text-xl mb-6">
             {isVi ? 'Mô tả' : 'Description'}
           </h2>
           <div className="prose-custom">
             <RichTextRenderer content={product.description} />
           </div>
-        </div>
+        </ScrollReveal>
       )}
 
       {/* Problem Solved */}
       {problemSolvedText && (
-        <div className="mt-10 rounded-2xl border border-border bg-secondary/30 p-6 md:p-8">
+        <ScrollReveal preset="card" className="mt-10 rounded-2xl border border-border bg-secondary/30 p-6 md:p-8">
           <h2 className="mb-3 font-heading text-xl font-semibold">
             {isVi ? 'Vấn đề được giải quyết' : 'Problem Solved'}
           </h2>
           <p className="text-muted-foreground">{problemSolvedText}</p>
-        </div>
+        </ScrollReveal>
       )}
 
       {/* Tech Stack */}
       {technologies.length > 0 && (
-        <div className="mt-10">
+        <ScrollReveal preset="compact" className="mt-10">
           <h2 className="mb-4 font-heading text-xl font-semibold">
             {isVi ? 'Công nghệ sử dụng' : 'Tech Stack'}
           </h2>
           <TechStackBadges technologies={technologies} />
-        </div>
+        </ScrollReveal>
       )}
 
       {/* Key Features */}
       {keyFeatures.length > 0 && (
-        <div className="mt-10">
+        <ScrollReveal preset="compact" className="mt-10">
           <h2 className="mb-4 font-heading text-xl font-semibold">
             {isVi ? 'Tính năng chính' : 'Key Features'}
           </h2>
@@ -193,7 +193,7 @@ export default async function ProductDetailPage({ params }: Props) {
               </li>
             ))}
           </ul>
-        </div>
+        </ScrollReveal>
       )}
     </div>
   )

@@ -27,22 +27,22 @@
   },
   "home": {
     "hero": {
-      "title": "Explore the world of",
-      "titleHighlight": "Tech & AI",
-      "subtitle": "Personal blog about technology, AI, and digital products. Sharing knowledge, experience, and inspiration.",
-      "ctaBlog": "Read Blog",
-      "ctaProducts": "Browse Products"
+      "title": "Field notes on AI, web apps, and",
+      "titleHighlight": "digital products",
+      "subtitle": "I write what I learn while building GTKBlog, testing AI workflows, and turning small product ideas into working systems.",
+      "ctaBlog": "Read latest notes",
+      "ctaProducts": "See what I build"
     },
-    "featuredPosts": "Featured Posts",
-    "featuredProducts": "Digital Products",
+    "featuredPosts": "Writing that shows the work",
+    "featuredProducts": "Resources from the build",
     "achievements": {
-      "eyebrow": "The blog in numbers",
-      "title": "Where knowledge gets written down",
-      "subtitle": "Every article, every product, every subscriber — a link in GTKBlog's ongoing trail of sharing."
+      "eyebrow": "Start here",
+      "title": "Three ways to understand GTKBlog faster",
+      "subtitle": "A guided path through the writing, products, and working principles behind the site."
     },
     "newsletter": {
-      "title": "Subscribe for new posts",
-      "subtitle": "Get notified when new AI and tech articles are published.",
+      "title": "Follow the build notes",
+      "subtitle": "Get new writing about AI workflows, Next.js, Payload CMS, and practical digital products.",
       "placeholder": "Your email",
       "cta": "Subscribe",
       "success": "Subscribed! Check your email to confirm."

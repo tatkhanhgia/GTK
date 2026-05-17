@@ -70,12 +70,12 @@ export function NewsletterSection({ locale }: NewsletterSectionProps) {
       <div className="relative z-10 mx-auto max-w-2xl">
         <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Newsletter</p>
         <h3 className="mt-3 font-heading text-2xl font-semibold md:text-3xl">
-          {isVi ? 'Đăng ký nhận bài viết mới' : 'Subscribe to new posts'}
+          {isVi ? 'Theo dõi ghi chép xây dựng' : 'Follow the build notes'}
         </h3>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
           {isVi
-            ? 'Nhận thông báo khi GTKBlog có bài viết mới về AI, công nghệ và sản phẩm số.'
-            : 'Get notified when GTKBlog publishes new posts about AI, technology, and digital products.'}
+            ? 'Nhận ghi chép mới về AI workflow, Next.js, Payload CMS và sản phẩm số thực hành.'
+            : 'Get notes on AI workflows, Next.js, Payload CMS, and practical digital products.'}
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row">

@@ -52,10 +52,13 @@ export const motionViewport = {
 } as const
 
 export const revealPresets = {
-  default: { y: 12, duration: motionDurations.section, scale: 1, viewport: 'section' },
+  default: { y: 24, duration: 0.42, scale: 1, viewport: 'section' },
   section: { y: 64, duration: motionDurations.section, scale: 1, viewport: 'editorialSection' },
+  pageHero: { y: 28, duration: 0.58, scale: 0.992, viewport: 'editorialHeading' },
   heading: { y: 40, duration: 0.44, scale: 1, viewport: 'editorialHeading' },
+  compact: { y: 16, duration: 0.34, scale: 1, viewport: 'editorialHeading' },
   card: { y: 52, duration: motionDurations.reveal, scale: 0.975, viewport: 'editorialCard' },
+  media: { y: 24, duration: 0.5, scale: 0.985, viewport: 'editorialCard' },
 } as const
 
 interface RevealVariantOptions {
