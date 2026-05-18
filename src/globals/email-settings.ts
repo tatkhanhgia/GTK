@@ -5,11 +5,12 @@ import { isPayloadAdminUser } from '../lib/admin/payload-admin-access'
 const providerOptions = [
   { label: 'Resend', value: 'resend' },
   { label: 'Zoho ZeptoMail', value: 'zoho' },
+  { label: 'SMTP', value: 'smtp' },
   { label: 'Cloudflare Email Service', value: 'cloudflare' },
 ]
 
 function maskProviderSecrets(doc: Record<string, unknown>) {
-  for (const key of ['resendApiKeyEncrypted', 'zohoTokenEncrypted', 'cloudflareApiTokenEncrypted']) {
+  for (const key of ['resendApiKeyEncrypted', 'zohoTokenEncrypted', 'smtpPasswordEncrypted', 'cloudflareApiTokenEncrypted']) {
     if (typeof doc[key] === 'string') {
       doc[key] = maskEmailSecret(doc[key])
     }
@@ -150,6 +151,99 @@ export const EmailSettings: GlobalConfig = {
           vi: 'Doi URL neu tai khoan ZeptoMail dung data center khac.',
           en: 'Override this URL if your ZeptoMail account uses another data center.',
         },
+      },
+    },
+    {
+      type: 'text',
+      name: 'smtpHost',
+      label: { vi: 'SMTP host', en: 'SMTP host' },
+      defaultValue: 'smtppro.zoho.com',
+      admin: {
+        condition: (_, siblingData) => siblingData.provider === 'smtp',
+        description: {
+          vi: 'Host SMTP tu nha cung cap email. Zoho thuong dung smtp.zoho.com hoac smtppro.zoho.com.',
+          en: 'SMTP host from your email provider. Zoho usually uses smtp.zoho.com or smtppro.zoho.com.',
+        },
+      },
+      validate: (value: string | null | undefined, { siblingData }: { siblingData?: Record<string, unknown> }) => requireSecretForProvider(
+        value,
+        siblingData,
+        'smtp',
+        process.env.SMTP_HOST,
+        'SMTP host is required when SMTP email provider is enabled.',
+      ),
+    },
+    {
+      type: 'number',
+      name: 'smtpPort',
+      label: { vi: 'SMTP port', en: 'SMTP port' },
+      defaultValue: 465,
+      admin: {
+        condition: (_, siblingData) => siblingData.provider === 'smtp',
+        description: {
+          vi: 'Dung 465 voi SSL hoac 587 voi TLS/STARTTLS.',
+          en: 'Use 465 for SSL or 587 for TLS/STARTTLS.',
+        },
+      },
+    },
+    {
+      type: 'checkbox',
+      name: 'smtpSecure',
+      label: { vi: 'SMTP secure SSL', en: 'SMTP secure SSL' },
+      defaultValue: true,
+      admin: {
+        condition: (_, siblingData) => siblingData.provider === 'smtp',
+        description: {
+          vi: 'Bat cho port 465. Tat cho port 587.',
+          en: 'Enable for port 465. Disable for port 587.',
+        },
+      },
+    },
+    {
+      type: 'text',
+      name: 'smtpUser',
+      label: { vi: 'SMTP username', en: 'SMTP username' },
+      admin: {
+        condition: (_, siblingData) => siblingData.provider === 'smtp',
+        description: {
+          vi: 'Thuong la dia chi email day du, vi du contact@domain.com.',
+          en: 'Usually the full mailbox address, for example contact@domain.com.',
+        },
+      },
+      validate: (value: string | null | undefined, { siblingData }: { siblingData?: Record<string, unknown> }) => requireSecretForProvider(
+        value,
+        siblingData,
+        'smtp',
+        process.env.SMTP_USER,
+        'SMTP username is required when SMTP email provider is enabled.',
+      ),
+    },
+    {
+      type: 'text',
+      name: 'smtpPasswordEncrypted',
+      label: { vi: 'SMTP password', en: 'SMTP password' },
+      admin: {
+        condition: (_, siblingData) => siblingData.provider === 'smtp',
+        description: {
+          vi: 'Nhap app password cua mailbox SMTP. Mat khau duoc ma hoa truoc khi luu.',
+          en: 'Enter the SMTP mailbox app password. The password is encrypted before save.',
+        },
+      },
+      validate: (value: string | null | undefined, { siblingData }: { siblingData?: Record<string, unknown> }) => requireSecretForProvider(
+        value,
+        siblingData,
+        'smtp',
+        process.env.SMTP_PASSWORD,
+        'SMTP password is required when SMTP email provider is enabled.',
+      ),
+      hooks: {
+        beforeChange: [
+          ({ value, originalDoc }) => preserveOrEncryptEmailSecret(
+            value,
+            originalDoc as Record<string, unknown> | undefined,
+            'smtpPasswordEncrypted',
+          ),
+        ],
       },
     },
     {

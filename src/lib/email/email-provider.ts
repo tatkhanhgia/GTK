@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { CloudflareEmailProvider } from './providers/cloudflare-email-provider'
 import { ResendEmailProvider } from './providers/resend-email-provider'
+import { SmtpEmailProvider } from './providers/smtp-email-provider'
 import { ZohoEmailProvider } from './providers/zoho-email-provider'
 import type { ResolvedEmailSettings } from './email-settings-service'
 
@@ -23,6 +24,10 @@ export function createEmailProvider(settings: ResolvedEmailSettings): EmailProvi
 
   if (settings.delivery.provider === 'zoho') {
     return new ZohoEmailProvider(settings.delivery.token, settings.delivery.apiUrl)
+  }
+
+  if (settings.delivery.provider === 'smtp') {
+    return new SmtpEmailProvider(settings.delivery)
   }
 
   if (settings.delivery.provider === 'cloudflare') {

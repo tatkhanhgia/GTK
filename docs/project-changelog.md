@@ -6,9 +6,11 @@ All significant changes to the GTK Blog project are documented here.
 
 ### Added
 - Completed email provider delivery with Zoho ZeptoMail and Cloudflare Email Service adapters, encrypted provider secrets, env fallback, migration, and tests.
+- Added SMTP email provider support for Zoho Mail/Admin mailbox delivery, including encrypted SMTP password storage, env fallback, migration, and tests.
 
 ### Fixed
 - Scoped Payload admin checkbox styling so email sending and welcome email toggles keep stable sizing.
+- Fixed SMTP env fallback precedence so Payload field defaults do not block `SMTP_HOST`, `SMTP_PORT`, and `SMTP_SECURE`.
 
 ## [0.1.9] - 2026-05-18
 
