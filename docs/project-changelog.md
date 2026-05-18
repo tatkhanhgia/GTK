@@ -2,6 +2,14 @@
 
 All significant changes to the GTK Blog project are documented here.
 
+## [0.1.10] - 2026-05-18
+
+### Added
+- Completed email provider delivery with Zoho ZeptoMail and Cloudflare Email Service adapters, encrypted provider secrets, env fallback, migration, and tests.
+
+### Fixed
+- Scoped Payload admin checkbox styling so email sending and welcome email toggles keep stable sizing.
+
 ## [0.1.9] - 2026-05-18
 
 ### Added

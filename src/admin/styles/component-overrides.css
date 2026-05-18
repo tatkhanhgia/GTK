@@ -120,14 +120,23 @@ body:has(.template-minimal) #custom-sidebar-container {
    which clips wide tables (e.g. Posts list ~650px) on a 390px screen
    so the data is invisible. Allow horizontal scrolling instead. */
 .collection-list .table,
-.collection-list__tables .table {
+.collection-list__tables .table,
+.versions .table {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100%;
   overflow-x: auto !important;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
 /* Desktop: force the table to fill its wrap and truncate long values so the
    longest title can't stretch its column and bleed into adjacent badges. */
 @media (min-width: 768px) {
+  .versions .table {
+    overflow-x: visible !important;
+  }
+
   .collection-list .table > table {
     width: 100%;
     table-layout: fixed;
@@ -153,12 +162,97 @@ body:has(.template-minimal) #custom-sidebar-container {
   }
 }
 
+.versions .table > table {
+  width: 100%;
+  table-layout: auto;
+}
+
+.versions .table > table th,
+.versions .table > table td {
+  padding: 14px 16px !important;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.versions .table #heading-updatedAt,
+.versions .table .cell-updatedAt {
+  min-width: 220px;
+}
+
+.versions .table #heading-id,
+.versions .table .cell-id {
+  width: 180px;
+}
+
+.versions .table #heading-_status,
+.versions .table .cell-_status {
+  width: 240px;
+}
+
 /* Mobile: keep horizontal scroll so narrow screens can still see every
    column. `max-content` lets the table grow beyond the 390px wrap and the
    parent `.table` wrapper provides `overflow-x: auto`. */
 @media (max-width: 767px) {
-  .collection-list .table > table {
+  .collection-list .table > table,
+  .versions .table > table {
     min-width: max-content;
+  }
+
+  .versions .table > table {
+    width: 100%;
+    min-width: 390px;
+  }
+
+  .versions .table > table th,
+  .versions .table > table td {
+    padding: 12px 10px !important;
+  }
+
+  .versions .table #heading-updatedAt,
+  .versions .table .cell-updatedAt {
+    min-width: 186px;
+  }
+
+  .versions .table #heading-id,
+  .versions .table .cell-id {
+    width: 56px;
+    min-width: 56px;
+  }
+
+  .versions .table #heading-_status,
+  .versions .table .cell-_status {
+    width: 126px;
+    min-width: 126px;
+  }
+
+  .versions .versions__page-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 10px;
+  }
+
+  .versions .per-page .popup-button {
+    width: auto;
+    min-width: 0;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 10px;
+    white-space: nowrap;
+  }
+
+  .versions .per-page__base-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .versions .per-page__icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
   }
 }
 
@@ -347,6 +441,48 @@ select:focus {
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 3px var(--admin-accent-light);
   outline: none;
+}
+
+/* Payload renders checkbox fields as button-like controls. Keep broad input
+   and button overrides from stretching the email settings toggles. */
+.field-type.checkbox,
+.checkbox-input {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.field-type.checkbox label,
+.checkbox-input label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  color: var(--admin-text-primary);
+  line-height: 1.35;
+}
+
+.field-type.checkbox input[type="checkbox"],
+.checkbox-input input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  padding: 0;
+  border-radius: 4px;
+  accent-color: var(--admin-accent);
+  cursor: pointer;
+}
+
+.field-type.checkbox button,
+.checkbox-input button {
+  min-width: 18px;
+  min-height: 18px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  padding: 0;
 }
 
 /* Button Hierarchy */
@@ -1825,6 +1961,21 @@ html.admin-light .template-default .collection-list .table > table td {
   align-items: center;
   gap: 6px;
   line-height: 1.2;
+}
+
+.template-default .doc-tab .pill-version-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--admin-accent-light);
+  color: var(--admin-accent);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* Kill the default right-edge fade gradient that only makes sense when

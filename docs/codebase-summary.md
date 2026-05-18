@@ -13,7 +13,7 @@
 | **UI Framework** | shadcn/ui (@base-ui/react) + Tailwind CSS v4 |
 | **i18n** | next-intl v4 (vi/en routing: `/vi/*`, `/en/*`) |
 | **Payment** | Stripe + SePay (VietQR/bank transfer) dual checkout |
-| **Email** | Resend + React Email (4 localized templates) |
+| **Email** | Resend / Zoho / Cloudflare + React Email templates |
 | **Rich Text Editor** | Payload Lexical (built-in) |
 | **Icons** | Lucide React |
 | **Testing** | Vitest + React Testing Library |
@@ -258,7 +258,7 @@ Configuration Files
 ## Key Architecture Decisions
 
 ### 0. **Member and Email Settings**
-- Payload `email-settings` global stores Resend sender settings, encrypted provider secret, and localized welcome email copy.
+- Payload `email-settings` global stores sender settings, encrypted provider secrets, provider-specific API settings, and localized welcome email copy.
 - Better Auth signup triggers a non-blocking welcome email through `databaseHooks.user.create.after`.
 - `/[locale]/profile/settings` now preloads user settings server-side and syncs display name changes to both `ba_users` and `user_profiles`.
 - `/admin/site-users` gives Payload admins a separate management surface for Better Auth site members, including role/status/email edits and password reset link generation.

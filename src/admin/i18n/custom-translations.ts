@@ -83,6 +83,10 @@ type CustomTranslationsShape = {
     platformNoOptions: string;
     platformPlaceholder: string;
   };
+  version: {
+    versionID: string;
+    versions: string;
+  };
   customDashboard: {
     heroKicker: string;
     heroTitle: string;
@@ -193,6 +197,10 @@ export const customTranslationsVi: CustomTranslationsShape = {
   customFields: {
     platformNoOptions: 'Không có lựa chọn',
     platformPlaceholder: 'Chọn nền tảng...',
+  },
+  version: {
+    versionID: 'ID',
+    versions: 'Lịch sử phiên bản',
   },
   customDashboard: {
     heroKicker: 'Tổng quan',
@@ -306,6 +314,10 @@ export const customTranslationsEn: CustomTranslationsShape = {
   customFields: {
     platformNoOptions: 'No options available',
     platformPlaceholder: 'Select platform...',
+  },
+  version: {
+    versionID: 'ID',
+    versions: 'Version history',
   },
   customDashboard: {
     heroKicker: 'Overview',

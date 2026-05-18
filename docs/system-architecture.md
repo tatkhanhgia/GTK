@@ -307,11 +307,10 @@ pending â†’ [webhook received] â†’ completed â†’ [token valid unt
 ### Admin-managed Email Settings
 
 - Payload global: `email-settings`.
-- Provider scope: provider-neutral settings with `resend` as the only implemented selectable provider.
-- Secret storage: `resendApiKeyEncrypted` encrypted server-side with `EMAIL_SETTINGS_ENCRYPTION_KEY`; admin reads show only a mask.
-- Fallback path: if no Payload settings exist, Resend delivery uses `RESEND_API_KEY` and `RESEND_FROM_EMAIL`.
+- Provider scope: provider-neutral settings with Resend, Zoho ZeptoMail, and Cloudflare Email Service adapters.
+- Secret storage: provider tokens encrypted server-side with `EMAIL_SETTINGS_ENCRYPTION_KEY`; admin reads show only a mask.
+- Fallback path: if no Payload settings exist, delivery can use provider env vars (`RESEND_API_KEY`, `ZOHO_ZEPTOMAIL_TOKEN`, `CLOUDFLARE_EMAIL_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) plus `RESEND_FROM_EMAIL`.
 - Provider boundary: `send-email.ts` resolves settings, selects an email provider adapter, then sends through the adapter. Unsupported provider values fail closed before any external call.
-- Future providers: Zoho and Cloudflare are intentionally deferred until schema, encrypted secrets, adapter, validation, tests, and deployment docs are complete.
 - Welcome email: Better Auth `databaseHooks.user.create.after` calls `sendWelcomeEmailForUser`; failures are logged and do not block signup.
 
 ### Templates (React Email)

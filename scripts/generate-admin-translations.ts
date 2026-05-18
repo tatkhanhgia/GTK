@@ -10,6 +10,7 @@ const ADMIN_KEY_PREFIXES = [
   'customDashboard',
   'customCells',
   'customFields',
+  'version',
 ]
 
 function isAdminKey(key: string) {
