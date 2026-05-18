@@ -6,6 +6,7 @@ import * as migration_20260513_160500_add_digital_downloads from './20260513_160
 import * as migration_20260514_003500_member_email_settings_site_users from './20260514_003500_member_email_settings_site_users';
 import * as migration_20260515_140500_add_email_settings_provider from './20260515_140500_add_email_settings_provider';
 import * as migration_20260518_134600_add_email_provider_credentials from './20260518_134600_add_email_provider_credentials';
+import * as migration_20260518_170000_add_smtp_email_settings from './20260518_170000_add_smtp_email_settings';
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260518_134600_add_email_provider_credentials.up,
     down: migration_20260518_134600_add_email_provider_credentials.down,
     name: '20260518_134600_add_email_provider_credentials'
+  },
+  {
+    up: migration_20260518_170000_add_smtp_email_settings.up,
+    down: migration_20260518_170000_add_smtp_email_settings.down,
+    name: '20260518_170000_add_smtp_email_settings'
   },
 ];

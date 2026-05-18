@@ -3,6 +3,7 @@ import { EmailSettings } from '@/globals/email-settings'
 
 const resendKeyField = EmailSettings.fields.find((field) => 'name' in field && field.name === 'resendApiKeyEncrypted')
 const zohoTokenField = EmailSettings.fields.find((field) => 'name' in field && field.name === 'zohoTokenEncrypted')
+const smtpPasswordField = EmailSettings.fields.find((field) => 'name' in field && field.name === 'smtpPasswordEncrypted')
 const cloudflareTokenField = EmailSettings.fields.find((field) => 'name' in field && field.name === 'cloudflareApiTokenEncrypted')
 
 describe('email-settings global access', () => {
@@ -10,6 +11,9 @@ describe('email-settings global access', () => {
     delete process.env.PAYLOAD_SECRET
     delete process.env.RESEND_API_KEY
     delete process.env.ZOHO_ZEPTOMAIL_TOKEN
+    delete process.env.SMTP_HOST
+    delete process.env.SMTP_USER
+    delete process.env.SMTP_PASSWORD
     delete process.env.CLOUDFLARE_EMAIL_API_TOKEN
   })
 
@@ -34,6 +38,7 @@ describe('email-settings global access', () => {
     const doc = {
       resendApiKeyEncrypted: 'enc:v1:stored-secret',
       zohoTokenEncrypted: 'enc:v1:zoho-secret',
+      smtpPasswordEncrypted: 'enc:v1:smtp-secret',
       cloudflareApiTokenEncrypted: 'enc:v1:cf-secret',
     }
 
@@ -42,6 +47,7 @@ describe('email-settings global access', () => {
     expect(result).toMatchObject({
       resendApiKeyEncrypted: '********',
       zohoTokenEncrypted: '********',
+      smtpPasswordEncrypted: '********',
       cloudflareApiTokenEncrypted: '********',
     })
   })
@@ -90,6 +96,9 @@ describe('email-settings global access', () => {
     const zohoValidate = zohoTokenField && 'validate' in zohoTokenField
       ? zohoTokenField.validate as (value: string, options: Record<string, unknown>) => true | string
       : undefined
+    const smtpPasswordValidate = smtpPasswordField && 'validate' in smtpPasswordField
+      ? smtpPasswordField.validate as (value: string, options: Record<string, unknown>) => true | string
+      : undefined
     const cloudflareValidate = cloudflareTokenField && 'validate' in cloudflareTokenField
       ? cloudflareTokenField.validate as (value: string, options: Record<string, unknown>) => true | string
       : undefined
@@ -97,6 +106,10 @@ describe('email-settings global access', () => {
     expect(zohoValidate?.('', {
       siblingData: { enabled: true, provider: 'zoho' },
     } as never)).toBe('Zoho ZeptoMail token is required when Zoho email provider is enabled.')
+
+    expect(smtpPasswordValidate?.('', {
+      siblingData: { enabled: true, provider: 'smtp' },
+    } as never)).toBe('SMTP password is required when SMTP email provider is enabled.')
 
     expect(cloudflareValidate?.('', {
       siblingData: { enabled: true, provider: 'cloudflare' },

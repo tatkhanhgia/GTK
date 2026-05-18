@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createElement, type ReactElement } from 'react'
 
 const resendSend = vi.hoisted(() => vi.fn())
+const smtpSendMail = vi.hoisted(() => vi.fn())
 const testEmail = () => createElement('div', null, 'Hello') as ReactElement
 const settingsState = vi.hoisted(() => ({
   settings: {
@@ -30,9 +31,18 @@ vi.mock('@/lib/email/resend-client', () => ({
   })),
 }))
 
+vi.mock('nodemailer', () => ({
+  default: {
+    createTransport: vi.fn(() => ({
+      sendMail: smtpSendMail,
+    })),
+  },
+}))
+
 describe('send-email provider selection', () => {
   afterEach(() => {
     resendSend.mockReset()
+    smtpSendMail.mockReset()
     vi.unstubAllGlobals()
     settingsState.settings = {
       enabled: true,
@@ -82,8 +92,8 @@ describe('send-email provider selection', () => {
   it('fails closed for unsupported provider configs', async () => {
     settingsState.settings = {
       ...settingsState.settings,
-      provider: 'smtp',
-      delivery: { provider: 'smtp' },
+      provider: 'mailgun',
+      delivery: { provider: 'mailgun' },
     }
 
     const { sendEmail } = await import('@/lib/email/send-email')
@@ -92,7 +102,7 @@ describe('send-email provider selection', () => {
       to: 'user@example.com',
       subject: 'Subject',
       react: testEmail(),
-    })).rejects.toThrow('Unsupported email provider: smtp')
+    })).rejects.toThrow('Unsupported email provider: mailgun')
     expect(resendSend).not.toHaveBeenCalled()
   })
 
@@ -170,5 +180,48 @@ describe('send-email provider selection', () => {
       subject: 'Subject',
     })
     expect(cloudflareBody.html).toContain('Hello')
+  })
+
+  it('sends through SMTP provider', async () => {
+    smtpSendMail.mockResolvedValue({ messageId: 'smtp-1' })
+    settingsState.settings = {
+      ...settingsState.settings,
+      provider: 'smtp',
+      delivery: {
+        provider: 'smtp',
+        host: 'smtp.zoho.com',
+        port: 465,
+        secure: true,
+        user: 'contact@example.com',
+        password: 'app_password',
+      },
+      replyTo: 'reply@example.com',
+    }
+
+    const nodemailer = await import('nodemailer')
+    const { sendEmail } = await import('@/lib/email/send-email')
+    const result = await sendEmail({
+      to: 'user@example.com',
+      subject: 'Subject',
+      react: testEmail(),
+    })
+
+    expect(result).toEqual({ id: 'smtp-1' })
+    expect(nodemailer.default.createTransport).toHaveBeenCalledWith({
+      host: 'smtp.zoho.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'contact@example.com',
+        pass: 'app_password',
+      },
+    })
+    expect(smtpSendMail).toHaveBeenCalledWith(expect.objectContaining({
+      from: 'GTKBlog <noreply@example.com>',
+      to: ['user@example.com'],
+      subject: 'Subject',
+      replyTo: 'reply@example.com',
+    }))
+    expect(smtpSendMail.mock.calls[0][0].html).toContain('Hello')
   })
 })
