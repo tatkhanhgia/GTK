@@ -23,6 +23,7 @@
     "@payloadcms/richtext-lexical": "3.84.1",
     "@payloadcms/ui": "3.84.1",
     "@react-email/components": "^1.0.11",
+    "@react-email/render": "2.0.5",
     "@stripe/stripe-js": "^9.0.1",
     "@upstash/ratelimit": "^2.0.8",
     "better-auth": "1.6.11",
