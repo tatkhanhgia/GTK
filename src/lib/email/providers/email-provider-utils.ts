@@ -1,5 +1,5 @@
+import { render } from '@react-email/render'
 import type { ReactElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 
 export interface ParsedEmailAddress {
   email: string
@@ -20,7 +20,7 @@ export function parseEmailAddress(value: string): ParsedEmailAddress {
 }
 
 export async function renderEmailHtml(react: ReactElement) {
-  return `<!doctype html>${renderToStaticMarkup(react)}`
+  return render(react)
 }
 
 export async function readProviderError(response: Response) {
