@@ -49,9 +49,14 @@ SEPAY_API_KEY=your-sepay-api-key
 SEPAY_WEBHOOK_SECRET=your-sepay-webhook-secret
 SEPAY_BANK_ACCOUNT=account-number-for-qr-generation
 
-# Email - provider-neutral settings, Resend implemented
+# Email - provider-neutral settings
 RESEND_API_KEY=re_... (from Resend Dashboard)
 RESEND_FROM_EMAIL=noreply@yourdomain.com
+ZOHO_ZEPTOMAIL_TOKEN= (optional, from Zoho ZeptoMail)
+ZOHO_ZEPTOMAIL_API_URL=https://api.zeptomail.com/v1.1/email
+CLOUDFLARE_EMAIL_API_TOKEN= (optional, from Cloudflare Email Service)
+CLOUDFLARE_ACCOUNT_ID= (required when Cloudflare email provider is selected)
+CLOUDFLARE_EMAIL_API_URL=https://api.cloudflare.com/client/v4
 EMAIL_SETTINGS_ENCRYPTION_KEY=32-byte-or-longer-random-secret
 
 # App Configuration

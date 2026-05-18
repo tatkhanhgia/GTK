@@ -3,12 +3,12 @@ import config from '@payload-config'
 import { decryptEmailSecret } from './email-secret-crypto'
 
 export type EmailLocale = 'vi' | 'en'
-export type EmailProviderName = 'resend'
+export type EmailProviderName = 'resend' | 'zoho' | 'cloudflare'
 
-export type EmailDeliverySettings = {
-  provider: 'resend'
-  apiKey: string | null
-}
+export type EmailDeliverySettings =
+  | { provider: 'resend'; apiKey: string | null }
+  | { provider: 'zoho'; token: string | null; apiUrl: string }
+  | { provider: 'cloudflare'; apiToken: string | null; accountId: string | null; apiUrl: string }
 
 export interface ResolvedEmailSettings {
   enabled: boolean
@@ -40,21 +40,51 @@ function formatFrom(name: string, email: string) {
 function resolveProvider(value: unknown): EmailProviderName {
   if (!value) return 'resend'
   if (value === 'resend') return 'resend'
+  if (value === 'zoho') return 'zoho'
+  if (value === 'cloudflare') return 'cloudflare'
   throw new Error(`Unsupported email provider: ${String(value)}`)
+}
+
+function resolveDeliverySettings(doc: Record<string, unknown> | null, provider: EmailProviderName): EmailDeliverySettings {
+  if (provider === 'resend') {
+    const encryptedKey = typeof doc?.resendApiKeyEncrypted === 'string' ? doc.resendApiKeyEncrypted : null
+    return {
+      provider,
+      apiKey: decryptEmailSecret(encryptedKey) || process.env.RESEND_API_KEY || null,
+    }
+  }
+
+  if (provider === 'zoho') {
+    const encryptedToken = typeof doc?.zohoTokenEncrypted === 'string' ? doc.zohoTokenEncrypted : null
+    return {
+      provider,
+      token: decryptEmailSecret(encryptedToken) || process.env.ZOHO_ZEPTOMAIL_TOKEN || null,
+      apiUrl: String(doc?.zohoApiUrl || process.env.ZOHO_ZEPTOMAIL_API_URL || 'https://api.zeptomail.com/v1.1/email'),
+    }
+  }
+
+  const encryptedToken = typeof doc?.cloudflareApiTokenEncrypted === 'string'
+    ? doc.cloudflareApiTokenEncrypted
+    : null
+
+  return {
+    provider,
+    apiToken: decryptEmailSecret(encryptedToken) || process.env.CLOUDFLARE_EMAIL_API_TOKEN || null,
+    accountId: String(doc?.cloudflareAccountId || process.env.CLOUDFLARE_ACCOUNT_ID || '') || null,
+    apiUrl: String(doc?.cloudflareApiUrl || process.env.CLOUDFLARE_EMAIL_API_URL || 'https://api.cloudflare.com/client/v4'),
+  }
 }
 
 function buildResolvedEmailSettings(doc: Record<string, unknown> | null, enabled: boolean): ResolvedEmailSettings {
   const provider = resolveProvider(doc?.provider)
   const fromEmail = String(doc?.fromEmail || process.env.RESEND_FROM_EMAIL || 'noreply@gtkblog.com')
   const fromName = String(doc?.fromName || 'GTKBlog')
-  const encryptedKey = typeof doc?.resendApiKeyEncrypted === 'string' ? doc.resendApiKeyEncrypted : null
-  const resendApiKey = decryptEmailSecret(encryptedKey) || process.env.RESEND_API_KEY || null
 
   return {
     enabled,
     welcomeEmailEnabled: enabled && doc?.welcomeEmailEnabled !== false,
     provider,
-    delivery: { provider: 'resend', apiKey: resendApiKey },
+    delivery: resolveDeliverySettings(doc, provider),
     fromEmail,
     fromName,
     from: formatFrom(fromName, fromEmail),

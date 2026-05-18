@@ -65,6 +65,10 @@ export const generatedTranslations = {
     "platformNoOptions": "Không có lựa chọn",
     "platformPlaceholder": "Chọn nền tảng..."
   },
+  "version": {
+    "versionID": "ID",
+    "versions": "Lịch sử phiên bản"
+  },
   "customDashboard": {
     "heroKicker": "Tổng quan",
     "heroTitle": "Quản lý nội dung, sản phẩm và media từ một giao diện duy nhất.",
@@ -174,6 +178,10 @@ export const generatedTranslations = {
   "customFields": {
     "platformNoOptions": "No options available",
     "platformPlaceholder": "Select platform..."
+  },
+  "version": {
+    "versionID": "ID",
+    "versions": "Version history"
   },
   "customDashboard": {
     "heroKicker": "Overview",

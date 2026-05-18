@@ -22,6 +22,11 @@ describe('email-settings-service', () => {
     payloadState.error = null
     delete process.env.RESEND_API_KEY
     delete process.env.RESEND_FROM_EMAIL
+    delete process.env.ZOHO_ZEPTOMAIL_TOKEN
+    delete process.env.ZOHO_ZEPTOMAIL_API_URL
+    delete process.env.CLOUDFLARE_EMAIL_API_TOKEN
+    delete process.env.CLOUDFLARE_ACCOUNT_ID
+    delete process.env.CLOUDFLARE_EMAIL_API_URL
   })
 
   it('defaults missing provider to Resend and keeps env fallback', async () => {
@@ -49,7 +54,7 @@ describe('email-settings-service', () => {
     const { resolveEmailSettings } = await import('@/lib/email/email-settings-service')
     const settings = await resolveEmailSettings()
 
-    expect(settings.delivery.apiKey).toBe('re_payload')
+    expect(settings.delivery).toEqual({ provider: 'resend', apiKey: 're_payload' })
     expect(settings.from).toBe('Admin <admin@example.com>')
     expect(settings.replyTo).toBe('reply@example.com')
   })
@@ -64,11 +69,44 @@ describe('email-settings-service', () => {
     )
   })
 
+  it('resolves Zoho settings with env fallback', async () => {
+    process.env.ZOHO_ZEPTOMAIL_TOKEN = 'zoho_env'
+    process.env.ZOHO_ZEPTOMAIL_API_URL = 'https://api.zoho.test/email'
+    payloadState.doc = { provider: 'zoho', fromEmail: 'admin@example.com' }
+
+    const { resolveEmailSettings } = await import('@/lib/email/email-settings-service')
+    const settings = await resolveEmailSettings()
+
+    expect(settings.provider).toBe('zoho')
+    expect(settings.delivery).toEqual({
+      provider: 'zoho',
+      token: 'zoho_env',
+      apiUrl: 'https://api.zoho.test/email',
+    })
+  })
+
+  it('resolves Cloudflare settings with env fallback', async () => {
+    process.env.CLOUDFLARE_EMAIL_API_TOKEN = 'cf_env'
+    process.env.CLOUDFLARE_ACCOUNT_ID = 'account_1'
+    payloadState.doc = { provider: 'cloudflare' }
+
+    const { resolveEmailSettings } = await import('@/lib/email/email-settings-service')
+    const settings = await resolveEmailSettings()
+
+    expect(settings.provider).toBe('cloudflare')
+    expect(settings.delivery).toEqual({
+      provider: 'cloudflare',
+      apiToken: 'cf_env',
+      accountId: 'account_1',
+      apiUrl: 'https://api.cloudflare.com/client/v4',
+    })
+  })
+
   it('fails closed for unsupported provider values', async () => {
-    payloadState.doc = { provider: 'zoho' }
+    payloadState.doc = { provider: 'smtp' }
 
     const { resolveEmailSettings } = await import('@/lib/email/email-settings-service')
 
-    await expect(resolveEmailSettings()).rejects.toThrow('Unsupported email provider: zoho')
+    await expect(resolveEmailSettings()).rejects.toThrow('Unsupported email provider: smtp')
   })
 })
