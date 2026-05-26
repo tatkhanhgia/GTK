@@ -14,6 +14,7 @@ packets, decisions, and validation proof.
 - `ARCHITECTURE.md`: harness boundary rules adapted to GTKBlog.
 - `TEST_MATRIX.md`: living map of behavior to proof.
 - `HARNESS_BACKLOG.md`: improvements discovered while working.
+- `../scripts/harness`: local CLI for queryable harness state.
 - `GLOSSARY.md`: shared terms.
 - `codebase-summary.md`: current GTKBlog implementation map.
 - `system-architecture.md`: concrete Next.js/Payload/Better Auth architecture.

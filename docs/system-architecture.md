@@ -313,6 +313,20 @@ pending â†’ [webhook received] â†’ completed â†’ [token valid unt
 - Provider boundary: `send-email.ts` resolves settings, selects an email provider adapter, then sends through the adapter. Unsupported provider values fail closed before any external call.
 - Welcome email: Better Auth `databaseHooks.user.create.after` calls `sendWelcomeEmailForUser`; failures are logged and do not block signup.
 
+## Admin AI Architecture
+
+- Admin route: `/admin/ai` is Payload-admin gated and uses JSON APIs under `/api/admin/ai/*`.
+- Provider profiles: Payload collection `admin-ai-profiles` stores name, OpenAI-compatible base URL, default model, optional model list, enabled flag, encrypted API key, and admin-editable agent behavior instructions.
+- Agent behavior: each profile can define role/persona, communication style, operational context, tool usage rules, and custom instructions. The server merges these with non-removable safety guardrails before calling the provider.
+- Secret storage: provider API keys are encrypted server-side with `ADMIN_AI_ENCRYPTION_KEY` or `PAYLOAD_SECRET` fallback; admin/browser reads receive only a mask.
+- Chat route: `POST /api/admin/ai/chat` loads the selected profile server-side, decrypts the key, calls `{baseUrl}/chat/completions`, and returns only assistant content, usage, tool results, and pending confirmations.
+- Session history: Payload collection `admin-ai-sessions` stores per-admin chat transcripts, profile/model metadata, title, and last-message time. Admin APIs under `/api/admin/ai/sessions` support list, create, reopen, and delete, with ownership checked by `adminUserId`.
+- File attachments: `/api/admin/ai/files` accepts admin-only Markdown, HTML, and text uploads for chat context. Payload stores unique file metadata in `admin-ai-files`, per-admin references in `admin-ai-file-references`, and cleaned bounded chunks in `admin-ai-file-chunks`.
+- Attachment safety: uploads are UTF-8 text only, default to a 1 MB per-file cap (`ADMIN_AI_FILE_UPLOAD_MAX_BYTES`, max 5 MB), share a 5 GB global unique-file quota, dedupe by SHA-256 checksum, and inject bounded text context into the provider request without storing raw content in session messages.
+- Tool contract: read tools can execute during chat; write tools create `admin-ai-action-confirmations` records and require explicit admin confirmation through `/api/admin/ai/actions/confirm`.
+- Audit trail: tool attempts and confirmations write redacted records to `admin-ai-audit-logs`.
+- Ops boundary: Docker/server operations are intentionally excluded from this phase. No Docker socket mount is required or recommended.
+
 ### Templates (React Email)
 
 | Template | Trigger | Variables |

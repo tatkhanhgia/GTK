@@ -66,6 +66,7 @@ Harness v0 adds:
 - Validation report template.
 - Test matrix.
 - Harness growth backlog.
+- Local durable layer through `scripts/harness` and `harness.db`.
 
 Harness v0 does not replace:
 
@@ -77,6 +78,29 @@ Harness v0 does not replace:
 
 Use harness artifacts to guide future changes, not to scaffold a second app
 structure.
+
+## Durable Layer
+
+GTKBlog uses a local SQLite durable layer for operational harness state. The
+tracked entrypoint is:
+
+```bash
+scripts/harness <command>
+```
+
+Use it for structured records such as intake classifications, story proof
+status, decisions, backlog items, traces, and friction reports. The local
+database files (`harness.db`, `harness.db-wal`, `harness.db-shm`) and downloaded
+CLI binary (`scripts/bin/harness-cli`) are intentionally ignored by git.
+
+The durable layer does not replace GTKBlog docs. Markdown remains the reviewable
+project context and product contract; SQLite stores local operational state that
+agents can query and regenerate from docs when needed.
+
+Trust rule: treat `scripts/harness decision verify` and `scripts/harness query
+sql` as trusted-local tools only. `decision verify` is disabled unless
+`HARNESS_ALLOW_DECISION_VERIFY=1` is set. Do not import or run verification
+commands from untrusted sources.
 
 ## Source Hierarchy
 
@@ -95,6 +119,9 @@ docs/TEST_MATRIX.md
 
 docs/decisions/*
   why the contract changed
+
+scripts/harness
+  local query and recording tool for operational harness state
 ```
 
 Before implementation, product docs describe intent. After implementation,

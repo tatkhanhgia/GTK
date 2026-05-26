@@ -2,15 +2,37 @@
 
 All significant changes to the GTK Blog project are documented here.
 
+## [0.1.11] - 2026-05-25
+
+### Added
+- Implemented admin AI provider profiles with encrypted API key storage, masked admin reads, Payload migration, and bootstrap fallback.
+- Added admin-only AI chat APIs for safe profile listing, OpenAI-compatible chat completions, read tool execution, write-action confirmations, cancellation, and redacted audit logs.
+- Wired `/admin/ai` to real profile/model loading, chat sending, provider errors, empty-profile state, and approve/cancel controls.
+- Added persisted Admin AI session history with Payload-backed list, reopen, delete, and continue-session UI.
+- Added DB-backed Admin AI file attachments for Markdown, HTML, and text sources with Payload collections, migration, checksum dedupe, quota enforcement, delete cleanup, bounded provider context injection, and compact admin composer/message chips.
+- Added a follow-up idempotent Admin AI sessions migration for databases where the provider-profile migration had already run.
+- Added admin-editable AI profile behavior settings for role, communication style, operational context, tool usage rules, and custom instructions.
+- Documented `ADMIN_AI_ENCRYPTION_KEY`, provider setup examples, and the no-Docker-ops boundary for this phase.
+
+### Fixed
+- Added an idempotent startup fix for Admin AI file upload tables and Payload locked-document relation columns, preventing `/admin` runtime query failures on local databases that predate the file attachment migration.
+- Replaced page-redirect admin auth behavior with JSON-safe admin API rejection for `/api/admin/ai/*`.
+- Preserved readable Markdown-style formatting in admin AI console replies and added concise response guardrails for provider output.
+- Parsed OpenAI-compatible provider text content parts, normalized root local provider URLs to `/v1/chat/completions`, and rejected provider error payloads so Admin AI chat no longer shows the generic provider acknowledgement for failed calls.
+- Fixed the Payload admin not-found route so missing/admin-redirected pages no longer crash on an empty client config.
+
 ## [0.1.10] - 2026-05-18
 
 ### Added
 - Completed email provider delivery with Zoho ZeptoMail and Cloudflare Email Service adapters, encrypted provider secrets, env fallback, migration, and tests.
 - Added SMTP email provider support for Zoho Mail/Admin mailbox delivery, including encrypted SMTP password storage, env fallback, migration, and tests.
+- Added initial admin-only AI Ops Console plan and UI shell at `/admin/ai` with provider/model placeholders, tool preview cards, confirmation affordance, and sidebar navigation.
 
 ### Fixed
 - Scoped Payload admin checkbox styling so email sending and welcome email toggles keep stable sizing.
 - Fixed SMTP env fallback precedence so Payload field defaults do not block `SMTP_HOST`, `SMTP_PORT`, and `SMTP_SECURE`.
+- Added an idempotent startup fix for `payload_locked_documents_rels.digital_downloads_id`, preventing Payload admin locked-document queries from failing on DBs that predate the digital downloads migration.
+- Fixed `/admin/ai` desktop layout so the fixed custom sidebar no longer covers the console, replaced the client form action with a normal client submit handler, and polished the AI chat surface across desktop and mobile.
 
 ## [0.1.9] - 2026-05-18
 

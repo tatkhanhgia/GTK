@@ -23,6 +23,7 @@
 type CustomTranslationsShape = {
   customSidebar: {
     dashboard: string;
+    aiConsole: string;
     posts: string;
     products: string;
     downloads: string;
@@ -40,6 +41,7 @@ type CustomTranslationsShape = {
   customHeader: {
     breadcrumbAdmin: string;
     pageTitleDashboard: string;
+    pageTitleAiConsole: string;
     pageTitleAccount: string;
     pageTitleAuthorProfile: string;
     pageTitleFallback: string;
@@ -138,6 +140,7 @@ type CustomTranslationsShape = {
 export const customTranslationsVi: CustomTranslationsShape = {
   customSidebar: {
     dashboard: 'Bảng điều khiển',
+    aiConsole: 'AI Console',
     posts: 'Bài viết',
     products: 'Sản phẩm',
     downloads: 'Tệp tải xuống',
@@ -155,6 +158,7 @@ export const customTranslationsVi: CustomTranslationsShape = {
   customHeader: {
     breadcrumbAdmin: 'Quản trị',
     pageTitleDashboard: 'Bảng điều khiển',
+    pageTitleAiConsole: 'AI Ops Console',
     pageTitleAccount: 'Tài khoản',
     pageTitleAuthorProfile: 'Hồ sơ tác giả',
     pageTitleFallback: 'Trang quản trị',
@@ -255,6 +259,7 @@ export const customTranslationsVi: CustomTranslationsShape = {
 export const customTranslationsEn: CustomTranslationsShape = {
   customSidebar: {
     dashboard: 'Dashboard',
+    aiConsole: 'AI Console',
     posts: 'Posts',
     products: 'Products',
     downloads: 'Downloads',
@@ -272,6 +277,7 @@ export const customTranslationsEn: CustomTranslationsShape = {
   customHeader: {
     breadcrumbAdmin: 'Admin',
     pageTitleDashboard: 'Dashboard',
+    pageTitleAiConsole: 'AI Ops Console',
     pageTitleAccount: 'Account',
     pageTitleAuthorProfile: 'Author profile',
     pageTitleFallback: 'Admin panel',

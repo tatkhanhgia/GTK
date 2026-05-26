@@ -7,6 +7,10 @@ import * as migration_20260514_003500_member_email_settings_site_users from './2
 import * as migration_20260515_140500_add_email_settings_provider from './20260515_140500_add_email_settings_provider';
 import * as migration_20260518_134600_add_email_provider_credentials from './20260518_134600_add_email_provider_credentials';
 import * as migration_20260518_170000_add_smtp_email_settings from './20260518_170000_add_smtp_email_settings';
+import * as migration_20260525_150000_add_admin_ai_profiles from './20260525_150000_add_admin_ai_profiles';
+import * as migration_20260525_181500_add_admin_ai_sessions from './20260525_181500_add_admin_ai_sessions';
+import * as migration_20260525_190000_add_admin_ai_profile_behavior from './20260525_190000_add_admin_ai_profile_behavior';
+import * as migration_20260525_230500_add_admin_ai_file_uploads from './20260525_230500_add_admin_ai_file_uploads';
 
 export const migrations = [
   {
@@ -53,5 +57,25 @@ export const migrations = [
     up: migration_20260518_170000_add_smtp_email_settings.up,
     down: migration_20260518_170000_add_smtp_email_settings.down,
     name: '20260518_170000_add_smtp_email_settings'
+  },
+  {
+    up: migration_20260525_150000_add_admin_ai_profiles.up,
+    down: migration_20260525_150000_add_admin_ai_profiles.down,
+    name: '20260525_150000_add_admin_ai_profiles'
+  },
+  {
+    up: migration_20260525_181500_add_admin_ai_sessions.up,
+    down: migration_20260525_181500_add_admin_ai_sessions.down,
+    name: '20260525_181500_add_admin_ai_sessions'
+  },
+  {
+    up: migration_20260525_190000_add_admin_ai_profile_behavior.up,
+    down: migration_20260525_190000_add_admin_ai_profile_behavior.down,
+    name: '20260525_190000_add_admin_ai_profile_behavior'
+  },
+  {
+    up: migration_20260525_230500_add_admin_ai_file_uploads.up,
+    down: migration_20260525_230500_add_admin_ai_file_uploads.down,
+    name: '20260525_230500_add_admin_ai_file_uploads'
   },
 ];
