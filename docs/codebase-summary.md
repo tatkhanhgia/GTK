@@ -201,9 +201,21 @@ src/
 │   │   ├── get-author-profile.ts # Fetch author-profile global from Payload
 │   │   ├── get-homepage-marquee.ts # Normalize admin-managed homepage marquee config
 │   │   └── get-blog-stats.ts     # Live counts (posts/topics/products/subscribers) for Achievements section
+│   ├── admin-ai/
+│   │   ├── publishing-policy.ts  # Server-side publish/schedule gating for web content
+│   │   ├── local-content-workflow.ts # Draft/publish orchestration for sourced content
+│   │   ├── local-content-structured-draft-builder.ts # Converts research into draft content packs
+│   │   ├── local-content-editorial-policy.ts # Title/excerpt/tag/category heuristics
+│   │   ├── content-publishing-tools.ts # Web CMS publish/schedule tools
+│   │   ├── content-research-tools.ts   # Source gathering and sanitization tools
+│   │   └── source-ledger-utils.ts  # Source normalization and verification helpers
+│   ├── content/
+│   │   └── publication-state.ts   # Shared draft/published state helpers
 │   ├── email/
-│   │   ├── resend-client.ts      # Resend email service
-│   │   ├── send-email.ts         # Generic email function (supports replyTo param)
+│   │   ├── email-provider.ts     # Provider selection and adapter contracts
+│   │   ├── email-settings-service.ts # Provider-neutral settings and secret resolution
+│   │   ├── resend-client.ts      # Resend adapter
+│   │   ├── send-email.ts         # Generic email dispatcher
 │   │   └── newsletter-actions.ts # Subscribe/unsubscribe
 │   ├── seo/
 │   │   ├── structured-data.ts    # JSON-LD helpers
