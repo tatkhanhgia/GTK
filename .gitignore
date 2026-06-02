@@ -79,7 +79,11 @@ ck.md
 /.impeccable/
 
 # Local debug artifacts
-.codex
+.codex/*
+!.codex/
+!.codex/hooks/
+!.codex/hooks/**
+!.codex/hooks.json
 .tmp-*
 yazi-x86_64-unknown-linux-gnu/
 

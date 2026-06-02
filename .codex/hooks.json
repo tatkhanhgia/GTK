@@ -1,0 +1,93 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/dev-rules-reminder.cjs\"",
+            "timeout": 30,
+            "statusMessage": "Loading GTKBlog development rules"
+          },
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/usage-quota-cache-refresh.cjs\"",
+            "timeout": 30,
+            "statusMessage": "Refreshing usage quota cache"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash|Read|Glob|Grep|^apply_patch$|^shell_command$|^functions\\.shell_command$|^read_file$|^replace_content$|^create_text_file$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/scout-block.cjs\"",
+            "timeout": 30,
+            "statusMessage": "Checking blocked paths"
+          },
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/privacy-block.cjs\"",
+            "timeout": 30,
+            "statusMessage": "Checking sensitive file access"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|^apply_patch$|^create_text_file$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/descriptive-name.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking file naming guidance"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|^apply_patch$|^replace_content$|^create_text_file$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/post-edit-simplify-reminder.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Tracking edited files"
+          },
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/plan-format-kanban.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking plan formatting"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit|^shell_command$|^functions\\.shell_command$|^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/usage-quota-cache-refresh.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Refreshing usage quota cache"
+          }
+        ]
+      },
+      {
+        "matcher": "Task|TaskCreate|TaskUpdate|TodoWrite|^update_plan$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/run-claude-hook.cjs\" \"$(git rev-parse --show-toplevel)/.claude/hooks/session-state.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Refreshing session state"
+          }
+        ]
+      }
+    ]
+  }
+}
