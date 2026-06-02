@@ -2,6 +2,29 @@
 
 All significant changes to the GTK Blog project are documented here.
 
+## [0.1.12] - 2026-06-01
+
+### Added
+- Local development seed now includes a default Admin AI profile for `Local Gemma` so `/admin/ai` can be used immediately after seeding.
+- Web-only Admin AI content publishing tools for sourced post/page draft, publish, and schedule flows.
+- Source ledger sanitization for web, uploaded-file, and existing-post summaries; publish/schedule policy accepts only server-signed source receipts, not model-fabricated source claims.
+- Server-side conversion from structured content packs into Payload Lexical rich text, with unsafe or unsupported nodes rejected.
+- Page `status`/`publishedAt` publishing fields with migration support.
+- Article structured data now emits `dateModified`.
+- Localized Payload post slugs with a migration from `posts.slug` to `posts_locales.slug`, including per-locale unique/index coverage.
+
+### Changed
+- Admin AI is permanently web CMS-only; Docker/server operations and any Admin AI `ops-runner` are removed from scope.
+- Publishing policy now runs server-side: new long-form publish needs admin confirmation, weak or missing sources block publish/schedule, and low-risk auto-publish is limited to approved-content refresh, approved-source translation, and typo fixes.
+- Scheduled content now uses `status: published` plus future `publishedAt`, and public collection access, post queries, page reads, RSS, and sitemap hide it until due.
+- Web source recording now requires public HTTPS URLs and rejects local/private hostnames; live fetching is disabled until a hardened egress client/proxy is available.
+- Payload Lexical rich text typography now has one scoped CSS source for Vietnamese-safe rendering in admin editors.
+
+### Fixed
+- Fixed Payload post edit doc controls so Preview gets its own icon button box and no longer overlaps the Publish action.
+- Local Admin AI content drafting now infers a blog category and starter tags from research context before creating the pending draft action, so blog drafts are no longer created as category-less generic posts.
+- Local DB deploy validation now covers Payload migrations, app bootstrap idempotency, digital download relations, and localized post slug backfill.
+
 ## [0.1.11] - 2026-05-25
 
 ### Added
@@ -10,15 +33,20 @@ All significant changes to the GTK Blog project are documented here.
 - Wired `/admin/ai` to real profile/model loading, chat sending, provider errors, empty-profile state, and approve/cancel controls.
 - Added persisted Admin AI session history with Payload-backed list, reopen, delete, and continue-session UI.
 - Added DB-backed Admin AI file attachments for Markdown, HTML, and text sources with Payload collections, migration, checksum dedupe, quota enforcement, delete cleanup, bounded provider context injection, and compact admin composer/message chips.
+- Added Admin AI blog management tools for reading blog categories and preparing localized post creation actions with admin confirmation before writing to Payload CMS.
 - Added a follow-up idempotent Admin AI sessions migration for databases where the provider-profile migration had already run.
 - Added admin-editable AI profile behavior settings for role, communication style, operational context, tool usage rules, and custom instructions.
 - Documented `ADMIN_AI_ENCRYPTION_KEY`, provider setup examples, and the no-Docker-ops boundary for this phase.
 
 ### Fixed
 - Added an idempotent startup fix for Admin AI file upload tables and Payload locked-document relation columns, preventing `/admin` runtime query failures on local databases that predate the file attachment migration.
+- Scoped Admin AI file checksum uniqueness to active uploads so re-uploading the same content after removing an attachment no longer fails with a generic file request error.
+- Preserved numeric Payload relationship ids when storing Admin AI file chunks and references, fixing `File` field validation failures that made attached files unavailable to chat.
+- Backfilled missing Admin AI file chunks on reused uploads and rejected chunkless attachments before provider calls so chat no longer silently sends empty file context.
 - Replaced page-redirect admin auth behavior with JSON-safe admin API rejection for `/api/admin/ai/*`.
 - Preserved readable Markdown-style formatting in admin AI console replies and added concise response guardrails for provider output.
 - Parsed OpenAI-compatible provider text content parts, normalized root local provider URLs to `/v1/chat/completions`, and rejected provider error payloads so Admin AI chat no longer shows the generic provider acknowledgement for failed calls.
+- Added Admin AI composer keyboard handling so Enter sends the current message and Shift+Enter keeps multiline editing.
 - Fixed the Payload admin not-found route so missing/admin-redirected pages no longer crash on an empty client config.
 
 ## [0.1.10] - 2026-05-18
@@ -127,6 +155,7 @@ All significant changes to the GTK Blog project are documented here.
 - Build script optimization: `NODE_OPTIONS=--max-old-space-size=4096` for larger heap allocation
 
 ### Fixed
+- **Admin AI editorial draft quality:** Local content workflow now uses a dedicated editorial policy layer for title/excerpt/tag/category decisions, resolves duplicate post slugs before creating pending drafts, strips prompt tail noise more aggressively, and expands prompts requesting 5-7 minute reads into longer structured draft bodies instead of the previous thin stub.
 - **Next.js security advisory remediation:** Upgraded Next.js to `16.2.6` with compatible Payload CMS `3.84.1`, updated related auth/i18n packages, and added npm overrides for patched transitive dependencies (`postcss`, `uuid`, `fast-uri`, `hono`, `@hono/node-server`, `express-rate-limit`, `ip-address`).
   - Restricted `next/image` remote hosts from wildcard `https://**` to known hosts used by the app
   - Added regression coverage for patched Next version and image optimizer host restrictions
