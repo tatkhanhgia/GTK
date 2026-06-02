@@ -122,4 +122,34 @@ describe('admin AI file storage service', () => {
     expect(payload.store['admin-ai-file-chunks'][0]).toMatchObject({ file: 9, content: '# Broken' })
     expect(payload.store['admin-ai-file-references'][0].file).toBe(9)
   })
+
+  it('recovers from checksum uniqueness collisions by re-reading the stored file', async () => {
+    const payload = createPayload()
+    const adminUser = { id: 'admin-1' }
+    const originalCreate = payload.create
+    let duplicateThrown = false
+
+    payload.create = vi.fn(async (args: Parameters<typeof originalCreate>[0]) => {
+      if (args.collection === 'admin-ai-files' && !duplicateThrown) {
+        duplicateThrown = true
+        payload.store['admin-ai-files'].push({
+          id: '9',
+          checksum: 'ac1e355a0547006fe78da98c14b02f320ef96b3a33f071e19ea3308669a4bfd8',
+          originalFilename: 'winner.md',
+          mimeType: 'text/plain',
+          byteSize: 8,
+          status: 'ready',
+        })
+        throw new Error('duplicate key value violates unique constraint "admin_ai_files_checksum_idx"')
+      }
+      return originalCreate(args)
+    }) as typeof payload.create
+
+    const result = await createAdminAiFileReference({ payload, adminUser, file: textFile('loser.md', '# Broken') })
+
+    expect(result.reused).toBe(true)
+    expect(payload.store['admin-ai-files']).toHaveLength(1)
+    expect(payload.store['admin-ai-file-references']).toHaveLength(1)
+    expect(payload.store['admin-ai-file-references'][0].file).toBe('9')
+  })
 })

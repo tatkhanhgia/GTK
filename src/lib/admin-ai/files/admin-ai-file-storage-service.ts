@@ -1,4 +1,5 @@
 import { AdminAiError, type AdminAiAttachment } from '../admin-ai-chat-contract'
+import { sql } from '@payloadcms/db-postgres'
 import { getAdminAiSession } from '../admin-ai-session-service'
 import { ADMIN_AI_GLOBAL_QUOTA_BYTES, type AdminAiUploadFileInput, validateAdminAiUploadFile } from './admin-ai-file-validation'
 import { checksumAdminAiText, chunkAdminAiText, normalizeAdminAiFileText, normalizeAdminAiRawText } from './admin-ai-file-text-processing'
@@ -9,6 +10,12 @@ export type PayloadAdminAiFileClient = {
   find: (args: { collection: string; [key: string]: unknown }) => Promise<{ docs?: unknown[] }>
   findByID: (args: { collection: string; id: string; [key: string]: unknown }) => Promise<unknown>
   update: (args: { collection: string; id: string; data: Record<string, unknown>; [key: string]: unknown }) => Promise<unknown>
+  db?: {
+    drizzle?: {
+      execute: (query: ReturnType<typeof sql>) => Promise<{ rows?: unknown[] }>
+      transaction: <T>(callback: (tx: { execute: (query: ReturnType<typeof sql>) => Promise<{ rows?: unknown[] }> }) => Promise<T>) => Promise<T>
+    }
+  }
 }
 
 type FileRecord = {
@@ -64,6 +71,10 @@ function toReference(doc: unknown): ReferenceRecord {
   return record(doc) as ReferenceRecord
 }
 
+function getDrizzle(payload: PayloadAdminAiFileClient) {
+  return payload.db?.drizzle
+}
+
 function toAttachment(reference: unknown, fileDoc?: unknown): AdminAiAttachment {
   const ref = toReference(reference)
   const file = toFile(fileDoc ?? ref.file)
@@ -86,6 +97,28 @@ async function findActiveFileByChecksum(payload: PayloadAdminAiFileClient, check
     where: { checksum: { equals: checksum }, deletedAt: { exists: false } },
   })
   return result.docs?.[0]
+}
+
+async function findActiveFileByChecksumInDb(
+  execute: (query: ReturnType<typeof sql>) => Promise<{ rows?: unknown[] }>,
+  checksum: string,
+) {
+  const result = await execute(sql`
+    SELECT
+      "id",
+      "checksum",
+      "original_filename" AS "originalFilename",
+      "mime_type" AS "mimeType",
+      "byte_size" AS "byteSize",
+      "status",
+      "deleted_at" AS "deletedAt",
+      "created_at" AS "createdAt"
+    FROM "admin_ai_files"
+    WHERE "checksum" = ${checksum}
+      AND "deleted_at" IS NULL
+    LIMIT 1
+  `)
+  return result.rows?.[0]
 }
 
 async function getAdminAiFileChunkCount(payload: PayloadAdminAiFileClient, fileId: string | number) {
@@ -116,6 +149,72 @@ export async function getAdminAiUniqueStorageBytes(payload: PayloadAdminAiFileCl
   return (result.docs ?? []).reduce<number>((sum, item) => sum + Number(toFile(item).byteSize ?? 0), 0)
 }
 
+async function getAdminAiUniqueStorageBytesInDb(
+  execute: (query: ReturnType<typeof sql>) => Promise<{ rows?: unknown[] }>,
+) {
+  const result = await execute(sql`
+    SELECT COALESCE(SUM("byte_size"), 0)::bigint AS "usedBytes"
+    FROM "admin_ai_files"
+    WHERE "deleted_at" IS NULL
+  `)
+  const row = result.rows?.[0] as { usedBytes?: number | string } | undefined
+  return Number(row?.usedBytes ?? 0)
+}
+
+function isUniqueChecksumConflict(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? '')
+  return /admin_ai_files_checksum_idx|duplicate key/i.test(message)
+}
+
+async function reserveAdminAiFileRecord(
+  payload: PayloadAdminAiFileClient,
+  upload: Awaited<ReturnType<typeof validateAdminAiUploadFile>>,
+  checksum: string,
+) {
+  const drizzle = getDrizzle(payload)
+  if (!drizzle) return null
+
+  return drizzle.transaction(async (tx) => {
+    await tx.execute(sql`LOCK TABLE "admin_ai_files" IN SHARE ROW EXCLUSIVE MODE`)
+
+    const existing = await findActiveFileByChecksumInDb(tx.execute, checksum)
+    if (existing) return { fileDoc: existing, reused: true }
+
+    const usedBytes = await getAdminAiUniqueStorageBytesInDb(tx.execute)
+    if (usedBytes + upload.byteSize > ADMIN_AI_GLOBAL_QUOTA_BYTES) {
+      throw new AdminAiError('BAD_REQUEST', 'Admin AI file storage quota exceeded.', 400)
+    }
+
+    const inserted = await tx.execute(sql`
+      INSERT INTO "admin_ai_files" (
+        "checksum",
+        "original_filename",
+        "mime_type",
+        "byte_size",
+        "status"
+      )
+      VALUES (
+        ${checksum},
+        ${upload.filename},
+        ${upload.mimeType},
+        ${upload.byteSize},
+        'ready'
+      )
+      RETURNING
+        "id",
+        "checksum",
+        "original_filename" AS "originalFilename",
+        "mime_type" AS "mimeType",
+        "byte_size" AS "byteSize",
+        "status",
+        "deleted_at" AS "deletedAt",
+        "created_at" AS "createdAt"
+    `)
+
+    return { fileDoc: inserted.rows?.[0], reused: false }
+  })
+}
+
 export async function createAdminAiFileReference(args: {
   payload: PayloadAdminAiFileClient
   adminUser: unknown
@@ -128,8 +227,9 @@ export async function createAdminAiFileReference(args: {
   const upload = await validateAdminAiUploadFile(args.file)
   const rawText = normalizeAdminAiRawText(upload.text)
   const checksum = checksumAdminAiText(rawText)
-  let fileDoc = await findActiveFileByChecksum(args.payload, checksum)
-  let reused = Boolean(fileDoc)
+  const dbReservation = await reserveAdminAiFileRecord(args.payload, upload, checksum)
+  let fileDoc = dbReservation?.fileDoc ?? await findActiveFileByChecksum(args.payload, checksum)
+  let reused = Boolean(dbReservation?.reused ?? fileDoc)
 
   if (!fileDoc) {
     const usedBytes = await getAdminAiUniqueStorageBytes(args.payload)
@@ -137,19 +237,28 @@ export async function createAdminAiFileReference(args: {
       throw new AdminAiError('BAD_REQUEST', 'Admin AI file storage quota exceeded.', 400)
     }
 
-    fileDoc = await args.payload.create({
-      collection: 'admin-ai-files',
-      data: {
-        checksum,
-        originalFilename: upload.filename,
-        mimeType: upload.mimeType,
-        byteSize: upload.byteSize,
-        status: 'ready',
-      },
-    })
+    try {
+      fileDoc = await args.payload.create({
+        collection: 'admin-ai-files',
+        data: {
+          checksum,
+          originalFilename: upload.filename,
+          mimeType: upload.mimeType,
+          byteSize: upload.byteSize,
+          status: 'ready',
+        },
+      })
+      reused = false
+    } catch (error) {
+      if (!isUniqueChecksumConflict(error)) throw error
+      fileDoc = await findActiveFileByChecksum(args.payload, checksum)
+      if (!fileDoc) throw error
+      reused = true
+    }
+  }
 
+  if (!reused) {
     await createAdminAiFileChunks(args.payload, fileDoc, upload.text, upload.extension)
-    reused = false
   } else if (await getAdminAiFileChunkCount(args.payload, getPayloadRelationId(fileDoc)) === 0) {
     await createAdminAiFileChunks(args.payload, fileDoc, upload.text, upload.extension)
   }

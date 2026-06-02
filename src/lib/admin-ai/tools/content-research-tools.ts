@@ -1,4 +1,6 @@
 import { AdminAiError } from '../admin-ai-chat-contract'
+import { lookup } from 'node:dns/promises'
+import { request } from 'node:https'
 import { isIP } from 'net'
 import { publishedNowWhere } from '@/lib/content/publication-state'
 import { asRecord } from './post-tool-content-utils'
@@ -32,13 +34,37 @@ function assertPublicHttpsUrl(rawUrl: string) {
   return url.toString()
 }
 
+type FetchTextFn = (url: string, timeoutMs?: number) => Promise<string>
+
+type ResolvedAddress = {
+  address: string
+  family: 4 | 6
+}
+
 function isPrivateHostname(hostname: string) {
   return hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === 'metadata.google.internal'
 }
 
 function isPrivateIpLiteral(hostname: string) {
   if (!isIP(hostname)) return false
-  if (hostname === '::1' || hostname.startsWith('fe80:') || hostname.startsWith('fc') || hostname.startsWith('fd')) return true
+  const normalized = hostname.toLowerCase()
+  if (
+    normalized === '::1' ||
+    normalized === '::' ||
+    normalized.startsWith('fe80:') ||
+    normalized.startsWith('fc') ||
+    normalized.startsWith('fd') ||
+    normalized.startsWith('::ffff:127.') ||
+    normalized.startsWith('::ffff:10.') ||
+    normalized.startsWith('::ffff:192.168.') ||
+    normalized.startsWith('::ffff:172.16.') ||
+    normalized.startsWith('::ffff:172.17.') ||
+    normalized.startsWith('::ffff:172.18.') ||
+    normalized.startsWith('::ffff:172.19.') ||
+    normalized.startsWith('::ffff:172.2') ||
+    normalized.startsWith('::ffff:169.254.') ||
+    normalized.startsWith('::ffff:0.')
+  ) return true
   const parts = hostname.split('.').map(Number)
   if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part))) return false
   return (
@@ -111,23 +137,90 @@ function unwrapSearchResultUrl(rawUrl: string) {
   }
 }
 
-async function fetchText(url: string, timeoutMs = 12000) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), timeoutMs)
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) GTKBlog-Admin-AI/1.0',
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
+async function resolvePublicAddress(url: URL): Promise<ResolvedAddress> {
+  if (isPrivateHostname(url.hostname) || isPrivateIpLiteral(url.hostname)) {
+    throw new AdminAiError('BAD_REQUEST', 'Research URL host is not allowed.', 400)
+  }
+
+  if (isIP(url.hostname)) {
+    return {
+      address: url.hostname,
+      family: (isIP(url.hostname) === 6 ? 6 : 4),
+    }
+  }
+
+  const resolved = await lookup(url.hostname, { all: true, verbatim: true })
+  if (!resolved.length || resolved.some((entry) => isPrivateIpLiteral(entry.address))) {
+    throw new AdminAiError('BAD_REQUEST', 'Research URL resolves to a private or reserved address.', 400)
+  }
+
+  const first = resolved[0]
+  return { address: first.address, family: first.family as 4 | 6 }
+}
+
+async function requestPublicHttpsText(rawUrl: string, timeoutMs = 12000, redirectsRemaining = 3): Promise<string> {
+  const url = new URL(assertPublicHttpsUrl(rawUrl))
+  const resolved = await resolvePublicAddress(url)
+
+  if (redirectsRemaining < 0) return ''
+
+  const path = `${url.pathname}${url.search}`
+  const headers: Record<string, string> = {
+    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) GTKBlog-Admin-AI/1.0',
+    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'accept-encoding': 'identity',
+    host: url.host,
+  }
+
+  return await new Promise<string>((resolve) => {
+    const req = request({
+      protocol: 'https:',
+      hostname: resolved.address,
+      family: resolved.family,
+      servername: url.hostname,
+      port: url.port ? Number(url.port) : 443,
+      path,
+      method: 'GET',
+      headers,
+      timeout: timeoutMs,
+    }, (response) => {
+      const statusCode = response.statusCode ?? 0
+      const location = response.headers.location
+      if (statusCode >= 300 && statusCode < 400 && location) {
+        response.resume()
+        const redirectUrl = new URL(location, url).toString()
+        void requestPublicHttpsText(redirectUrl, timeoutMs, redirectsRemaining - 1).then(resolve).catch(() => resolve(''))
+        return
+      }
+      if (statusCode < 200 || statusCode >= 300) {
+        response.resume()
+        resolve('')
+        return
+      }
+
+      response.setEncoding('utf8')
+      const chunks: string[] = []
+      response.on('data', (chunk) => chunks.push(chunk))
+      response.on('end', () => resolve(chunks.join('')))
     })
-    if (!response.ok) return ''
-    return await response.text()
+
+    req.on('timeout', () => req.destroy(new Error('timeout')))
+    req.on('error', () => resolve(''))
+    req.end()
+  })
+}
+
+let fetchTextImpl: FetchTextFn = requestPublicHttpsText
+
+export function setResearchFetchTextForTests(fetcher?: FetchTextFn) {
+  fetchTextImpl = fetcher ?? requestPublicHttpsText
+}
+
+async function fetchText(url: string, timeoutMs = 12000) {
+  try {
+    return await fetchTextImpl(url, timeoutMs)
   } catch {
     return ''
-  } finally {
-    clearTimeout(timeout)
   }
 }
 

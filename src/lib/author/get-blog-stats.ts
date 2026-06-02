@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import type { Locale } from '@/i18n/config'
 import type { AchievementItem } from '@/components/sections/achievements-section'
+import { publishedNowWhere } from '@/lib/content/publication-state'
 
 const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
@@ -59,7 +60,7 @@ export async function getBlogStats(locale: Locale): Promise<AchievementItem[]> {
       // limit: 0 is the lightest way to ask Payload for `totalDocs` only.
       payload.find({
         collection: 'posts',
-        where: { status: { equals: 'published' } },
+        where: publishedNowWhere(),
         limit: 0,
         depth: 0,
       }),

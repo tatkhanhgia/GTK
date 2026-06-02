@@ -1,9 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { readExistingPostSources, researchWebSources } from '@/lib/admin-ai/tools/content-research-tools'
+import {
+  readExistingPostSources,
+  researchWebSources,
+  setResearchFetchTextForTests,
+} from '@/lib/admin-ai/tools/content-research-tools'
 
 describe('content research tools', () => {
   beforeEach(() => {
-    vi.unstubAllGlobals()
+    setResearchFetchTextForTests()
   })
 
   it('rejects localhost web research URLs without fetching', async () => {
@@ -16,17 +20,17 @@ describe('content research tools', () => {
   })
 
   it('searches public web results and fetches source summaries', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+    setResearchFetchTextForTests(async (url: string) => {
       if (String(url).includes('html.duckduckgo.com')) {
-        return new Response(`
+        return `
           <html><body>
             <a rel="nofollow" class="result__a" href="https://example.com/research">Gemma 4 official notes</a>
             <div class="result__snippet">Gemma 4 introduces a stronger multimodal stack.</div>
           </body></html>
-        `, { status: 200 })
+        `
       }
       if (String(url) === 'https://example.com/research') {
-        return new Response(`
+        return `
           <html>
             <head>
               <title>Gemma 4 official notes</title>
@@ -34,10 +38,10 @@ describe('content research tools', () => {
             </head>
             <body><p>Gemma 4 introduces a stronger multimodal stack for production workloads.</p></body>
           </html>
-        `, { status: 200 })
+        `
       }
       throw new Error(`Unexpected fetch: ${String(url)}`)
-    }))
+    })
 
     const entries = await researchWebSources({ query: 'Gemma 4' }, { id: 'admin-1' })
 
@@ -52,17 +56,17 @@ describe('content research tools', () => {
   })
 
   it('fetches explicit web URLs and summarizes page content', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+    setResearchFetchTextForTests(async (url: string) => {
       if (String(url) === 'https://example.com/research') {
-        return new Response(`
+        return `
           <html>
             <head><title>Example Research</title></head>
             <body><p>Example research summary for local testing.</p></body>
           </html>
-        `, { status: 200 })
+        `
       }
       throw new Error(`Unexpected fetch: ${String(url)}`)
-    }))
+    })
 
     const entries = await researchWebSources({ urls: ['https://example.com/research'] }, { id: 'admin-1' })
 
@@ -73,6 +77,18 @@ describe('content research tools', () => {
     })
     expect(entries[0].summary).toContain('Example Research')
     expect(entries[0].summary).toContain('local testing')
+  })
+
+  it('rejects redirect targets that land on private hosts', async () => {
+    setResearchFetchTextForTests(async (url: string) => {
+      if (url === 'https://example.com/research') {
+        throw new Error('should not be called when URL validation fails')
+      }
+      return ''
+    })
+
+    await expect(researchWebSources({ urls: ['https://metadata.google.internal/latest'] }, { id: 'admin-1' }))
+      .rejects.toMatchObject({ code: 'BAD_REQUEST' })
   })
 
   it('filters existing post sources to published-now content', async () => {
