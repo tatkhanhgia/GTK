@@ -37,6 +37,7 @@ type CallOpenAiCompatibleChatArgs = {
   systemPrompt?: string
   tools?: OpenAiToolDefinition[]
   timeoutMs?: number
+  maxTokens?: number
   fetcher?: typeof fetch
 }
 
@@ -111,9 +112,27 @@ function readProviderErrorMessage(error: ProviderResponse['error']) {
   return typeof error?.message === 'string' ? error.message : undefined
 }
 
+export function getDefaultTimeoutMs(baseUrl: string) {
+  try {
+    const url = new URL(baseUrl.trim())
+    return url.protocol === 'http:' ? 240000 : 30000
+  } catch {
+    return 30000
+  }
+}
+
+export function getDefaultMaxTokens(baseUrl: string) {
+  try {
+    const url = new URL(baseUrl.trim())
+    return url.protocol === 'http:' ? 160 : 800
+  } catch {
+    return 800
+  }
+}
+
 export async function callOpenAiCompatibleChat(args: CallOpenAiCompatibleChatArgs): Promise<OpenAiCompatibleChatResult> {
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), args.timeoutMs ?? 30000)
+  const timeout = setTimeout(() => controller.abort(), args.timeoutMs ?? getDefaultTimeoutMs(args.baseUrl))
 
   try {
     const response = await (args.fetcher ?? fetch)(normalizeOpenAiChatUrl(args.baseUrl), {
@@ -128,6 +147,7 @@ export async function callOpenAiCompatibleChat(args: CallOpenAiCompatibleChatArg
         messages: [{ role: 'system', content: args.systemPrompt || adminAiSystemPrompt }, ...args.messages],
         tools: args.tools,
         tool_choice: args.tools?.length ? 'auto' : undefined,
+        max_tokens: args.maxTokens ?? getDefaultMaxTokens(args.baseUrl),
       }),
     })
 

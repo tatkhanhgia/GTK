@@ -16,4 +16,12 @@ describe('database bootstrap schema guards', () => {
       expect(bootstrap).toContain(requiredName)
     }
   })
+
+  it('keeps Admin AI file checksum dedupe scoped to active files', () => {
+    const bootstrap = readFileSync('scripts/bootstrap-db.js', 'utf8')
+
+    expect(bootstrap).toContain('DROP INDEX IF EXISTS admin_ai_files_checksum_idx')
+    expect(bootstrap).toContain('WHERE deleted_at IS NULL')
+    expect(bootstrap).toContain('index:admin_ai_files_checksum_idx_active')
+  })
 })

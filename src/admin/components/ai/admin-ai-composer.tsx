@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormEvent } from 'react'
+import type { FormEvent, KeyboardEvent } from 'react'
 import { useRef } from 'react'
 import { Paperclip, SendHorizontal, ShieldCheck } from 'lucide-react'
 import type { AdminAiAttachment } from '@/lib/admin-ai/admin-ai-chat-contract'
@@ -32,8 +32,7 @@ export function AdminAiComposer({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const submitCurrentMessage = () => {
     const field = textareaRef.current
     const message = field?.value.trim() ?? ''
     if (!message || disabled || isBusy || isUploadingFile) return
@@ -42,6 +41,17 @@ export function AdminAiComposer({
       field.value = ''
       field.focus()
     }
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    submitCurrentMessage()
+  }
+
+  const handleMessageKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
+    event.preventDefault()
+    submitCurrentMessage()
   }
 
   const handleFileChange = () => {
@@ -68,6 +78,7 @@ export function AdminAiComposer({
           rows={3}
           disabled={disabled || isBusy}
           placeholder={placeholder ?? 'Hỏi trạng thái site, tìm bài draft, hoặc yêu cầu sửa nội dung...'}
+          onKeyDown={handleMessageKeyDown}
           className="min-h-[92px] resize-none bg-transparent text-sm leading-6 text-[var(--admin-text-primary)] outline-none placeholder:text-[var(--admin-text-muted)] disabled:cursor-not-allowed disabled:opacity-60"
         />
         {(attachments.length > 0 || uploadError) && (

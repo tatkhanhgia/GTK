@@ -428,8 +428,10 @@ BEGIN
   END IF;
 END $$;
 
-CREATE UNIQUE INDEX IF NOT EXISTS admin_ai_files_checksum_idx
-  ON admin_ai_files USING btree (checksum);
+DROP INDEX IF EXISTS admin_ai_files_checksum_idx;
+CREATE UNIQUE INDEX admin_ai_files_checksum_idx
+  ON admin_ai_files USING btree (checksum)
+  WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS admin_ai_files_deleted_at_idx
   ON admin_ai_files USING btree (deleted_at);
 CREATE INDEX IF NOT EXISTS admin_ai_file_references_admin_user_id_idx
@@ -566,9 +568,15 @@ const FIXES = [
              'admin_ai_files_id',
              'admin_ai_file_references_id',
              'admin_ai_file_chunks_id'
-           )`,
+           )
+         UNION
+         SELECT 'index:admin_ai_files_checksum_idx_active' AS item
+         FROM pg_indexes
+         WHERE schemaname = 'public'
+           AND indexname = 'admin_ai_files_checksum_idx'
+           AND indexdef ILIKE '%WHERE (deleted_at IS NULL)%'`,
       )
-      if (rows.length === 6) {
+      if (rows.length === 7) {
         return { status: 'up-to-date' }
       }
       await client.query(ADMIN_AI_FILE_UPLOAD_SCHEMA_SQL)

@@ -1,3 +1,5 @@
+import { mergePublishedNowWhere } from '@/lib/content/publication-state'
+
 const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
 /**
@@ -23,11 +25,10 @@ export async function getRelatedPosts(
   const result = await payload.find({
     collection: 'posts',
     locale,
-    where: {
+    where: mergePublishedNowWhere({
       slug: { not_equals: currentSlug },
       category: { equals: categoryId },
-      status: { equals: 'published' },
-    },
+    }),
     sort: '-publishedAt',
     limit,
     depth: 1,

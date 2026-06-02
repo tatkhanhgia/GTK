@@ -10,6 +10,7 @@ const chatMocks = vi.hoisted(() => ({
   callProvider: vi.fn(),
   appendSession: vi.fn(),
   loadAttachmentContext: vi.fn(),
+  runLocalContentWorkflow: vi.fn(),
 }))
 
 vi.mock('@/lib/admin/payload-admin-api-auth', () => ({
@@ -25,7 +26,14 @@ vi.mock('@/lib/admin-ai/openai-compatible-client', () => ({
 }))
 
 vi.mock('@/lib/admin-ai/admin-ai-tool-registry', () => ({
-  getAdminAiToolDefinitions: vi.fn(() => []),
+  getAdminAiToolDefinitions: vi.fn((allowedToolNames?: string[]) => (allowedToolNames ?? []).map((name: string) => ({
+    type: 'function',
+    function: {
+      name,
+      description: '',
+      parameters: {},
+    },
+  }))),
   handleAdminAiToolCalls: vi.fn(() => Promise.resolve({ pendingActions: [], toolResults: [] })),
 }))
 
@@ -35,6 +43,10 @@ vi.mock('@/lib/admin-ai/admin-ai-session-service', () => ({
 
 vi.mock('@/lib/admin-ai/files/admin-ai-file-context-service', () => ({
   loadAdminAiAttachmentContext: chatMocks.loadAttachmentContext,
+}))
+
+vi.mock('@/lib/admin-ai/local-content-workflow', () => ({
+  runLocalContentWorkflow: chatMocks.runLocalContentWorkflow,
 }))
 
 describe('admin AI chat API', () => {
@@ -54,6 +66,12 @@ describe('admin AI chat API', () => {
     chatMocks.loadAttachmentContext.mockResolvedValue({
       attachments: [{ referenceId: 'ref-1', filename: 'outline.md', status: 'ready' }],
       contextMessage: 'Attachment: outline.md\nHello from file',
+    })
+    chatMocks.runLocalContentWorkflow.mockResolvedValue({
+      handled: false,
+      assistantContent: '',
+      pendingActions: [],
+      toolResults: [],
     })
   })
 
@@ -95,6 +113,69 @@ describe('admin AI chat API', () => {
         attachments: [expect.objectContaining({ referenceId: 'ref-1' })],
       }),
     }))
+  })
+
+  it('runs the local content workflow for blog prompts', async () => {
+    authState.user = { id: 'admin-1', role: 'admin' }
+    chatMocks.resolveProfile.mockResolvedValueOnce({
+      id: 'profile-1',
+      baseUrl: 'http://localhost:1234/v1',
+      apiKey: 'key',
+      defaultModel: 'gemma-4-e4-b-it',
+      modelOptions: [],
+    })
+    chatMocks.runLocalContentWorkflow.mockResolvedValueOnce({
+      handled: true,
+      assistantContent: 'workflow-done',
+      pendingActions: [{ id: '1', toolName: 'post_create_write', summary: 'Confirm', expiresAt: '2026-06-01T00:00:00.000Z' }],
+      toolResults: [],
+    })
+    const { POST } = await import('@/app/api/admin/ai/chat/route')
+
+    const response = await POST(new Request('https://app.test/api/admin/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'Research về model gemma 4 sau đó tạo bài post/blog về nó' }],
+      }),
+    }))
+
+    expect(response.status).toBe(200)
+    expect(chatMocks.runLocalContentWorkflow).toHaveBeenCalledWith(expect.anything(), authState.user, expect.stringContaining('gemma 4'))
+    expect(chatMocks.callProvider).not.toHaveBeenCalled()
+  })
+
+  it('returns workflow results and pending actions for local content prompts', async () => {
+    authState.user = { id: 'admin-1', role: 'admin' }
+    chatMocks.resolveProfile.mockResolvedValueOnce({
+      id: 'profile-1',
+      baseUrl: 'http://localhost:1234/v1',
+      apiKey: 'key',
+      defaultModel: 'gemma-4-e4-b-it',
+      modelOptions: [],
+    })
+    chatMocks.runLocalContentWorkflow.mockResolvedValueOnce({
+      handled: true,
+      assistantContent: 'workflow-done',
+      pendingActions: [{ id: '1', toolName: 'post_create_write', summary: 'Confirm', expiresAt: '2026-06-01T00:00:00.000Z' }],
+      toolResults: [],
+    })
+    const { POST } = await import('@/app/api/admin/ai/chat/route')
+
+    const response = await POST(new Request('https://app.test/api/admin/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'Research về model gemma 4 sau đó tạo bài post/blog về nó' }],
+      }),
+    }))
+
+    expect(response.status).toBe(200)
+    await expect(response.json()).resolves.toMatchObject({
+      message: {
+        role: 'assistant',
+        content: 'workflow-done',
+      },
+      pendingActions: [{ toolName: 'post_create_write' }],
+    })
   })
 
   it('rejects empty provider responses before persisting a fallback assistant message', async () => {

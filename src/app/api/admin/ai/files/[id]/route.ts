@@ -17,8 +17,10 @@ function errorResponse(error: unknown) {
   if (error instanceof AdminAiError) {
     return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: error.status })
   }
+  const requestId = `admin-ai-file-${Date.now().toString(36)}`
+  console.error(`[${requestId}] Admin AI file request failed`, error)
   return NextResponse.json(
-    { error: { code: 'BAD_REQUEST', message: 'Admin AI file request failed.' } },
+    { error: { code: 'BAD_REQUEST', message: `Admin AI file request failed. Request ID: ${requestId}` } },
     { status: 500 },
   )
 }

@@ -8,6 +8,7 @@ function isPrivateIpv4(hostname: string) {
   return (
     first === 10 ||
     first === 127 ||
+    (first === 169 && second === 254) ||
     (first === 172 && second >= 16 && second <= 31) ||
     (first === 192 && second === 168)
   )

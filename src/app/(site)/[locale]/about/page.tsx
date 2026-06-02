@@ -13,6 +13,7 @@ import { TopicsGrid } from '@/components/about/topics-grid'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { AchievementsSection } from '@/components/sections/achievements-section'
 import { getBlogStats } from '@/lib/author/get-blog-stats'
+import { mergePublishedNowWhere } from '@/lib/content/publication-state'
 
 interface Props {
   params: Promise<{ locale: string }>
@@ -42,7 +43,7 @@ async function fetchAboutContent(locale: Locale) {
     const result = await payload.find({
       collection: 'pages',
       locale,
-      where: { slug: { equals: 'about' } },
+      where: mergePublishedNowWhere({ slug: { equals: 'about' } }),
       limit: 1,
     })
     return result.docs[0] ?? null

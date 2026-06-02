@@ -58,8 +58,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       NULL;
     END $$;
 
-    CREATE UNIQUE INDEX IF NOT EXISTS "admin_ai_files_checksum_idx"
-      ON "admin_ai_files" USING btree ("checksum");
+    DROP INDEX IF EXISTS "admin_ai_files_checksum_idx";
+    CREATE UNIQUE INDEX "admin_ai_files_checksum_idx"
+      ON "admin_ai_files" USING btree ("checksum")
+      WHERE "deleted_at" IS NULL;
     CREATE INDEX IF NOT EXISTS "admin_ai_files_deleted_at_idx"
       ON "admin_ai_files" USING btree ("deleted_at");
     CREATE INDEX IF NOT EXISTS "admin_ai_file_references_admin_user_id_idx"

@@ -46,6 +46,12 @@ function getId(value: unknown) {
   return String(source.id ?? value ?? '')
 }
 
+function getPayloadRelationId(value: unknown) {
+  const source = record(value)
+  const id = source.id ?? value
+  return typeof id === 'number' || typeof id === 'string' ? id : String(id ?? '')
+}
+
 function getRelatedId(value: unknown) {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : getId(value)
 }
@@ -80,6 +86,24 @@ async function findActiveFileByChecksum(payload: PayloadAdminAiFileClient, check
     where: { checksum: { equals: checksum }, deletedAt: { exists: false } },
   })
   return result.docs?.[0]
+}
+
+async function getAdminAiFileChunkCount(payload: PayloadAdminAiFileClient, fileId: string | number) {
+  const result = await payload.find({
+    collection: 'admin-ai-file-chunks',
+    limit: 1,
+    depth: 0,
+    where: { file: { equals: fileId } },
+  })
+  return result.docs?.length ?? 0
+}
+
+async function createAdminAiFileChunks(payload: PayloadAdminAiFileClient, fileDoc: unknown, text: string, extension: string) {
+  const cleanedText = normalizeAdminAiFileText(text, extension)
+  const fileRelationId = getPayloadRelationId(fileDoc)
+  for (const chunk of chunkAdminAiText(cleanedText)) {
+    await payload.create({ collection: 'admin-ai-file-chunks', data: { file: fileRelationId, ...chunk } })
+  }
 }
 
 export async function getAdminAiUniqueStorageBytes(payload: PayloadAdminAiFileClient) {
@@ -124,17 +148,16 @@ export async function createAdminAiFileReference(args: {
       },
     })
 
-    const cleanedText = normalizeAdminAiFileText(upload.text, upload.extension)
-    for (const chunk of chunkAdminAiText(cleanedText)) {
-      await args.payload.create({ collection: 'admin-ai-file-chunks', data: { file: getId(fileDoc), ...chunk } })
-    }
+    await createAdminAiFileChunks(args.payload, fileDoc, upload.text, upload.extension)
     reused = false
+  } else if (await getAdminAiFileChunkCount(args.payload, getPayloadRelationId(fileDoc)) === 0) {
+    await createAdminAiFileChunks(args.payload, fileDoc, upload.text, upload.extension)
   }
 
   const reference = await args.payload.create({
     collection: 'admin-ai-file-references',
     data: {
-      file: getId(fileDoc),
+      file: getPayloadRelationId(fileDoc),
       adminUserId,
       adminUserEmail: getAdminField(args.adminUser, 'email') || undefined,
       sessionId: args.sessionId,
@@ -174,7 +197,7 @@ export async function deleteAdminAiFileReference(payload: PayloadAdminAiFileClie
 
   const deletedAt = new Date().toISOString()
   await payload.update({ collection: 'admin-ai-file-references', id, data: { deletedAt } })
-  const fileId = getRelatedId(ref.file)
+  const fileId = getPayloadRelationId(ref.file)
   const activeRefs = await payload.find({
     collection: 'admin-ai-file-references',
     limit: 1,
@@ -183,7 +206,7 @@ export async function deleteAdminAiFileReference(payload: PayloadAdminAiFileClie
   })
 
   if ((activeRefs.docs ?? []).length === 0) {
-    await payload.update({ collection: 'admin-ai-files', id: fileId, data: { deletedAt } })
+    await payload.update({ collection: 'admin-ai-files', id: String(fileId), data: { deletedAt } })
     const chunks = await payload.find({
       collection: 'admin-ai-file-chunks',
       limit: 1000,

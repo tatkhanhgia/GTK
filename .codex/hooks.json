@@ -46,6 +46,17 @@
             "statusMessage": "Checking file naming guidance"
           }
         ]
+      },
+      {
+        "matcher": "^shell_command$|^functions\\.shell_command$|^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude",
+            "timeout": 10,
+            "statusMessage": "Compressing shell output with RTK"
+          }
+        ]
       }
     ],
     "PostToolUse": [

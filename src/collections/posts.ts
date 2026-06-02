@@ -1,4 +1,7 @@
 import type { CollectionConfig } from 'payload'
+import { publishedNowWhere } from '../lib/content/publication-state'
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 // Walk a Lexical rich-text tree and collect only the actual text content
 // from text nodes. Skips structural metadata (type, format, version, ...)
@@ -25,6 +28,10 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'publishedAt', 'category'],
     description: { vi: 'Quản lý bài viết blog', en: 'Manage blog posts' },
+    preview: (doc, { locale }) => {
+      const slug = typeof doc?.slug === 'string' ? doc.slug : ''
+      return slug ? `${SITE_URL}/${locale === 'en' ? 'en' : 'vi'}/blog/${slug}?preview=1` : null
+    },
   },
   versions: {
     drafts: {
@@ -34,9 +41,7 @@ export const Posts: CollectionConfig = {
   access: {
     read: ({ req }) => {
       if (req.user) return true
-      return {
-        status: { equals: 'published' },
-      }
+      return publishedNowWhere()
     },
   },
   fields: [
@@ -53,6 +58,7 @@ export const Posts: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
+      localized: true,
       label: { vi: 'Đường dẫn', en: 'Slug' },
       admin: {
         position: 'sidebar',

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { publishedNowWhere } from '@/lib/content/publication-state'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -30,7 +31,7 @@ export async function GET(
     const result = await payload.find({
       collection: 'posts',
       locale: loc,
-      where: { status: { equals: 'published' } },
+      where: publishedNowWhere(),
       sort: '-publishedAt',
       limit: 20,
       depth: 0,

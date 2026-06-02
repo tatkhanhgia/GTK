@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   callOpenAiCompatibleChat,
+  getDefaultMaxTokens,
+  getDefaultTimeoutMs,
   normalizeOpenAiChatUrl,
 } from '@/lib/admin-ai/openai-compatible-client'
 
@@ -40,6 +42,7 @@ describe('openai-compatible-client', () => {
     const body = JSON.parse(String(init.body))
     expect(init.headers.authorization).toBe('Bearer sk-provider')
     expect(body.model).toBe('gpt-test')
+    expect(body.max_tokens).toBe(800)
     expect(body.messages[0].role).toBe('system')
     expect(body.messages[0].content).toBe('custom profile prompt')
     expect(body.messages[1]).toEqual({ role: 'user', content: 'hello' })
@@ -82,5 +85,12 @@ describe('openai-compatible-client', () => {
       messages: [{ role: 'user', content: 'hello' }],
       fetcher,
     })).rejects.toThrow('Unexpected endpoint or method')
+  })
+
+  it('uses longer defaults for local providers', () => {
+    expect(getDefaultTimeoutMs('http://localhost:1234/v1')).toBe(240000)
+    expect(getDefaultMaxTokens('http://localhost:1234/v1')).toBe(160)
+    expect(getDefaultTimeoutMs('https://provider.test/v1')).toBe(30000)
+    expect(getDefaultMaxTokens('https://provider.test/v1')).toBe(800)
   })
 })

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { publishedNowWhere } from '@/lib/content/publication-state'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const locales = ['vi', 'en'] as const
@@ -56,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Blog posts
     const posts = await payload.find({
       collection: 'posts',
-      where: { status: { equals: 'published' } },
+      where: publishedNowWhere(),
       limit: 1000,
       depth: 0,
     })

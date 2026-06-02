@@ -42,6 +42,12 @@ function getId(value: unknown) {
   return String(source.id ?? value ?? '')
 }
 
+function getPayloadRelationId(value: unknown) {
+  const source = record(value)
+  const id = source.id ?? value
+  return typeof id === 'number' || typeof id === 'string' ? id : String(id ?? '')
+}
+
 function toAttachment(ref: FileRef, file: FileDoc): AdminAiAttachment {
   return {
     referenceId: String(ref.id ?? ''),
@@ -84,7 +90,7 @@ export async function loadAdminAiAttachmentContext(args: {
       depth: 1,
     })) as FileRef
     const file = record(ref.file) as FileDoc
-    const fileId = getId(ref.file)
+    const fileId = getPayloadRelationId(ref.file)
 
     if (
       !ref.id ||
@@ -112,6 +118,10 @@ export async function loadAdminAiAttachmentContext(args: {
       .map((chunk) => String((chunk as ChunkDoc).content ?? ''))
       .join('\n\n')
       .slice(0, remaining)
+
+    if (!content.trim()) {
+      throw new AdminAiError('BAD_REQUEST', 'AI file attachment has no indexed text. Re-upload the file.', 400)
+    }
 
     remaining -= content.length
     sections.push([

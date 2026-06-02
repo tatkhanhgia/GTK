@@ -1,19 +1,19 @@
 # GTKBlog Codebase Summary
 
-> Full-stack Next.js 15 personal tech/AI blog + digital product store with embedded Payload CMS 3, Better Auth 1.5.6, and Stripe + SePay payments.
+> Full-stack Next.js 16 personal tech/AI blog + digital product store with embedded Payload CMS 3.84.1, Better Auth 1.6.11, provider-neutral email delivery, and Stripe + SePay payments.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | Next.js 15.x (App Router, Turbopack) |
+| **Framework** | Next.js 16.2.6 (App Router, Turbopack) |
 | **Database** | PostgreSQL + Drizzle ORM |
-| **CMS** | Payload CMS 3.x (embedded in Next.js) |
-| **Auth** | Better Auth 1.5.6 (email/password + Google + GitHub OAuth) |
+| **CMS** | Payload CMS 3.84.1 (embedded in Next.js) |
+| **Auth** | Better Auth 1.6.11 (email/password + Google + GitHub OAuth) |
 | **UI Framework** | shadcn/ui (@base-ui/react) + Tailwind CSS v4 |
 | **i18n** | next-intl v4 (vi/en routing: `/vi/*`, `/en/*`) |
 | **Payment** | Stripe + SePay (VietQR/bank transfer) dual checkout |
-| **Email** | Resend / Zoho / Cloudflare + React Email templates |
+| **Email** | Provider-neutral adapters: Resend, SMTP, Zoho ZeptoMail, Cloudflare Email Service + React Email templates |
 | **Rich Text Editor** | Payload Lexical (built-in) |
 | **Icons** | Lucide React |
 | **Testing** | Vitest + React Testing Library |
@@ -257,9 +257,10 @@ Configuration Files
 
 ## Key Architecture Decisions
 
-### 0. **Member and Email Settings**
-- Payload `email-settings` global stores sender settings, encrypted provider secrets, provider-specific API settings, and localized welcome email copy.
+### 0. **Member, Email, and Publishing Settings**
+- Payload `email-settings` global stores sender settings, encrypted provider secrets, provider-specific API settings, and localized welcome email copy across Resend, SMTP, Zoho ZeptoMail, and Cloudflare Email Service.
 - Better Auth signup triggers a non-blocking welcome email through `databaseHooks.user.create.after`.
+- Admin AI content publishing is web-only: publish/schedule/draft actions run through server-side source checks, source receipts, and editorial confirmation, while Docker/server ops stay out of scope.
 - `/[locale]/profile/settings` now preloads user settings server-side and syncs display name changes to both `ba_users` and `user_profiles`.
 - `/admin/site-users` gives Payload admins a separate management surface for Better Auth site members, including role/status/email edits and password reset link generation.
 
@@ -406,14 +407,20 @@ Orders/Downloads → Linked via user ID
 ```
 
 ### 10. **Email & Localization**
-- **Resend service:** Single API for all email
-- **React Email templates:** Four types
+- **Provider-neutral email adapter:** `send-email.ts` resolves settings, selects the active provider adapter, and fails closed for unsupported providers.
+- **React Email templates:** Four primary types
   1. Welcome (on signup)
   2. Order confirmation (after payment)
   3. Password reset (reset flow)
   4. Newsletter notification (new posts)
 - **Language:** Matched to user's locale preference
-- **Send from:** Single verified sender (env: `RESEND_FROM_EMAIL`)
+- **Send from:** Verified sender from provider settings or env fallback (`RESEND_FROM_EMAIL`, SMTP sender, or provider equivalent)
+
+### 11. **Admin AI Content Publishing**
+- Admin AI content tools prepare sourced drafts, publish approved web content, and schedule posts/pages with `status` + `publishedAt` state handled server-side.
+- Source ledger entries are sanitized before use; only verified sources can satisfy publish/schedule checks.
+- Local content helpers separate research, editorial policy, and lexical content assembly so the publish path stays deterministic and reviewable.
+- `src/lib/content/publication-state.ts` keeps public-facing content state handling consistent across posts and pages.
 
 ## Design System Integration
 

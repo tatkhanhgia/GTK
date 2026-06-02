@@ -109,7 +109,7 @@ export async function confirmAdminAiAction(payload: PayloadConfirmationClient, a
     if (getUpdatedDocs(claim).length === 0) {
       throw new AdminAiError('BAD_REQUEST', 'Action is already executing.', 409)
     }
-    const result = await executeConfirmedAdminAiTool(payload, toolName, doc.input)
+    const result = await executeConfirmedAdminAiTool(payload, toolName, doc.input, adminUser)
     await payload.update({
       collection: 'admin-ai-action-confirmations',
       id,

@@ -10,6 +10,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { BlogCard } from '@/components/ui/blog-card'
 import { Sidebar } from '@/components/layout/sidebar'
 import { formatDate, readingTimeLabel } from '@/lib/utils'
+import { articleSchema } from '@/lib/seo/structured-data'
 import { Calendar, Clock, User } from 'lucide-react'
 import type { Locale } from '@/i18n/config'
 import type { Metadata } from 'next'
@@ -74,9 +75,28 @@ export default async function BlogPostPage({ params }: Props) {
       : 'Author'
 
   const isVi = loc === 'vi'
+  const imageUrl =
+    post.featuredImage && typeof post.featuredImage === 'object'
+      ? (post.featuredImage as { url?: string }).url
+      : undefined
+  const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/${loc}/blog/${slug}`
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleSchema({
+            title,
+            excerpt,
+            authorName,
+            publishedAt: post.publishedAt ?? undefined,
+            modifiedAt: post.updatedAt ?? post.publishedAt ?? undefined,
+            imageUrl,
+            url: canonicalUrl,
+          })),
+        }}
+      />
       <ReadingProgress />
       <div className="mx-auto max-w-[1200px] px-6 py-10">
         <div className="flex gap-10 items-start">

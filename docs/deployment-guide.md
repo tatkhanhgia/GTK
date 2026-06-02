@@ -124,7 +124,7 @@ Routine production releases should use the manual GitHub Actions workflow in **P
 5. Configure agent behavior fields if this profile needs a custom role, tone, operating context, tool policy, or extra instructions.
 6. Open `/admin/ai`, select profile/model, send a test prompt.
 
-This phase does not run Docker operations. Do not mount `/var/run/docker.sock` into the app container for Admin AI chat.
+Admin AI does not run Docker/server operations. Do not mount `/var/run/docker.sock` into the app container for Admin AI chat and do not add an Admin AI `ops-runner`.
 
 ## Production CI/CD Phase 2
 
