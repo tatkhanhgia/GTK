@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   ArrowUpLeft,
+  Bot,
   FileImage,
   FileStack,
   FileText,
@@ -23,7 +24,7 @@ import { useAdminTranslation } from '../../i18n/use-admin-translation';
 interface NavItem {
   href: string;
   icon: LucideIcon;
-  labelKey: 'dashboard' | 'posts' | 'products' | 'downloads' | 'media' | 'pages' | 'users' | 'siteUsers' | 'emailSettings' | 'author';
+  labelKey: 'dashboard' | 'aiConsole' | 'posts' | 'products' | 'downloads' | 'media' | 'pages' | 'users' | 'siteUsers' | 'emailSettings' | 'author';
 }
 
 // Labels are resolved at render time via `t()` so the sidebar reacts to the
@@ -31,6 +32,7 @@ interface NavItem {
 // cheap to diff and make the translation coverage obvious at a glance.
 const navItems: NavItem[] = [
   { labelKey: 'dashboard', href: '/admin', icon: LayoutGrid },
+  { labelKey: 'aiConsole', href: '/admin/ai', icon: Bot },
   { labelKey: 'posts', href: '/admin/collections/posts', icon: Newspaper },
   { labelKey: 'products', href: '/admin/collections/products', icon: Package },
   { labelKey: 'downloads', href: '/admin/collections/digital-downloads', icon: FileStack },

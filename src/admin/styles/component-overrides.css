@@ -1550,7 +1550,7 @@ table td:first-child input[type="checkbox"] {
 .rich-text-lexical .editor-scroller,
 .rich-text-lexical .ContentEditable__root,
 .rich-text-lexical .LexicalEditorTheme__placeholder,
-.editor-container [contenteditable="true"] {
+.rich-text-lexical .editor-container [contenteditable="true"] {
   font-family: var(--admin-font-vietnamese-safe) !important;
   line-height: 1.8 !important;
   letter-spacing: normal !important;
@@ -1561,9 +1561,8 @@ table td:first-child input[type="checkbox"] {
 }
 
 .rich-text-lexical .ContentEditable__root [data-lexical-text="true"],
-.ContentEditable__root [data-lexical-text="true"],
-.LexicalEditorTheme__paragraph,
-.LexicalEditorTheme__quote {
+.rich-text-lexical .LexicalEditorTheme__paragraph,
+.rich-text-lexical .LexicalEditorTheme__quote {
   font-family: var(--admin-font-vietnamese-safe) !important;
   line-height: 1.8 !important;
   letter-spacing: normal !important;
@@ -1575,12 +1574,12 @@ table td:first-child input[type="checkbox"] {
 
 /* Headings keep Payload's block sizing while using Vietnamese-safe glyphs. */
 .rich-text-lexical .ContentEditable__root :is(h1, h2, h3, h4, h5, h6),
-.LexicalEditorTheme__h1,
-.LexicalEditorTheme__h2,
-.LexicalEditorTheme__h3,
-.LexicalEditorTheme__h4,
-.LexicalEditorTheme__h5,
-.LexicalEditorTheme__h6 {
+.rich-text-lexical .LexicalEditorTheme__h1,
+.rich-text-lexical .LexicalEditorTheme__h2,
+.rich-text-lexical .LexicalEditorTheme__h3,
+.rich-text-lexical .LexicalEditorTheme__h4,
+.rich-text-lexical .LexicalEditorTheme__h5,
+.rich-text-lexical .LexicalEditorTheme__h6 {
   font-family: var(--admin-font-vietnamese-safe) !important;
   letter-spacing: normal !important;
   text-rendering: auto !important;
@@ -3742,6 +3741,52 @@ html.admin-dark :is(.template-default, .drawer__content-children) .field-type.ar
   flex-wrap: wrap;
 }
 
+.template-default .doc-controls__controls,
+.drawer__content-children .doc-controls__controls {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+.template-default .doc-controls__controls .preview-btn,
+.drawer__content-children .doc-controls__controls .preview-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  border: 1px solid #e5dccb !important;
+  color: var(--admin-text-secondary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  overflow: hidden !important;
+  text-decoration: none !important;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 80ms ease !important;
+}
+
+.template-default .doc-controls__controls .preview-btn:hover,
+.drawer__content-children .doc-controls__controls .preview-btn:hover {
+  background: #faf5ec !important;
+  border-color: var(--admin-accent) !important;
+  color: var(--admin-accent) !important;
+}
+
+.template-default .doc-controls__controls .preview-btn svg,
+.drawer__content-children .doc-controls__controls .preview-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex: 0 0 16px !important;
+}
+
 /* ============================================================
    UNIFIED BUTTON SYSTEM — Primary / Secondary / Icon
    Applies to both `.template-default` (main edit view) and
@@ -5751,12 +5796,16 @@ html.admin-dark .drawer__content-children .doc-controls__controls-wrapper button
 /* --- Icon-only "..." kebab menu trigger --- */
 html.dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button,
 html.dark .template-default .doc-controls__controls-wrapper > .popup-button,
+html.dark .template-default .doc-controls__controls .preview-btn,
 html.dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button,
 html.dark .drawer__content-children .doc-controls__controls-wrapper > .popup-button,
+html.dark .drawer__content-children .doc-controls__controls .preview-btn,
 html.admin-dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button,
 html.admin-dark .template-default .doc-controls__controls-wrapper > .popup-button,
+html.admin-dark .template-default .doc-controls__controls .preview-btn,
 html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button,
-html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup-button {
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup-button,
+html.admin-dark .drawer__content-children .doc-controls__controls .preview-btn {
   background: #201d1a !important;
   border-color: rgba(245, 240, 232, 0.14) !important;
   color: var(--admin-text-secondary) !important;
@@ -5764,9 +5813,13 @@ html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .pop
 }
 
 html.dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+html.dark .template-default .doc-controls__controls .preview-btn:hover,
 html.dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+html.dark .drawer__content-children .doc-controls__controls .preview-btn:hover,
 html.admin-dark .template-default .doc-controls__controls-wrapper > .popup > .popup-button:hover,
-html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button:hover {
+html.admin-dark .template-default .doc-controls__controls .preview-btn:hover,
+html.admin-dark .drawer__content-children .doc-controls__controls-wrapper > .popup > .popup-button:hover,
+html.admin-dark .drawer__content-children .doc-controls__controls .preview-btn:hover {
   background: #2a2622 !important;
   border-color: var(--admin-accent) !important;
   color: var(--admin-accent) !important;

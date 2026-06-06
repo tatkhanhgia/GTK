@@ -5,6 +5,7 @@ export const generatedTranslations = {
   vi: {
   "customSidebar": {
     "dashboard": "Bảng điều khiển",
+    "aiConsole": "AI Console",
     "posts": "Bài viết",
     "products": "Sản phẩm",
     "downloads": "Tệp tải xuống",
@@ -22,6 +23,7 @@ export const generatedTranslations = {
   "customHeader": {
     "breadcrumbAdmin": "Quản trị",
     "pageTitleDashboard": "Bảng điều khiển",
+    "pageTitleAiConsole": "AI Ops Console",
     "pageTitleAccount": "Tài khoản",
     "pageTitleAuthorProfile": "Hồ sơ tác giả",
     "pageTitleFallback": "Trang quản trị",
@@ -119,6 +121,7 @@ export const generatedTranslations = {
   en: {
   "customSidebar": {
     "dashboard": "Dashboard",
+    "aiConsole": "AI Console",
     "posts": "Posts",
     "products": "Products",
     "downloads": "Downloads",
@@ -136,6 +139,7 @@ export const generatedTranslations = {
   "customHeader": {
     "breadcrumbAdmin": "Admin",
     "pageTitleDashboard": "Dashboard",
+    "pageTitleAiConsole": "AI Ops Console",
     "pageTitleAccount": "Account",
     "pageTitleAuthorProfile": "Author profile",
     "pageTitleFallback": "Admin panel",

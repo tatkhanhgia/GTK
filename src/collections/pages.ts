@@ -1,4 +1,7 @@
 import type { CollectionConfig } from 'payload'
+import { publishedNowWhere } from '../lib/content/publication-state'
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -8,7 +11,15 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
+    defaultColumns: ['title', 'slug', 'status', 'publishedAt'],
     description: { vi: 'Quản lý trang tĩnh', en: 'Manage static pages' },
+    preview: (doc, { locale }) => {
+      const slug = typeof doc?.slug === 'string' ? doc.slug : ''
+      return slug ? `${SITE_URL}/${locale === 'en' ? 'en' : 'vi'}/${slug}?preview=1` : null
+    },
+  },
+  access: {
+    read: ({ req }) => req.user ? true : publishedNowWhere(),
   },
   fields: [
     {
@@ -60,6 +71,27 @@ export const Pages: CollectionConfig = {
           vi: 'Ảnh hero tùy chọn dùng cho trang chủ',
           en: 'Optional hero image for homepage',
         },
+      },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      label: { vi: 'Trạng thái', en: 'Status' },
+      options: [
+        { label: { vi: 'Nháp', en: 'Draft' }, value: 'draft' },
+        { label: { vi: 'Đã xuất bản', en: 'Published' }, value: 'published' },
+      ],
+      defaultValue: 'draft',
+      required: true,
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'publishedAt',
+      type: 'date',
+      label: { vi: 'Thời gian xuất bản', en: 'Published at' },
+      admin: {
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayAndTime' },
       },
     },
   ],

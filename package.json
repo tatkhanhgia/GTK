@@ -1,10 +1,10 @@
 {
   "name": "gtkblog",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "private": true,
   "scripts": {
     "predev": "node scripts/bootstrap-db.js",
-    "dev": "cross-env PAYLOAD_MIGRATING=true next dev",
+    "dev": "cross-env PAYLOAD_MIGRATING=true next dev --webpack",
     "build": "cross-env PAYLOAD_MIGRATING=true NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "eslint",
@@ -78,6 +78,9 @@
     "hono": "4.12.18",
     "@hono/node-server": "1.19.13",
     "express-rate-limit": "8.5.2",
-    "ip-address": "10.2.0"
+    "ip-address": "10.2.0",
+    "@swc/helpers": "0.5.23",
+    "esbuild": "0.28.0",
+    "yaml": "2.9.0"
   }
 }

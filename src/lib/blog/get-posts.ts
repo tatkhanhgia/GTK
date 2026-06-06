@@ -1,4 +1,5 @@
 import type { Where } from 'payload'
+import { mergePublishedNowWhere } from '@/lib/content/publication-state'
 
 const shouldSkipBuildDbAccess = process.env.SKIP_BUILD_DB_ACCESS === 'true'
 
@@ -42,10 +43,12 @@ export async function getPosts({
   ])
   const payload = await getPayload({ config })
 
-  const where: Where = { status: { equals: status } }
+  const where: Where = status === 'published' ? mergePublishedNowWhere() : { status: { equals: status } }
   if (category) {
     // Filter by category slug via relationship
-    where['category.slug'] = { equals: category }
+    const categoryWhere: Where = { 'category.slug': { equals: category } }
+    if ('and' in where && Array.isArray(where.and)) where.and.push(categoryWhere)
+    else where['category.slug'] = { equals: category }
   }
 
   const result = await payload.find({

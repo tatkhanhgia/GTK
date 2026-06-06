@@ -55,6 +55,7 @@ function resolveSearchTarget(pathname: string, t: TFunction<CustomTranslationKey
 // Exact-match paths that map to a dedicated page-title translation key.
 const ROUTE_TITLE_KEYS: Record<string, CustomTranslationKeys> = {
   '/admin': 'customHeader:pageTitleDashboard',
+  '/admin/ai': 'customHeader:pageTitleAiConsole',
   '/admin/account': 'customHeader:pageTitleAccount',
   '/admin/globals/author-profile': 'customHeader:pageTitleAuthorProfile',
 };

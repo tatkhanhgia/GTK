@@ -79,7 +79,11 @@ ck.md
 /.impeccable/
 
 # Local debug artifacts
-.codex
+.codex/*
+!.codex/
+!.codex/hooks/
+!.codex/hooks/**
+!.codex/hooks.json
 .tmp-*
 yazi-x86_64-unknown-linux-gnu/
 
@@ -101,3 +105,9 @@ worktrees/
 
 # Generated OpenCode backup from scripts/generate-opencode.py --force
 .opencode.backup/
+
+# Harness durable layer
+harness.db
+harness.db-wal
+harness.db-shm
+scripts/bin/harness-cli

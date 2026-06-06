@@ -2,6 +2,10 @@ import { getPayload } from 'payload'
 import config from '../../payload.config'
 import { categories, posts, products, pages } from './seed-data'
 
+const adminAiSeedProfileName = 'Local Gemma'
+const adminAiSeedBaseUrl = 'http://169.254.83.107:1234'
+const adminAiSeedModel = 'gemma-4-e4-b-it'
+
 // Build Lexical richtext JSON from plain text paragraphs
 function createRichText(paragraphs: string[]) {
   return {
@@ -49,6 +53,45 @@ async function createLocalized<T extends Record<string, unknown>>(
   return created
 }
 
+async function seedAdminAiProfile(payload: Awaited<ReturnType<typeof getPayload>>) {
+  const apiKey = process.env.ADMIN_AI_SEED_API_KEY?.trim()
+  if (!apiKey) {
+    console.warn('! Admin AI profile skipped: ADMIN_AI_SEED_API_KEY is not set')
+    return null
+  }
+
+  const existing = await payload.find({
+    collection: 'admin-ai-profiles',
+    where: { name: { equals: adminAiSeedProfileName } },
+    limit: 1,
+  })
+
+  const data = {
+    name: adminAiSeedProfileName,
+    providerType: 'openai-compatible',
+    baseUrl: adminAiSeedBaseUrl,
+    apiKeyEncrypted: apiKey,
+    defaultModel: adminAiSeedModel,
+    modelOptions: [{ model: adminAiSeedModel }],
+    enabled: true,
+    notes: 'Seeded for local development.',
+  }
+
+  if (existing.docs.length === 0) {
+    await payload.create({ collection: 'admin-ai-profiles', data })
+    console.log('+ Admin AI profile created')
+    return 'created'
+  }
+
+  await payload.update({
+    collection: 'admin-ai-profiles',
+    id: existing.docs[0].id,
+    data,
+  })
+  console.log('= Admin AI profile already exists, updated')
+  return 'updated'
+}
+
 async function seed() {
   const env = process.env.NODE_ENV
   if (env && env !== 'development' && env !== 'test') {
@@ -73,6 +116,8 @@ async function seed() {
     adminId = adminExists.docs[0].id
     console.log('= Admin user already exists, skipping')
   }
+
+  await seedAdminAiProfile(payload)
 
   // 2. Categories (idempotent by slug)
   const categoryMap: Record<string, number | string> = {}

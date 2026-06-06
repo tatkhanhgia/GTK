@@ -429,56 +429,11 @@ pre {
    Vietnamese Text Support - Rich Text Editor Fixes
    ============================================================ */
 
-/* Ensure Vietnamese text in rich text editor renders correctly
-   NOTE: rules below are intentionally NOT scoped to `.payload-admin`
-   because the Payload v3 admin layout does not apply that class anywhere
-   on the DOM (only `.payload-admin-header` exists). Scoping to it would
-   make these rules dead. */
-.rich-text-editor,
-.lexical-editor,
-[data-lexical-editor="true"],
-.editor-shell {
-  font-family: var(--admin-font-vietnamese-safe);
-  line-height: var(--admin-leading-relaxed);
-}
-
-/* Vietnamese content needs extra line height for diacritics */
-.rich-text-editor p,
-.rich-text-editor li,
-.lexical-editor p,
-.lexical-editor li,
-[data-lexical-editor="true"] p,
-[data-lexical-editor="true"] li,
-[data-lexical-text="true"] {
-  line-height: var(--admin-leading-relaxed);
-  font-family: var(--admin-font-vietnamese-safe);
-}
-
-/* Ensure proper font inheritance for all text elements */
-.field-type.textarea textarea,
-.rich-text-lexical .editor-scroller {
+/* Ensure proper font inheritance for textarea content.
+   Lexical editor typography lives in component-overrides.css. */
+.field-type.textarea textarea {
   font-family: var(--admin-font-vietnamese-safe);
   line-height: var(--admin-leading-normal);
-}
-
-/* Fix for lexical editor text rendering without flattening block styles */
-.ContentEditable__root,
-.ContentEditable__root [data-lexical-text="true"],
-.LexicalEditorTheme__paragraph,
-.LexicalEditorTheme__quote {
-  font-family: var(--admin-font-vietnamese-safe);
-  line-height: var(--admin-leading-relaxed);
-  letter-spacing: normal;
-}
-
-.LexicalEditorTheme__h1,
-.LexicalEditorTheme__h2,
-.LexicalEditorTheme__h3,
-.LexicalEditorTheme__h4,
-.LexicalEditorTheme__h5,
-.LexicalEditorTheme__h6 {
-  font-family: var(--admin-font-vietnamese-safe);
-  letter-spacing: normal;
 }
 
 /* ============================================================

@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'motion/react'
 import { usePathname } from 'next/navigation'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { motionEasings } from '@/lib/motion/motion-presets'
 
 interface PageMotionShellProps {
@@ -12,8 +12,13 @@ interface PageMotionShellProps {
 export function PageMotionShell({ children }: PageMotionShellProps) {
   const pathname = usePathname()
   const prefersReducedMotion = useReducedMotion()
+  const [hasMounted, setHasMounted] = useState(false)
 
-  if (prefersReducedMotion) {
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  if (!hasMounted || prefersReducedMotion) {
     return <main className="min-h-[calc(100vh-4rem)]">{children}</main>
   }
 

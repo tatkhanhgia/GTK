@@ -64,6 +64,9 @@ CLOUDFLARE_ACCOUNT_ID= (required when Cloudflare email provider is selected)
 CLOUDFLARE_EMAIL_API_URL=https://api.cloudflare.com/client/v4
 EMAIL_SETTINGS_ENCRYPTION_KEY=32-byte-or-longer-random-secret
 
+# Admin AI - stable key for encrypted provider profiles
+ADMIN_AI_ENCRYPTION_KEY=32-byte-or-longer-random-secret
+
 # App Configuration
 NEXT_PUBLIC_APP_URL=https://yourdomain.com
 NODE_ENV=production
@@ -74,7 +77,7 @@ NODE_ENV=production
 ```bash
 # On your local machine (before deployment)
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-# Use output for PAYLOAD_SECRET and BETTER_AUTH_SECRET
+# Use output for PAYLOAD_SECRET, BETTER_AUTH_SECRET, EMAIL_SETTINGS_ENCRYPTION_KEY, and ADMIN_AI_ENCRYPTION_KEY
 ```
 
 ### 3. Verify `.env.local` (Git-ignored)
@@ -106,6 +109,22 @@ Routine production releases should use the manual GitHub Actions workflow in **P
 4. Exec's `node server.js` (Next.js standalone output).
 
 **You never need to `psql` or `exec` into the container to migrate.**
+
+### Admin AI Provider Setup
+
+`/admin/ai` uses admin-created provider profiles, not frontend env vars.
+
+1. Keep `ADMIN_AI_ENCRYPTION_KEY` stable across deploys. Rotating it means saved provider API keys must be re-entered.
+2. Open `/admin/collections/admin-ai-profiles`.
+3. Create an enabled OpenAI-compatible profile:
+   - OpenAI: `https://api.openai.com/v1`
+   - OpenRouter: `https://openrouter.ai/api/v1`
+   - Local gateway: your gateway base URL ending before `/chat/completions`
+4. Enter API key and default model. The key is encrypted before save and masked on reads.
+5. Configure agent behavior fields if this profile needs a custom role, tone, operating context, tool policy, or extra instructions.
+6. Open `/admin/ai`, select profile/model, send a test prompt.
+
+Admin AI does not run Docker/server operations. Do not mount `/var/run/docker.sock` into the app container for Admin AI chat and do not add an Admin AI `ops-runner`.
 
 ## Production CI/CD Phase 2
 

@@ -14,6 +14,13 @@ import { Posts } from './src/collections/posts'
 import { Products } from './src/collections/products'
 import { Pages } from './src/collections/pages'
 import { Translations } from './src/collections/translations'
+import { AdminAiProfiles } from './src/collections/admin-ai-profiles'
+import { AdminAiActionConfirmations } from './src/collections/admin-ai-action-confirmations'
+import { AdminAiAuditLogs } from './src/collections/admin-ai-audit-logs'
+import { AdminAiFileChunks } from './src/collections/admin-ai-file-chunks'
+import { AdminAiFileReferences } from './src/collections/admin-ai-file-references'
+import { AdminAiFiles } from './src/collections/admin-ai-files'
+import { AdminAiSessions } from './src/collections/admin-ai-sessions'
 import { AuthorProfile } from './src/globals/author-profile'
 import { EmailSettings } from './src/globals/email-settings'
 import { generatedTranslations } from './src/admin/i18n/generated-translations'
@@ -68,7 +75,23 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Categories, DigitalDownloads, Media, Posts, Products, Pages, Translations],
+  collections: [
+    Users,
+    Categories,
+    DigitalDownloads,
+    Media,
+    Posts,
+    Products,
+    Pages,
+    Translations,
+    AdminAiProfiles,
+    AdminAiActionConfirmations,
+    AdminAiAuditLogs,
+    AdminAiFiles,
+    AdminAiFileReferences,
+    AdminAiFileChunks,
+    AdminAiSessions,
+  ],
   globals: [AuthorProfile, EmailSettings],
   routes: {
     admin: '/admin',

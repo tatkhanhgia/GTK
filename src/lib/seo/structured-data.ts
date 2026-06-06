@@ -21,6 +21,7 @@ export function articleSchema({
   excerpt,
   authorName,
   publishedAt,
+  modifiedAt,
   imageUrl,
   url,
 }: {
@@ -28,6 +29,7 @@ export function articleSchema({
   excerpt?: string
   authorName: string
   publishedAt?: string
+  modifiedAt?: string
   imageUrl?: string
   url: string
 }) {
@@ -46,6 +48,7 @@ export function articleSchema({
       url: APP_URL,
     },
     datePublished: publishedAt,
+    dateModified: modifiedAt ?? publishedAt,
     url,
     ...(imageUrl ? { image: imageUrl } : {}),
   }
