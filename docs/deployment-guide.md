@@ -138,8 +138,7 @@ Required GitHub Secrets:
 - `VPS_KNOWN_HOSTS` (pinned `known_hosts` line for the VPS, not runtime `ssh-keyscan` output)
 - `VPS_PROJECT_PATH`
 - `PRODUCTION_URL`
-- `GHCR_USERNAME` (account that can read `ghcr.io/<owner>/gtkblog`)
-- `GHCR_TOKEN` (package read access for the VPS pull; GitHub-side publish uses the built-in `GITHUB_TOKEN`)
+- No GHCR read secret is required for deploy. The workflow reuses the run-scoped built-in `GITHUB_TOKEN` plus `github.actor` to authenticate the VPS pull against `ghcr.io/<owner>/gtkblog`.
 
 Release order:
 

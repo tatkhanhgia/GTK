@@ -169,7 +169,7 @@ jobs:
               docker system df || true
             }
 
-            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             cleanup_gtkblog_docker_images
             docker compose pull app
             docker compose up -d --no-build app
