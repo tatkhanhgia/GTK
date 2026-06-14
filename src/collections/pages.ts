@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { assertRichTextMediaQuality } from '../lib/content/rich-text-media-quality'
 import { publishedNowWhere } from '../lib/content/publication-state'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -44,8 +45,8 @@ export const Pages: CollectionConfig = {
       label: { vi: 'Nội dung', en: 'Content' },
       admin: {
         description: {
-          vi: 'Nội dung trang (hỗ trợ định dạng rich text)',
-          en: 'Page content (rich text with formatting support)',
+          vi: 'Nội dung trang. Dùng ảnh inline khi ảnh là một phần của nội dung, không phải hero.',
+          en: 'Page content. Use inline images when the image is part of the page body, not the hero.',
         },
       },
     },
@@ -68,8 +69,8 @@ export const Pages: CollectionConfig = {
       label: { vi: 'Ảnh hero', en: 'Hero image' },
       admin: {
         description: {
-          vi: 'Ảnh hero tùy chọn dùng cho trang chủ',
-          en: 'Optional hero image for homepage',
+          vi: 'Ảnh hero tùy chọn cho phần đầu trang. Ảnh trong nội dung nên chèn trực tiếp vào rich text.',
+          en: 'Optional hero image for the page header. Body images should be inserted directly into rich text.',
         },
       },
     },
@@ -95,4 +96,15 @@ export const Pages: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    beforeChange: [
+      ({ data, originalDoc }) => {
+        const content = data.content ?? originalDoc?.content
+        if (data.status === 'published') {
+          assertRichTextMediaQuality(content)
+        }
+        return data
+      },
+    ],
+  },
 }

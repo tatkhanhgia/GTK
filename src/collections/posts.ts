@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { assertRichTextMediaQuality } from '../lib/content/rich-text-media-quality'
 import { publishedNowWhere } from '../lib/content/publication-state'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -76,12 +77,24 @@ export const Posts: CollectionConfig = {
       localized: true,
       required: true,
       label: { vi: 'Nội dung', en: 'Content' },
+      admin: {
+        description: {
+          vi: 'Soạn thân bài tại đây. Dùng ảnh inline cho screenshot, diagram, hoặc hình minh họa nằm giữa các đoạn.',
+          en: 'Write the article body here. Use inline images for screenshots, diagrams, or illustrations placed between sections.',
+        },
+      },
     },
     {
       name: 'featuredImage',
       type: 'upload',
       relationTo: 'media',
       label: { vi: 'Ảnh đại diện', en: 'Featured image' },
+      admin: {
+        description: {
+          vi: 'Chỉ dùng cho thumbnail, social preview và SEO. Không thay thế ảnh minh họa trong thân bài.',
+          en: 'Used for cards, social previews, and SEO only. It does not replace inline article images.',
+        },
+      },
     },
     {
       name: 'category',
@@ -163,14 +176,18 @@ export const Posts: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      ({ data }) => {
+      ({ data, originalDoc }) => {
         // Auto-calculate reading time from richtext content. Walk the
         // Lexical tree and count only real text (not JSON metadata).
         // 200 wpm is the standard average adult silent reading speed.
-        if (data.content) {
-          const plain = extractLexicalText(data.content).trim()
+        const content = data.content ?? originalDoc?.content
+        if (content) {
+          const plain = extractLexicalText(content).trim()
           const wordCount = plain ? plain.split(/\s+/).length : 0
           data.readingTime = Math.max(1, Math.ceil(wordCount / 200))
+        }
+        if (data.status === 'published' || data._status === 'published') {
+          assertRichTextMediaQuality(content)
         }
         return data
       },

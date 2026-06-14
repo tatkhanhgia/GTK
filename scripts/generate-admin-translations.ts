@@ -55,7 +55,10 @@ async function main() {
 
   const outputPath = path.resolve(process.cwd(), 'src/admin/i18n/generated-translations.ts')
 
-  if (process.env.SKIP_ADMIN_TRANSLATION_GENERATION === 'true') {
+  if (
+    process.env.SKIP_ADMIN_TRANSLATION_GENERATION === 'true' ||
+    process.env.SKIP_BUILD_DB_ACCESS === 'true'
+  ) {
     if (!fs.existsSync(outputPath)) {
       throw new Error(`Cannot skip admin translation generation because ${outputPath} does not exist`)
     }

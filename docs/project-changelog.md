@@ -5,6 +5,11 @@ All significant changes to the GTK Blog project are documented here.
 ## [0.1.12] - 2026-06-01
 
 ### Added
+- Published CMS pages now render publicly at `/[locale]/[slug]` with localized metadata, optional hero image, and rich text body rendering.
+- Dynamic sitemap generation now includes published CMS pages served by the new localized page route while avoiding duplicate reserved slugs.
+- Blog rich text uploads now render on the public site as responsive figures with caption support.
+- Admin AI structured content packs now accept image and image placeholder blocks for sourced draft workflows.
+- Publish-time inline media quality checks now flag populated rich text images that are missing alt text or captions.
 - Local development seed now includes a default Admin AI profile for `Local Gemma` so `/admin/ai` can be used immediately after seeding.
 - Web-only Admin AI content publishing tools for sourced post/page draft, publish, and schedule flows.
 - Source ledger sanitization for web, uploaded-file, and existing-post summaries; publish/schedule policy accepts only server-signed source receipts, not model-fabricated source claims.
@@ -14,6 +19,8 @@ All significant changes to the GTK Blog project are documented here.
 - Localized Payload post slugs with a migration from `posts.slug` to `posts_locales.slug`, including per-locale unique/index coverage.
 
 ### Changed
+- Post, page, and product admin rich text fields now clarify when to use inline images versus featured/hero/gallery images.
+- Rich text blockquotes now use full bordered editorial treatment instead of a colored side stripe.
 - Admin AI is permanently web CMS-only; Docker/server operations and any Admin AI `ops-runner` are removed from scope.
 - Publishing policy now runs server-side: new long-form publish needs admin confirmation, weak or missing sources block publish/schedule, and low-risk auto-publish is limited to approved-content refresh, approved-source translation, and typo fixes.
 - Scheduled content now uses `status: published` plus future `publishedAt`, and public collection access, post queries, page reads, RSS, and sitemap hide it until due.
@@ -21,6 +28,7 @@ All significant changes to the GTK Blog project are documented here.
 - Payload Lexical rich text typography now has one scoped CSS source for Vietnamese-safe rendering in admin editors.
 
 ### Fixed
+- Build-time DB skip now also covers admin translation generation and public i18n message loading, so `SKIP_BUILD_DB_ACCESS=true` builds without requiring PostgreSQL.
 - Fixed Payload post edit doc controls so Preview gets its own icon button box and no longer overlaps the Publish action.
 - Local Admin AI content drafting now infers a blog category and starter tags from research context before creating the pending draft action, so blog drafts are no longer created as category-less generic posts.
 - Local DB deploy validation now covers Payload migrations, app bootstrap idempotency, digital download relations, and localized post slug backfill.

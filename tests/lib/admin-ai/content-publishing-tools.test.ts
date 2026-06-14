@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { publishPost } from '@/lib/admin-ai/tools/content-publishing-tools'
+import { publishPage, publishPost } from '@/lib/admin-ai/tools/content-publishing-tools'
 import { attachSourceReceipts } from '@/lib/admin-ai/tools/source-ledger-utils'
 
 describe('content publishing tools', () => {
@@ -30,6 +30,92 @@ describe('content publishing tools', () => {
       scheduledFor: '2020-01-01T00:00:00.000Z',
       sourceLedger,
     }, true, { id: 'admin-1' })).rejects.toMatchObject({ code: 'BAD_REQUEST' })
+    expect(payload.update).not.toHaveBeenCalled()
+  })
+
+  it('rejects post publish when inline images are missing alt or caption', async () => {
+    const payload = {
+      find: vi.fn(),
+      findByID: vi.fn().mockResolvedValue({
+        title: 'Post',
+        slug: 'post',
+        excerpt: 'Excerpt',
+        content: {
+          root: {
+            children: [
+              {
+                fields: {},
+                relationTo: 'media',
+                type: 'upload',
+                value: { mimeType: 'image/png', url: '/media/diagram.png' },
+                version: 3,
+              },
+            ],
+          },
+        },
+        category: 1,
+      }),
+      create: vi.fn(),
+      update: vi.fn(),
+    }
+
+    const sourceLedger = attachSourceReceipts([{
+      kind: 'existing-post',
+      title: 'Source',
+      retrievedAt: '2026-06-01T00:00:00.000Z',
+      summary: 'Approved source content with enough detail for a narrow update.',
+      confidence: 'high',
+    }], { id: 'admin-1' })
+
+    await expect(publishPost(payload, {
+      postId: '1',
+      sourceLedger,
+    }, false, { id: 'admin-1' })).rejects.toMatchObject({
+      code: 'BAD_REQUEST',
+      message: expect.stringContaining('Inline image 1 is missing alt text.'),
+    })
+    expect(payload.update).not.toHaveBeenCalled()
+  })
+
+  it('rejects page publish when inline images are missing alt or caption', async () => {
+    const payload = {
+      find: vi.fn(),
+      findByID: vi.fn().mockResolvedValue({
+        title: 'Page',
+        slug: 'page',
+        content: {
+          root: {
+            children: [
+              {
+                fields: {},
+                relationTo: 'media',
+                type: 'upload',
+                value: { mimeType: 'image/png', url: '/media/page-diagram.png' },
+                version: 3,
+              },
+            ],
+          },
+        },
+      }),
+      create: vi.fn(),
+      update: vi.fn(),
+    }
+
+    const sourceLedger = attachSourceReceipts([{
+      kind: 'existing-post',
+      title: 'Source',
+      retrievedAt: '2026-06-01T00:00:00.000Z',
+      summary: 'Approved source content with enough detail for a narrow update.',
+      confidence: 'high',
+    }], { id: 'admin-1' })
+
+    await expect(publishPage(payload, {
+      pageId: '1',
+      sourceLedger,
+    }, false, { id: 'admin-1' })).rejects.toMatchObject({
+      code: 'BAD_REQUEST',
+      message: expect.stringContaining('Inline image 1 is missing alt text.'),
+    })
     expect(payload.update).not.toHaveBeenCalled()
   })
 })

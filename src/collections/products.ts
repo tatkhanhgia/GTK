@@ -45,6 +45,12 @@ export const Products: CollectionConfig = {
       type: 'richText',
       localized: true,
       label: { vi: 'Mô tả', en: 'Description' },
+      admin: {
+        description: {
+          vi: 'Mô tả chi tiết sản phẩm. Có thể chèn ảnh inline cho ảnh giải thích hoặc hướng dẫn.',
+          en: 'Detailed product description. Inline images can be used for explanatory or instructional media.',
+        },
+      },
     },
     {
       name: 'excerpt',

@@ -11,6 +11,10 @@ type ContentPackBlock = {
   items?: unknown
   language?: unknown
   children?: unknown
+  mediaId?: unknown
+  relationTo?: unknown
+  alt?: unknown
+  caption?: unknown
 }
 
 const MAX_BLOCKS = 80
@@ -27,6 +31,36 @@ function safeUrl(value: unknown) {
     throw new AdminAiError('BAD_REQUEST', 'Links must use http, https, mailto, or site-relative URLs.', 400)
   }
   return url
+}
+
+function uploadNode(block: ContentPackBlock, blockIndex: number): LexicalNode {
+  const mediaId = getText(block.mediaId, 120)
+  if (!mediaId) {
+    const caption = getText(block.caption, 240)
+    return paragraph([
+      caption
+        ? `[Image needed: ${caption}]`
+        : '[Image needed: add a relevant screenshot, diagram, or illustration here.]',
+    ])
+  }
+
+  const relationTo = getText(block.relationTo, 80) || 'media'
+  if (relationTo !== 'media') {
+    throw new AdminAiError('BAD_REQUEST', 'Image blocks only support the media collection.', 400)
+  }
+
+  return {
+    fields: {
+      alt: getText(block.alt, 240),
+      caption: getText(block.caption, 300),
+    },
+    format: '',
+    id: `ai-${mediaId}-${blockIndex}`,
+    relationTo,
+    type: 'upload',
+    value: mediaId,
+    version: 3,
+  }
 }
 
 function inlineNodes(value: unknown): LexicalNode[] {
@@ -63,9 +97,10 @@ function paragraph(children: unknown) {
   }
 }
 
-function blockToLexical(block: ContentPackBlock) {
+function blockToLexical(block: ContentPackBlock, blockIndex: number) {
   const type = String(block.type ?? 'paragraph')
   if (type === 'paragraph') return paragraph(block.children ?? block.text)
+  if (type === 'image' || type === 'imagePlaceholder') return uploadNode(block, blockIndex)
   if (type === 'heading') {
     const level = Number(block.level)
     if (![2, 3, 4].includes(level)) throw new AdminAiError('BAD_REQUEST', 'Headings only support levels 2, 3, and 4.', 400)
@@ -118,7 +153,7 @@ export function createRichTextFromContentPack(value: unknown) {
 
   return {
     root: {
-      children: blocks.map((block) => blockToLexical(asRecord(block))),
+      children: blocks.map((block, index) => blockToLexical(asRecord(block), index)),
       direction: 'ltr' as const,
       format: '' as const,
       indent: 0,

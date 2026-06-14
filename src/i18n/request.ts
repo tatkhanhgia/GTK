@@ -10,7 +10,9 @@ async function loadStaticMessages(locale: string) {
 }
 
 function shouldSkipDbTranslations() {
-  return process.env.SKIP_DB_TRANSLATIONS === 'true'
+  return (
+    process.env.SKIP_DB_TRANSLATIONS === 'true' || process.env.SKIP_BUILD_DB_ACCESS === 'true'
+  )
 }
 
 function buildNestedTree(records: Array<{ key: string; vi: string; en: string }>, locale: string) {

@@ -1,5 +1,6 @@
 import { AdminAiError } from '../admin-ai-chat-contract'
 import { evaluatePublishingPolicy, type PublishingPolicyResult } from '../publishing-policy'
+import { findRichTextMediaQualityIssues } from '@/lib/content/rich-text-media-quality'
 import { asRecord, createRichText, getOptionalText, getPostId, getText, slugify } from './post-tool-content-utils'
 import { createRichTextFromContentPack } from './lexical-content-builder'
 import { verifySourceLedgerReceipts } from './source-ledger-utils'
@@ -49,11 +50,27 @@ function textForPolicy(record: Record<string, unknown>) {
 function ensureCanPublishPost(post: Record<string, unknown>) {
   const missing = ['title', 'slug', 'excerpt', 'content', 'category'].filter((key) => !post[key])
   if (missing.length > 0) throw new AdminAiError('BAD_REQUEST', `Post is missing publish fields: ${missing.join(', ')}.`, 400)
+  const mediaIssues = findRichTextMediaQualityIssues(post.content)
+  if (mediaIssues.length > 0) {
+    throw new AdminAiError(
+      'BAD_REQUEST',
+      `Fix inline media before publishing: ${mediaIssues.map((issue) => issue.message).join(' ')}`,
+      400
+    )
+  }
 }
 
 function ensureCanPublishPage(page: Record<string, unknown>) {
   const missing = ['title', 'slug', 'content'].filter((key) => !page[key])
   if (missing.length > 0) throw new AdminAiError('BAD_REQUEST', `Page is missing publish fields: ${missing.join(', ')}.`, 400)
+  const mediaIssues = findRichTextMediaQualityIssues(page.content)
+  if (mediaIssues.length > 0) {
+    throw new AdminAiError(
+      'BAD_REQUEST',
+      `Fix inline media before publishing: ${mediaIssues.map((issue) => issue.message).join(' ')}`,
+      400
+    )
+  }
 }
 
 export async function createPageDraft(payload: PayloadContentPublishClient, input: unknown): Promise<ToolOutcome> {
