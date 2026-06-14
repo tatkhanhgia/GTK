@@ -5,25 +5,36 @@ import type { CSSProperties } from 'react'
 import type { Locale } from '@/i18n/config'
 
 const TOPICS = ['AI', 'Next.js', 'Payload', 'Products']
-const SESSION_STORAGE_KEY = 'gtkblog.homepageEntryLoader.seen'
+const DEFAULT_DISPLAY_MS = 1760
+const REDUCED_MOTION_DISPLAY_MS = 520
 
 interface HomepageEntryLoaderProps {
   locale: Locale
 }
 
-function hasSeenHomepageEntryLoader() {
-  try {
-    return window.sessionStorage.getItem(SESSION_STORAGE_KEY) === 'true'
-  } catch {
-    return false
-  }
+function getDisplayDuration() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? REDUCED_MOTION_DISPLAY_MS
+    : DEFAULT_DISPLAY_MS
 }
 
-function markHomepageEntryLoaderSeen() {
+function isPrimaryNavigationClick(event: MouseEvent) {
+  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+}
+
+function isHomepageHref(href: string, locale: Locale) {
   try {
-    window.sessionStorage.setItem(SESSION_STORAGE_KEY, 'true')
+    const url = new URL(href, window.location.href)
+
+    if (url.origin !== window.location.origin) {
+      return false
+    }
+
+    const pathname = url.pathname.replace(/\/$/, '') || '/'
+
+    return pathname === '/' || pathname === `/${locale}`
   } catch {
-    // Storage is best-effort; blocked storage should not prevent the homepage from rendering.
+    return false
   }
 }
 
@@ -39,23 +50,39 @@ export function HomepageEntryLoader({ locale }: HomepageEntryLoaderProps) {
       : 'Technical notes, AI workflows, digital products'
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const hasSeenLoader = hasSeenHomepageEntryLoader()
+    let hideTimer = 0
 
-    if (hasSeenLoader) {
-      return
+    function showLoader() {
+      window.clearTimeout(hideTimer)
+      setVisible(true)
+      hideTimer = window.setTimeout(
+        () => setVisible(false),
+        getDisplayDuration(),
+      )
     }
 
-    markHomepageEntryLoaderSeen()
-    setVisible(true)
+    function handleHomepageLinkClick(event: MouseEvent) {
+      if (!isPrimaryNavigationClick(event) || !(event.target instanceof Element)) {
+        return
+      }
 
-    const hideTimer = window.setTimeout(
-      () => setVisible(false),
-      prefersReducedMotion ? 520 : 1760,
-    )
+      const link = event.target.closest<HTMLAnchorElement>('a[href]')
 
-    return () => window.clearTimeout(hideTimer)
-  }, [])
+      if (!link || (link.target && link.target !== '_self') || !isHomepageHref(link.href, locale)) {
+        return
+      }
+
+      showLoader()
+    }
+
+    showLoader()
+    document.addEventListener('click', handleHomepageLinkClick)
+
+    return () => {
+      window.clearTimeout(hideTimer)
+      document.removeEventListener('click', handleHomepageLinkClick)
+    }
+  }, [locale])
 
   if (!visible) return null
 

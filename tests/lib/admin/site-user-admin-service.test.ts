@@ -84,4 +84,14 @@ describe('site-user-admin-service', () => {
     expect(page).toContain('form={saveFormId}')
     expect(page).toContain('id={`save-site-user-${member.id}`}')
   })
+
+  it('keeps the site members page aligned with the custom admin shell', () => {
+    const page = readFileSync('src/app/(payload)/admin/site-users/page.tsx', 'utf8')
+    const header = readFileSync('src/admin/components/layout/custom-header-client.tsx', 'utf8')
+
+    expect(page).toContain("import { CustomHeader } from '@/admin/components/layout/custom-header'")
+    expect(page).toContain('<CustomHeader />')
+    expect(page).toContain('md:ml-[var(--admin-sidebar-width)]')
+    expect(header).toContain("'/admin/site-users': 'customSidebar:siteUsers'")
+  })
 })

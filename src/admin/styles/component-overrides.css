@@ -5332,6 +5332,277 @@ html.admin-dark .drawer__content {
   color: var(--admin-accent) !important;
 }
 
+/* ============================================================
+   CONFIRMATION MODALS
+   Payload uses the shared `.confirmation-modal` for delete, restore,
+   reset, leave-without-saving, dashboard discard, and related confirmations.
+   Keep the behavior intact and polish the existing modal shell instead of
+   replacing Payload's accessible focus/modal implementation. */
+
+.confirmation-modal {
+  --admin-confirm-surface: oklch(98.5% 0.012 74);
+  --admin-confirm-muted: oklch(95.8% 0.016 74);
+  --admin-confirm-border: color-mix(in oklch, var(--admin-accent) 18%, var(--admin-border));
+  --admin-confirm-danger-soft: color-mix(in oklch, var(--admin-error) 13%, var(--admin-confirm-surface));
+  --admin-confirm-danger-border: color-mix(in oklch, var(--admin-error) 32%, var(--admin-border));
+  --admin-confirm-focus: color-mix(in oklch, var(--admin-accent) 34%, transparent);
+  align-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  display: flex !important;
+  height: 100dvh !important;
+  inset: 0 !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  max-width: none !important;
+  overflow: hidden;
+  padding: clamp(16px, 4vw, 32px) !important;
+  position: fixed !important;
+  width: 100vw !important;
+}
+
+.confirmation-modal::before {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(217, 119, 87, 0.13), transparent 34%),
+    rgba(24, 21, 18, 0.5) !important;
+  opacity: 1 !important;
+}
+
+.confirmation-modal::after {
+  backdrop-filter: blur(10px) saturate(0.96) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(0.96) !important;
+}
+
+.confirmation-modal__wrapper {
+  isolation: isolate;
+  z-index: 1;
+  width: min(100%, 520px);
+  max-width: 520px !important;
+  gap: 0 !important;
+  overflow: hidden;
+  padding: 0 !important;
+  background: var(--admin-confirm-surface);
+  border: 1px solid var(--admin-confirm-border);
+  border-radius: var(--admin-radius-xl);
+  box-shadow: var(--admin-shadow-lg);
+  color: var(--admin-text-primary);
+  transform: translateY(0);
+}
+
+.confirmation-modal__wrapper::before {
+  content: '';
+  display: block;
+  height: 4px;
+  background: var(--admin-accent);
+}
+
+.confirmation-modal__content {
+  gap: 0.75rem !important;
+  padding: 1.5rem 1.5rem 1.125rem;
+}
+
+.confirmation-modal__content h1,
+.confirmation-modal__content h2 {
+  margin: 0 !important;
+  color: var(--admin-text-primary) !important;
+  font-family: var(--admin-font-sans) !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: var(--admin-tracking-normal) !important;
+}
+
+.confirmation-modal__content p,
+.confirmation-modal__content span {
+  margin: 0 !important;
+  color: var(--admin-text-secondary) !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.55 !important;
+  letter-spacing: var(--admin-tracking-normal) !important;
+}
+
+.confirmation-modal__content strong {
+  color: var(--admin-text-primary);
+  font-weight: 700;
+}
+
+.confirmation-modal__controls {
+  display: flex !important;
+  justify-content: flex-end;
+  gap: 0.75rem !important;
+  padding: 1rem 1.5rem 1.5rem;
+  background: var(--admin-confirm-muted);
+  border-top: 1px solid var(--admin-border);
+}
+
+.confirmation-modal__controls .btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  min-height: 44px;
+  margin: 0 !important;
+  padding: 0 1rem !important;
+  border-radius: var(--admin-radius-md) !important;
+  font-size: 0.875rem !important;
+  font-weight: 650 !important;
+  line-height: 1 !important;
+  transition:
+    background-color var(--admin-transition-fast),
+    border-color var(--admin-transition-fast),
+    color var(--admin-transition-fast),
+    box-shadow var(--admin-transition-fast),
+    transform var(--admin-transition-fast) !important;
+}
+
+.confirmation-modal__controls .btn:focus-visible {
+  outline: 2px solid var(--admin-accent) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px var(--admin-confirm-focus) !important;
+}
+
+.confirmation-modal__controls .btn:active {
+  transform: translateY(1px) !important;
+}
+
+.confirmation-modal #confirm-cancel {
+  background: var(--admin-confirm-surface) !important;
+  border: 1px solid var(--admin-border-strong) !important;
+  color: var(--admin-text-secondary) !important;
+  box-shadow: 0 1px 2px rgba(24, 21, 18, 0.04) !important;
+}
+
+.confirmation-modal #confirm-cancel:hover {
+  background: var(--admin-bg-tertiary) !important;
+  border-color: var(--admin-text-tertiary) !important;
+  color: var(--admin-text-primary) !important;
+}
+
+.confirmation-modal #confirm-action {
+  background: var(--admin-accent) !important;
+  border: 1px solid var(--admin-accent) !important;
+  color: #fff8f1 !important;
+  box-shadow: 0 8px 18px rgba(217, 119, 87, 0.2) !important;
+}
+
+.confirmation-modal #confirm-action:hover {
+  background: var(--admin-accent-hover) !important;
+  border-color: var(--admin-accent-hover) !important;
+  box-shadow: 0 10px 22px rgba(217, 119, 87, 0.25) !important;
+}
+
+.confirmation-modal.delete-document .confirmation-modal__wrapper::before,
+.confirmation-modal[id^='perma-delete-'] .confirmation-modal__wrapper::before,
+.confirmation-modal[id$='confirm-delete-many-docs'] .confirmation-modal__wrapper::before,
+.confirmation-modal[id='confirm-many-delete'] .confirmation-modal__wrapper::before,
+.confirmation-modal[id='confirm-empty-trash'] .confirmation-modal__wrapper::before {
+  background: var(--admin-error);
+}
+
+.confirmation-modal.delete-document #confirm-action,
+.confirmation-modal[id^='perma-delete-'] #confirm-action,
+.confirmation-modal[id$='confirm-delete-many-docs'] #confirm-action,
+.confirmation-modal[id='confirm-many-delete'] #confirm-action,
+.confirmation-modal[id='confirm-empty-trash'] #confirm-action {
+  background: var(--admin-error) !important;
+  border-color: var(--admin-error) !important;
+  color: #fff8f1 !important;
+  box-shadow: 0 8px 18px rgba(217, 79, 79, 0.2) !important;
+}
+
+.confirmation-modal.delete-document #confirm-action:hover,
+.confirmation-modal[id^='perma-delete-'] #confirm-action:hover,
+.confirmation-modal[id$='confirm-delete-many-docs'] #confirm-action:hover,
+.confirmation-modal[id='confirm-many-delete'] #confirm-action:hover,
+.confirmation-modal[id='confirm-empty-trash'] #confirm-action:hover {
+  background: color-mix(in oklch, var(--admin-error) 86%, var(--admin-text-primary)) !important;
+  border-color: color-mix(in oklch, var(--admin-error) 86%, var(--admin-text-primary)) !important;
+  box-shadow: 0 10px 22px rgba(217, 79, 79, 0.26) !important;
+}
+
+.confirmation-modal .delete-document__checkbox,
+.confirmation-modal .delete-documents__checkbox {
+  margin-top: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--admin-confirm-danger-soft);
+  border: 1px solid var(--admin-confirm-danger-border);
+  border-radius: var(--admin-radius-md);
+}
+
+.confirmation-modal .delete-document__checkbox label,
+.confirmation-modal .delete-documents__checkbox label {
+  color: var(--admin-text-primary) !important;
+  font-size: 0.875rem !important;
+  font-weight: 650 !important;
+  line-height: 1.35 !important;
+}
+
+.confirmation-modal .delete-document__checkbox input[type='checkbox'],
+.confirmation-modal .delete-documents__checkbox input[type='checkbox'] {
+  accent-color: var(--admin-error);
+}
+
+html.dark .confirmation-modal,
+html.admin-dark .confirmation-modal {
+  --admin-confirm-surface: oklch(20.5% 0.012 74);
+  --admin-confirm-muted: oklch(24% 0.012 74);
+  --admin-confirm-border: color-mix(in oklch, var(--admin-accent) 24%, var(--admin-border));
+  --admin-confirm-danger-soft: color-mix(in oklch, var(--admin-error) 20%, var(--admin-confirm-surface));
+  --admin-confirm-danger-border: color-mix(in oklch, var(--admin-error) 42%, var(--admin-border));
+}
+
+html.dark .confirmation-modal::before,
+html.admin-dark .confirmation-modal::before {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(224, 144, 112, 0.12), transparent 34%),
+    rgba(0, 0, 0, 0.68) !important;
+}
+
+html.dark .confirmation-modal #confirm-cancel,
+html.admin-dark .confirmation-modal #confirm-cancel {
+  background: oklch(24% 0.012 74) !important;
+  border-color: var(--admin-border-strong) !important;
+  color: var(--admin-text-secondary) !important;
+}
+
+html.dark .confirmation-modal #confirm-cancel:hover,
+html.admin-dark .confirmation-modal #confirm-cancel:hover {
+  background: oklch(28% 0.012 74) !important;
+  color: var(--admin-text-primary) !important;
+}
+
+@media (max-width: 560px) {
+  .confirmation-modal {
+    align-items: flex-end !important;
+    padding: 12px !important;
+  }
+
+  .confirmation-modal__wrapper {
+    width: 100%;
+    max-width: none !important;
+    border-radius: var(--admin-radius-lg);
+  }
+
+  .confirmation-modal__content {
+    padding: 1.25rem 1.125rem 1rem;
+  }
+
+  .confirmation-modal__controls {
+    flex-direction: column-reverse;
+    padding: 1rem 1.125rem 1.125rem;
+  }
+
+  .confirmation-modal__controls .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirmation-modal__controls .btn {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ---------- Document header inside drawer ---------- */
 .drawer__content-children .doc-header {
   margin-bottom: 1rem !important;

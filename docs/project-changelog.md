@@ -28,6 +28,9 @@ All significant changes to the GTK Blog project are documented here.
 - Payload Lexical rich text typography now has one scoped CSS source for Vietnamese-safe rendering in admin editors.
 
 ### Fixed
+- Homepage entry loader now replays on every homepage mount and same-page home-link click instead of showing only once per browser session.
+- Fixed `/admin/site-users` custom admin layout so the fixed sidebar no longer covers content and the shared admin header/mobile menu is available.
+- Polished Payload admin confirmation modals with warm overlay styling, responsive action layout, and destructive delete treatment.
 - Build-time DB skip now also covers admin translation generation and public i18n message loading, so `SKIP_BUILD_DB_ACCESS=true` builds without requiring PostgreSQL.
 - Fixed Payload post edit doc controls so Preview gets its own icon button box and no longer overlaps the Publish action.
 - Local Admin AI content drafting now infers a blog category and starter tags from research context before creating the pending draft action, so blog drafts are no longer created as category-less generic posts.

@@ -56,6 +56,7 @@ function resolveSearchTarget(pathname: string, t: TFunction<CustomTranslationKey
 const ROUTE_TITLE_KEYS: Record<string, CustomTranslationKeys> = {
   '/admin': 'customHeader:pageTitleDashboard',
   '/admin/ai': 'customHeader:pageTitleAiConsole',
+  '/admin/site-users': 'customSidebar:siteUsers',
   '/admin/account': 'customHeader:pageTitleAccount',
   '/admin/globals/author-profile': 'customHeader:pageTitleAuthorProfile',
 };

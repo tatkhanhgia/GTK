@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import Link from 'next/link'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HomepageEntryLoader } from '@/components/ui/homepage-entry-loader'
 
@@ -20,30 +21,51 @@ describe('HomepageEntryLoader', () => {
     vi.restoreAllMocks()
   })
 
-  it('shows once and persists the display for the browser session', () => {
+  it('shows on every homepage mount', () => {
     const { unmount } = render(<HomepageEntryLoader locale="en" />)
 
     expect(screen.getByRole('status', { name: 'Opening GTKBlog' })).toBeInTheDocument()
-    expect(window.sessionStorage.getItem('gtkblog.homepageEntryLoader.seen')).toBe('true')
 
     unmount()
     render(<HomepageEntryLoader locale="en" />)
 
-    expect(screen.queryByRole('status', { name: 'Opening GTKBlog' })).not.toBeInTheDocument()
+    expect(screen.getByRole('status', { name: 'Opening GTKBlog' })).toBeInTheDocument()
   })
 
-  it('still renders when session storage is blocked', () => {
-    const storageError = Object.assign(new Error('Access denied'), { name: 'SecurityError' })
-
-    vi.spyOn(window.sessionStorage, 'getItem').mockImplementation(() => {
-      throw storageError
-    })
-    vi.spyOn(window.sessionStorage, 'setItem').mockImplementation(() => {
-      throw storageError
-    })
-
-    render(<HomepageEntryLoader locale="en" />)
+  it('restarts when the current homepage link is clicked', () => {
+    render(
+      <>
+        <HomepageEntryLoader locale="en" />
+        <Link href="/en">Home</Link>
+      </>,
+    )
 
     expect(screen.getByRole('status', { name: 'Opening GTKBlog' })).toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(520)
+    })
+
+    expect(screen.queryByRole('status', { name: 'Opening GTKBlog' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('link', { name: 'Home' }))
+
+    expect(screen.getByRole('status', { name: 'Opening GTKBlog' })).toBeInTheDocument()
+  })
+
+  it('keeps the shorter duration for reduced motion', () => {
+    render(<HomepageEntryLoader locale="en" />)
+
+    act(() => {
+      vi.advanceTimersByTime(519)
+    })
+
+    expect(screen.getByRole('status', { name: 'Opening GTKBlog' })).toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(screen.queryByRole('status', { name: 'Opening GTKBlog' })).not.toBeInTheDocument()
   })
 })
