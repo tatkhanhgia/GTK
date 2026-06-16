@@ -1,4 +1,8 @@
 # Project Changelog
+## [Unreleased]
+
+### Fixed
+- Restored public read access on the `media` collection so post thumbnails, hero images, and inline article images are served anonymously via `/api/media/file/:filename`. Previously the default collection read access blocked anonymous requests, causing broken images on the public site and 400 errors from the Next.js image optimizer.
 
 All significant changes to the GTK Blog project are documented here.
 

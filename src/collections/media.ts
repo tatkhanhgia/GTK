@@ -1,10 +1,20 @@
 import type { CollectionConfig } from 'payload'
+import { isPayloadAdminUser } from '@/lib/admin/payload-admin-access'
 
 export const Media: CollectionConfig = {
   slug: 'media',
   labels: {
     singular: { vi: 'Media', en: 'Media' },
     plural: { vi: 'Media', en: 'Media' },
+  },
+  access: {
+    // Media assets are referenced by public pages (thumbnails, hero images,
+    // inline article images), so anonymous read access is required for the
+    // upload file endpoint (/api/media/file/:filename) and the REST read API.
+    read: () => true,
+    create: ({ req }) => isPayloadAdminUser(req.user),
+    update: ({ req }) => isPayloadAdminUser(req.user),
+    delete: ({ req }) => isPayloadAdminUser(req.user),
   },
   admin: {
     description: {
