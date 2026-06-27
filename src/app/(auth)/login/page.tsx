@@ -159,7 +159,7 @@ function getSafeCallbackUrl(value: string | null) {
 function LoginCardShell() {
   return (
     <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground shadow-sm">
-      Dang tai...
+      Đang tải...
     </div>
   )
 }
