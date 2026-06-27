@@ -42,11 +42,11 @@ export function HomepageEntryLoader({ locale }: HomepageEntryLoaderProps) {
   const [visible, setVisible] = useState(false)
   const label =
     locale === 'vi'
-      ? 'Dang mo GTKBlog'
+      ? 'Đang mở GTKBlog'
       : 'Opening GTKBlog'
   const sublabel =
     locale === 'vi'
-      ? 'Ghi chu ky thuat, AI workflow, san pham so'
+      ? 'Ghi chú kỹ thuật, AI workflow, sản phẩm số'
       : 'Technical notes, AI workflows, digital products'
 
   useEffect(() => {
