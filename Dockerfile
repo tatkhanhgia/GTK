@@ -32,7 +32,16 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 # Copy package files and install production deps (includes tsx)
 COPY --from=builder /app/package.json /app/package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+# Retry npm ci: @swc/core (transitive via next-intl) intermittently SIGBUSes
+# during its native postinstall on CI runners (exit 135 / "Bus error").
+# npm ci wipes node_modules before each run, so retries start clean.
+RUN for i in 1 2 3; do \
+      echo "npm ci --omit=dev (attempt $i)"; \
+      npm ci --omit=dev && npm cache clean --force && exit 0; \
+      echo "npm ci attempt $i failed; retrying in 5s..."; \
+      sleep 5; \
+    done; \
+    echo "npm ci failed after 3 attempts" >&2; exit 1
 
 # Patch Payload's bin/loadEnv.js for CJS/ESM interop so tsx can load
 # payload.config.ts without hitting the require(esm) cycle.
