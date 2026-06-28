@@ -13,8 +13,8 @@ const DEFAULT_DURATION_SECONDS = 48
 
 const DEFAULT_MARQUEE: Record<Locale, Pick<HomepageMarquee, 'eyebrow' | 'items'>> = {
   vi: {
-    eyebrow: 'Dang tap trung',
-    items: ['AI thuc chien', 'Next.js va Payload', 'San pham so'],
+    eyebrow: 'Đang tập trung',
+    items: ['AI thực chiến', 'Next.js và Payload', 'Sản phẩm số'],
   },
   en: {
     eyebrow: 'Now exploring',
