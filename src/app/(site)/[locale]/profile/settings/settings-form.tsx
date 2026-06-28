@@ -33,7 +33,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch {
-      setError('Khong the luu thay doi. Vui long thu lai.')
+      setError('Không thể lưu thay đổi. Vui lòng thử lại.')
     } finally {
       setLoading(false)
     }
@@ -51,7 +51,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       }
       const result = await authClient.changePassword({ currentPassword, newPassword, revokeOtherSessions: true })
       if (result.error) {
-        setError(result.error.message || 'Khong the doi mat khau.')
+        setError(result.error.message || 'Không thể đổi mật khẩu.')
         return
       }
       setCurrentPassword('')
@@ -65,12 +65,12 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
 
   return (
     <div>
-      <h2 className="font-heading mb-6 text-xl font-semibold">Cai dat tai khoan</h2>
+      <h2 className="font-heading mb-6 text-xl font-semibold">Cài đặt tài khoản</h2>
 
       {saved && (
         <div className="mb-4 flex items-center gap-2 rounded-lg bg-success/10 p-3 text-sm text-success">
           <CheckCircle className="h-4 w-4" />
-          Da luu thay doi
+          Đã lưu thay đổi
         </div>
       )}
       {error && <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
@@ -81,24 +81,24 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           <input type="email" value={settings.email} disabled className="h-11 w-full cursor-not-allowed rounded-lg border border-border bg-muted px-4 text-sm text-muted-foreground" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium">Ten hien thi</label>
+          <label className="mb-1.5 block text-sm font-medium">Tên hiển thị</label>
           <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={80} className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium">Gioi thieu</label>
+          <label className="mb-1.5 block text-sm font-medium">Giới thiệu</label>
           <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={300} className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
         <button type="submit" disabled={loading} className={cn(buttonVariants(), 'w-full')}>
-          {loading ? 'Dang luu...' : 'Luu thay doi'}
+          {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
         </button>
       </form>
 
       <form onSubmit={handlePasswordSubmit} className="mt-10 max-w-md space-y-6">
-        <h3 className="font-heading text-lg font-semibold">Doi mat khau</h3>
-        <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Mat khau hien tai" className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mat khau moi" minLength={8} className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+        <h3 className="font-heading text-lg font-semibold">Đổi mật khẩu</h3>
+        <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Mật khẩu hiện tại" className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mật khẩu mới" minLength={8} className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         <button type="submit" disabled={passwordLoading} className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}>
-          {passwordLoading ? 'Dang doi...' : 'Doi mat khau'}
+          {passwordLoading ? 'Đang đổi...' : 'Đổi mật khẩu'}
         </button>
       </form>
     </div>
