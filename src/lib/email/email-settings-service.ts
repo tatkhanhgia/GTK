@@ -25,8 +25,8 @@ export interface ResolvedEmailSettings {
 
 const defaultWelcome = {
   vi: {
-    subject: 'Chao mung den voi GTKBlog',
-    body: 'Cam on ban da tao tai khoan tren GTKBlog. Kham pha cac bai viet ve AI va cong nghe!',
+    subject: 'Chào mừng đến với GTKBlog',
+    body: 'Cảm ơn bạn đã tạo tài khoản trên GTKBlog. Khám phá các bài viết về AI và công nghệ!',
   },
   en: {
     subject: 'Welcome to GTKBlog',
